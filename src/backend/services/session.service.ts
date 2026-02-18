@@ -19,7 +19,7 @@ export class SessionService {
       const sessions = await readJsonFile<Session>(SESSIONS_FILE);
       const token = generateId();
       const expiresAt = new Date(
-        Date.now() + config.sessionDurationMs
+        Date.now() + config.sessionDurationMs,
       ).toISOString();
 
       sessions.push({ token, userId, expiresAt });
@@ -43,7 +43,7 @@ export class SessionService {
       const now = new Date();
 
       const session = sessions.find(
-        s => s.token === token && new Date(s.expiresAt) > now
+        (s) => s.token === token && new Date(s.expiresAt) > now,
       );
 
       return session?.userId || null;
@@ -60,7 +60,7 @@ export class SessionService {
   async deleteSession(token: string): Promise<void> {
     try {
       const sessions = await readJsonFile<Session>(SESSIONS_FILE);
-      const filtered = sessions.filter(s => s.token !== token);
+      const filtered = sessions.filter((s) => s.token !== token);
       await writeJsonFile(SESSIONS_FILE, filtered);
     } catch (error) {
       console.error('Failed to delete session:', error);
@@ -77,12 +77,12 @@ export class SessionService {
       const sessions = await readJsonFile<Session>(SESSIONS_FILE);
       const now = new Date();
 
-      const valid = sessions.filter(s => new Date(s.expiresAt) > now);
+      const valid = sessions.filter((s) => new Date(s.expiresAt) > now);
       const removedCount = sessions.length - valid.length;
 
       if (removedCount > 0) {
         await writeJsonFile(SESSIONS_FILE, valid);
-        console.log(`Cleaned ${removedCount} expired sessions`);
+        console.warn(`Очищено истёкших сессий: ${removedCount}`);
       }
 
       return removedCount;
@@ -100,14 +100,14 @@ export class SessionService {
   async extendSession(token: string): Promise<boolean> {
     try {
       const sessions = await readJsonFile<Session>(SESSIONS_FILE);
-      const sessionIndex = sessions.findIndex(s => s.token === token);
+      const sessionIndex = sessions.findIndex((s) => s.token === token);
 
       if (sessionIndex === -1) {
         return false;
       }
 
       sessions[sessionIndex].expiresAt = new Date(
-        Date.now() + config.sessionDurationMs
+        Date.now() + config.sessionDurationMs,
       ).toISOString();
 
       await writeJsonFile(SESSIONS_FILE, sessions);

@@ -14,10 +14,12 @@ const sessionService = new SessionService();
  * Создаёт пользователя и устанавливает сессию
  */
 export async function register(req: Request, res: Response): Promise<void> {
-  const { name, email, login, phone, password } = req.body;
+  const {
+    name, email, login: userLogin, phone, password,
+  } = req.body;
 
   // Валидация обязательных полей
-  if (!name || !email || !login || !phone || !password) {
+  if (!name || !email || !userLogin || !phone || !password) {
     res.status(400).json({ message: 'Missing fields' });
     return;
   }
@@ -37,7 +39,7 @@ export async function register(req: Request, res: Response): Promise<void> {
   const users = await readJsonFile<User>(USERS_FILE);
 
   // Проверка уникальности email и login
-  if (users.some(u => u.email === email || u.login === login)) {
+  if (users.some((u) => u.email === email || u.login === userLogin)) {
     res.status(409).json({ message: 'User already exists' });
     return;
   }
@@ -47,7 +49,7 @@ export async function register(req: Request, res: Response): Promise<void> {
     id: generateId(),
     name,
     email,
-    login,
+    login: userLogin,
     phone,
     password, // В реальном проекте нужно хешировать!
     createdAt: new Date().toISOString(),
@@ -76,10 +78,10 @@ export async function register(req: Request, res: Response): Promise<void> {
  * Проверяет учётные данные и создаёт сессию
  */
 export async function login(req: Request, res: Response): Promise<void> {
-  const { login, password } = req.body;
+  const { login: loginInput, password } = req.body;
 
   // Проверка наличия учётных данных
-  if (!login || !password) {
+  if (!loginInput || !password) {
     res.status(400).json({ message: 'Missing credentials' });
     return;
   }
@@ -88,7 +90,7 @@ export async function login(req: Request, res: Response): Promise<void> {
 
   // Поиск пользователя по login или email с проверкой пароля
   const user = users.find(
-    u => (u.login === login || u.email === login) && u.password === password
+    (u) => (u.login === loginInput || u.email === loginInput) && u.password === password,
   );
 
   if (!user) {
@@ -131,7 +133,7 @@ export async function logout(req: Request, res: Response): Promise<void> {
  * Требует авторизации
  */
 export async function getCurrentUser(req: Request, res: Response): Promise<void> {
-  const userId = (req as unknown as { userId: string }).userId;
+  const { userId } = (req as unknown as { userId: string });
 
   if (!userId) {
     res.status(401).json({ message: 'Unauthorized' });
@@ -139,7 +141,7 @@ export async function getCurrentUser(req: Request, res: Response): Promise<void>
   }
 
   const users = await readJsonFile<User>(USERS_FILE);
-  const user = users.find(u => u.id === userId);
+  const user = users.find((u) => u.id === userId);
 
   if (!user) {
     res.status(404).json({ message: 'User not found' });

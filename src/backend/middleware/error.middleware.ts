@@ -18,6 +18,7 @@ export function errorHandler(
   err: AppError,
   _req: Request,
   res: Response,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _next: NextFunction,
 ): void {
   const statusCode = err.statusCode || 500;
@@ -47,8 +48,8 @@ export function errorHandler(
  */
 export function createError(
   message: string,
-  statusCode: number = 500,
-  code: string = 'INTERNAL_ERROR',
+  statusCode = 500,
+  code = 'INTERNAL_ERROR',
   details?: unknown,
 ): AppError {
   const error: AppError = new Error(message);

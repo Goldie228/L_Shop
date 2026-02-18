@@ -8,11 +8,6 @@ import { config } from '../config/constants';
 const DATA_DIR = config.dataDir;
 
 /**
- * Тип для JSON-данных
- */
-type JsonData = Record<string, unknown> | unknown[];
-
-/**
  * Гарантирует существование папки data и всех необходимых JSON-файлов
  * Выполняется при старте сервера
  */
@@ -29,8 +24,8 @@ export async function ensureDataFiles(): Promise<void> {
     // Создание директории
     await fs.mkdir(DATA_DIR, { recursive: true });
 
-    // Инициализация каждого файла
-    for (const file of files) {
+    // Инициализация файлов с использованием Promise.all
+    await Promise.all(files.map(async (file) => {
       const filePath = path.join(DATA_DIR, file);
 
       try {
@@ -38,9 +33,9 @@ export async function ensureDataFiles(): Promise<void> {
       } catch {
         // Файл не существует — создаём пустой массив
         await fs.writeFile(filePath, JSON.stringify([], null, 2));
-        console.log(`Created: ${file}`);
+        console.warn(`Created: ${file}`);
       }
-    }
+    }));
   } catch (error) {
     console.error('Failed to initialize data files:', error);
     throw new Error('Data initialization failed');

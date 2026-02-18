@@ -66,20 +66,26 @@ async function startServer(): Promise<void> {
   try {
     // Инициализация файлов с данными
     await ensureDataFiles();
-    console.log('Data files initialized');
+    // eslint-disable-next-line no-console
+    console.log('Файлы данных инициализированы');
 
     // Запуск сервера
     const server = app.listen(config.port, () => {
-      console.log(`Server running on http://localhost:${config.port}`);
-      console.log(`Environment: ${config.nodeEnv}`);
-      console.log(`Frontend URL: ${config.frontendUrl}`);
+      // eslint-disable-next-line no-console
+      console.log(`Сервер запущен на http://localhost:${config.port}`);
+      // eslint-disable-next-line no-console
+      console.log(`Окружение: ${config.nodeEnv}`);
+      // eslint-disable-next-line no-console
+      console.log(`URL фронтенда: ${config.frontendUrl}`);
     });
 
-    // Graceful shutdown — плавное завершение работы
+    // Плавное завершение работы (graceful shutdown)
     const gracefulShutdown = (signal: string) => {
-      console.log(`\n${signal} received. Shutting down gracefully...`);
+      // eslint-disable-next-line no-console
+      console.log(`\nПолучен сигнал ${signal}. Плавное завершение работы...`);
       server.close(() => {
-        console.log('HTTP server closed.');
+        // eslint-disable-next-line no-console
+        console.log('HTTP-сервер закрыт.');
         process.exit(0);
       });
 
@@ -92,7 +98,6 @@ async function startServer(): Promise<void> {
 
     process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
     process.on('SIGINT', () => gracefulShutdown('SIGINT'));
-
   } catch (error) {
     console.error('Failed to start server:', error);
     process.exit(1);
