@@ -189,4 +189,4 @@ interface Order {
 
 ## Лицензия
 
-ISC
+MIT

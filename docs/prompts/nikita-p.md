@@ -184,6 +184,144 @@ On the main page:
 3. Create PR to `main`
 4. Request review from colleagues
 
+## Testing
+
+### Unit tests for ProductService
+
+Create `src/backend/services/__tests__/product.service.test.ts`:
+
+```typescript
+import { ProductService } from '../product.service';
+import { readJsonFile } from '../../utils/file.utils';
+import { Product } from '../../models/product.model';
+
+jest.mock('../../utils/file.utils');
+
+const mockReadJsonFile = readJsonFile as jest.MockedFunction<typeof readJsonFile>;
+
+describe('ProductService', () => {
+  let productService: ProductService;
+
+  const mockProducts: Product[] = [
+    {
+      id: '1',
+      name: 'iPhone 15',
+      description: 'Smartphone from Apple',
+      price: 999,
+      category: 'electronics',
+      inStock: true,
+      rating: 4.5,
+      reviewsCount: 128,
+    },
+    {
+      id: '2',
+      name: 'Samsung Galaxy',
+      description: 'Smartphone from Samsung',
+      price: 799,
+      category: 'electronics',
+      inStock: false,
+      rating: 4.0,
+      reviewsCount: 64,
+    },
+  ];
+
+  beforeEach(() => {
+    productService = new ProductService();
+    jest.clearAllMocks();
+  });
+
+  describe('getProducts', () => {
+    it('should return all products when no filters', async () => {
+      mockReadJsonFile.mockResolvedValue(mockProducts);
+
+      const result = await productService.getProducts({});
+
+      expect(result).toHaveLength(2);
+    });
+
+    it('should filter by search term', async () => {
+      mockReadJsonFile.mockResolvedValue(mockProducts);
+
+      const result = await productService.getProducts({ search: 'iphone' });
+
+      expect(result).toHaveLength(1);
+      expect(result[0].name).toBe('iPhone 15');
+    });
+
+    it('should filter by category', async () => {
+      mockReadJsonFile.mockResolvedValue(mockProducts);
+
+      const result = await productService.getProducts({ category: 'electronics' });
+
+      expect(result).toHaveLength(2);
+    });
+
+    it('should filter by inStock', async () => {
+      mockReadJsonFile.mockResolvedValue(mockProducts);
+
+      const result = await productService.getProducts({ inStock: 'true' });
+
+      expect(result).toHaveLength(1);
+      expect(result[0].inStock).toBe(true);
+    });
+
+    it('should filter by minRating (variant 17)', async () => {
+      mockReadJsonFile.mockResolvedValue(mockProducts);
+
+      const result = await productService.getProducts({ minRating: '4.2' });
+
+      expect(result).toHaveLength(1);
+      expect(result[0].rating).toBe(4.5);
+    });
+
+    it('should sort by price ascending', async () => {
+      mockReadJsonFile.mockResolvedValue(mockProducts);
+
+      const result = await productService.getProducts({ sort: 'price_asc' });
+
+      expect(result[0].price).toBe(799);
+      expect(result[1].price).toBe(999);
+    });
+
+    it('should sort by price descending', async () => {
+      mockReadJsonFile.mockResolvedValue(mockProducts);
+
+      const result = await productService.getProducts({ sort: 'price_desc' });
+
+      expect(result[0].price).toBe(999);
+      expect(result[1].price).toBe(799);
+    });
+  });
+
+  describe('getProductById', () => {
+    it('should return product by id', async () => {
+      mockReadJsonFile.mockResolvedValue(mockProducts);
+
+      const result = await productService.getProductById('1');
+
+      expect(result).not.toBeNull();
+      expect(result?.name).toBe('iPhone 15');
+    });
+
+    it('should return null for non-existent id', async () => {
+      mockReadJsonFile.mockResolvedValue(mockProducts);
+
+      const result = await productService.getProductById('999');
+
+      expect(result).toBeNull();
+    });
+  });
+});
+```
+
+### Run tests
+
+```bash
+npm test                    # Run all tests
+npm run test:watch          # Watch mode
+npm run test:coverage       # With coverage report
+```
+
 ## Final checklist
 
 - [ ] Backend: controller, service, routes
@@ -193,4 +331,5 @@ On the main page:
 - [ ] Frontend: ProductCard, Filters components
 - [ ] Data-attributes: data-title, data-price
 - [ ] Variant 17: rating, reviewsCount, minRating filter
+- [ ] Tests: unit tests for ProductService
 - [ ] Git: branch, commits, PR

@@ -4,6 +4,4 @@ src/backend/data/*.json
 !.gitkeep
 .DS_Store
 *.log
-
-# Environment variables
 .env

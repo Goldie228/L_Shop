@@ -13,6 +13,6 @@
     "noImplicitAny": true,
     "strictNullChecks": true
   },
-  "include": ["src/backend/**/*"],
+  "include": ["src/backend/**/*", "src/backend/types/**/*.d.ts"],
   "exclude": ["node_modules", "src/frontend"]
 }

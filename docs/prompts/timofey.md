@@ -182,6 +182,160 @@ In the cart:
 - `data-title="basket"` - on the element with product name
 - `data-price="basket"` - on the element with product price
 
+## Testing
+
+### Unit tests for CartService
+
+Create `src/backend/services/__tests__/cart.service.test.ts`:
+
+```typescript
+import { CartService } from '../cart.service';
+import { readJsonFile, writeJsonFile } from '../../utils/file.utils';
+import { Cart } from '../../models/cart.model';
+import { Product } from '../../models/product.model';
+
+jest.mock('../../utils/file.utils');
+
+const mockReadJsonFile = readJsonFile as jest.MockedFunction<typeof readJsonFile>;
+const mockWriteJsonFile = writeJsonFile as jest.MockedFunction<typeof writeJsonFile>;
+
+describe('CartService', () => {
+  let cartService: CartService;
+
+  const mockProducts: Product[] = [
+    {
+      id: 'product-1',
+      name: 'iPhone 15',
+      description: 'Smartphone',
+      price: 1000,
+      category: 'electronics',
+      inStock: true,
+      discountPercent: 10, // Variant 21
+    },
+    {
+      id: 'product-2',
+      name: 'Samsung Galaxy',
+      description: 'Smartphone',
+      price: 800,
+      category: 'electronics',
+      inStock: true,
+    },
+  ];
+
+  const mockCarts: Cart[] = [
+    {
+      userId: 'user-1',
+      items: [
+        { productId: 'product-1', quantity: 2 },
+      ],
+      updatedAt: '2024-01-15T10:00:00Z',
+    },
+  ];
+
+  beforeEach(() => {
+    cartService = new CartService();
+    jest.clearAllMocks();
+  });
+
+  describe('getCart', () => {
+    it('should return cart with enriched items', async () => {
+      mockReadJsonFile
+        .mockResolvedValueOnce(mockCarts)
+        .mockResolvedValueOnce(mockProducts);
+
+      const result = await cartService.getCart('user-1');
+
+      expect(result.userId).toBe('user-1');
+      expect(result.items).toHaveLength(1);
+      expect(result.items[0].name).toBe('iPhone 15');
+    });
+
+    it('should calculate discount correctly (variant 21)', async () => {
+      mockReadJsonFile
+        .mockResolvedValueOnce(mockCarts)
+        .mockResolvedValueOnce(mockProducts);
+
+      const result = await cartService.getCart('user-1');
+
+      // 2 items * 1000 price * 0.9 (10% discount) = 1800
+      expect(result.items[0].total).toBe(1800);
+      expect(result.items[0].discountPercent).toBe(10);
+    });
+
+    it('should return empty cart for new user', async () => {
+      mockReadJsonFile
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce(mockProducts);
+
+      const result = await cartService.getCart('new-user');
+
+      expect(result.items).toHaveLength(0);
+      expect(result.totalSum).toBe(0);
+    });
+  });
+
+  describe('addItem', () => {
+    it('should add new item to cart', async () => {
+      mockReadJsonFile
+        .mockResolvedValueOnce(mockCarts)
+        .mockResolvedValueOnce(mockProducts);
+      mockWriteJsonFile.mockResolvedValue();
+
+      await cartService.addItem('user-1', 'product-2', 1);
+
+      expect(mockWriteJsonFile).toHaveBeenCalled();
+    });
+
+    it('should increase quantity if item exists', async () => {
+      mockReadJsonFile
+        .mockResolvedValueOnce(mockCarts)
+        .mockResolvedValueOnce(mockProducts);
+      mockWriteJsonFile.mockResolvedValue();
+
+      await cartService.addItem('user-1', 'product-1', 1);
+
+      // Should increase from 2 to 3
+      const savedCart = mockWriteJsonFile.mock.calls[0][1] as Cart[];
+      const item = savedCart[0].items.find(i => i.productId === 'product-1');
+      expect(item?.quantity).toBe(3);
+    });
+  });
+
+  describe('updateItem', () => {
+    it('should update item quantity', async () => {
+      mockReadJsonFile.mockResolvedValueOnce(mockCarts);
+      mockWriteJsonFile.mockResolvedValue();
+
+      await cartService.updateItem('user-1', 'product-1', 5);
+
+      const savedCart = mockWriteJsonFile.mock.calls[0][1] as Cart[];
+      const item = savedCart[0].items.find(i => i.productId === 'product-1');
+      expect(item?.quantity).toBe(5);
+    });
+  });
+
+  describe('removeItem', () => {
+    it('should remove item from cart', async () => {
+      mockReadJsonFile.mockResolvedValueOnce(mockCarts);
+      mockWriteJsonFile.mockResolvedValue();
+
+      await cartService.removeItem('user-1', 'product-1');
+
+      const savedCart = mockWriteJsonFile.mock.calls[0][1] as Cart[];
+      expect(savedCart[0].items).toHaveLength(0);
+    });
+  });
+});
+```
+
+### Run tests
+
+```bash
+npm test                    # Run all tests
+npm run test:watch          # Watch mode
+npm run test:coverage       # With coverage report
+```
+
 ## Git
 
 1. Create branch: `git checkout -b feature/cart-timofey`
@@ -199,4 +353,5 @@ In the cart:
 - [ ] Frontend: Cart, CartItem components
 - [ ] Data-attributes: data-title="basket", data-price="basket"
 - [ ] Variant 21: discounts, discountPercent
+- [ ] Tests: unit tests for CartService
 - [ ] Git: branch, commits, PR

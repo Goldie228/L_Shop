@@ -1,10 +1,21 @@
-// Модель пользователя
+/**
+ * Модель пользователя
+ */
 export interface User {
+  /** Уникальный идентификатор */
   id: string;
+  /** Имя пользователя */
   name: string;
+  /** Email */
   email: string;
+  /** Логин */
   login: string;
+  /** Телефон */
   phone: string;
-  password: string; // plain text для прототипа
+  /** Хешированный пароль */
+  password: string;
+  /** Дата создания */
   createdAt: string;
+  /** Дата обновления */
+  updatedAt: string;
 }

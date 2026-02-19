@@ -1,22 +1,16 @@
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
+import { AuthRequest } from './auth-request';
 import { SessionService } from '../services/session.service';
 
 const sessionService = new SessionService();
 
 /**
- * Расширение интерфейса Request для добавления userId
- */
-export interface AuthRequest extends Request {
-  userId?: string;
-}
-
-/**
- * Middleware для проверки авторизации
- * Проверяет наличие и валидность sessionToken в cookies
- * Добавляет userId в request при успешной проверке
+ * Middleware for authorization check
+ * Verifies presence and validity of sessionToken in cookies
+ * Adds userId to request on successful verification
  */
 export async function authMiddleware(
-  req: Request,
+  req: AuthRequest,
   res: Response,
   next: NextFunction,
 ): Promise<void> {
@@ -46,8 +40,8 @@ export async function authMiddleware(
       return;
     }
 
-    // Добавляем userId в request
-    (req as AuthRequest).userId = userId;
+    // Add userId to request
+    req.userId = userId;
     next();
   } catch (error) {
     console.error('Auth middleware error:', error);
@@ -59,11 +53,11 @@ export async function authMiddleware(
 }
 
 /**
- * Необязательная авторизация
- * Не блокирует запрос, но добавляет userId если есть
+ * Optional authorization
+ * Does not block the request, but adds userId if present
  */
 export async function optionalAuth(
-  req: Request,
+  req: AuthRequest,
   res: Response,
   next: NextFunction,
 ): Promise<void> {
@@ -73,13 +67,12 @@ export async function optionalAuth(
     if (token) {
       const userId = await sessionService.getUserIdByToken(token);
       if (userId) {
-        (req as AuthRequest).userId = userId;
+        req.userId = userId;
       }
     }
 
     next();
   } catch (error) {
-    // Не блокируем запрос при ошибке
     console.error('Optional auth error:', error);
     next();
   }
