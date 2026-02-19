@@ -9,9 +9,9 @@ import path from 'path';
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 export const config = {
-  port: parseInt(process.env.PORT || '3000', 10),
+  port: parseInt(process.env.PORT || '3001', 10),
   nodeEnv: process.env.NODE_ENV || 'development',
-  frontendUrl: process.env.FRONTEND_URL || 'http://localhost:8080',
+  frontendUrl: process.env.FRONTEND_URL || 'http://localhost:8081',
 
   // Длительность сессии в минутах (по умолчанию 10 минут)
   sessionDurationMinutes: parseInt(process.env.SESSION_DURATION_MINUTES || '10', 10),

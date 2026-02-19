@@ -2,7 +2,8 @@
  * Middleware для проверки авторизации
  */
 
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
+import { AuthRequest } from './auth-request';
 import { SessionService } from '../services/session.service';
 
 const sessionService = new SessionService();
@@ -12,7 +13,7 @@ const sessionService = new SessionService();
  * При успехе добавляет userId в request
  */
 export async function authMiddleware(
-  req: Request,
+  req: AuthRequest,
   res: Response,
   next: NextFunction,
 ): Promise<void> {
@@ -59,7 +60,7 @@ export async function authMiddleware(
  * Не блокирует запрос, но добавляет userId если токен валиден
  */
 export async function optionalAuth(
-  req: Request,
+  req: AuthRequest,
   _res: Response,
   next: NextFunction,
 ): Promise<void> {

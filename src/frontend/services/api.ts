@@ -250,5 +250,5 @@ export class ApiClient {
  * Uses relative URLs (same origin)
  */
 export const api = new ApiClient({
-  baseUrl: ''
+  baseUrl: 'http://localhost:3001'
 });
