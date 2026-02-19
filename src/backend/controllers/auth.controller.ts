@@ -4,6 +4,7 @@
  */
 
 import { Request, Response } from 'express';
+import { AuthRequest } from '../middleware/auth-request';
 import { SessionService } from '../services/session.service';
 import { UserService } from '../services/user.service';
 import { isValidEmail, isValidPhone } from '../utils/validators';
@@ -195,7 +196,7 @@ export async function logout(req: Request, res: Response): Promise<void> {
  * Получение информации о текущем пользователе
  * Требует авторизации
  */
-export async function getCurrentUser(req: Request, res: Response): Promise<void> {
+export async function getCurrentUser(req: AuthRequest, res: Response): Promise<void> {
   try {
     const { userId } = req;
 
