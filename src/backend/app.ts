@@ -25,8 +25,18 @@ function corsOriginValidator(
   origin: string | undefined,
   callback: (err: Error | null, allow?: boolean) => void,
 ): void {
+  // Debug логирование для диагностики CORS
+  // eslint-disable-next-line no-console
+  console.log(`[CORS] Запрос с origin: ${origin || 'undefined'}`);
+  // eslint-disable-next-line no-console
+  console.log(`[CORS] Режим: ${config.isProduction ? 'production' : 'development'}`);
+  // eslint-disable-next-line no-console
+  console.log(`[CORS] Разрешённый frontendUrl: ${config.frontendUrl}`);
+
   // Разрешаем запросы без origin (например, от Postman, мобильных приложений)
   if (!origin) {
+    // eslint-disable-next-line no-console
+    console.log('[CORS] Разрешено: origin отсутствует');
     callback(null, true);
     return;
   }
@@ -35,8 +45,12 @@ function corsOriginValidator(
   if (config.isProduction) {
     const allowedOrigins = [config.frontendUrl];
     if (allowedOrigins.includes(origin)) {
+      // eslint-disable-next-line no-console
+      console.log('[CORS] Разрешено: origin совпадает с whitelist (production)');
       callback(null, true);
     } else {
+      // eslint-disable-next-line no-console
+      console.log('[CORS] Запрещено: origin не в whitelist (production)');
       callback(new Error('Not allowed by CORS'), false);
     }
     return;
@@ -45,8 +59,12 @@ function corsOriginValidator(
   // В development режиме разрешаем любой localhost origin
   const localhostRegex = /^http:\/\/localhost(:\d+)?$/;
   if (localhostRegex.test(origin)) {
+    // eslint-disable-next-line no-console
+    console.log('[CORS] Разрешено: localhost origin (development)');
     callback(null, true);
   } else {
+    // eslint-disable-next-line no-console
+    console.log('[CORS] Запрещено: не localhost origin (development)');
     callback(new Error('Not allowed by CORS'), false);
   }
 }
