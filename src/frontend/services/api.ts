@@ -9,7 +9,7 @@ import {
   ApiClientConfig,
   ApiError,
   NetworkError
-} from '../types/api';
+} from '../types/api.js';
 
 /**
  * Default API client configuration
@@ -246,9 +246,14 @@ export class ApiClient {
 }
 
 /**
+ * Базовый URL для API запросов
+ * Использует переменную окружения VITE_API_URL с fallback на localhost
+ */
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+
+/**
  * Default API client instance
- * Uses relative URLs (same origin)
  */
 export const api = new ApiClient({
-  baseUrl: 'http://localhost:3001'
+  baseUrl: API_BASE_URL
 });
