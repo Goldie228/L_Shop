@@ -167,43 +167,38 @@ app.use('/api/orders', orderRoutes);
 
 ## Frontend
 
-### Структура файлов:
+### Структура файлов для создания:
 
 ```
 src/frontend/
-  pages/
-    DeliveryPage.ts
-    OrdersPage.ts
-  components/
-    DeliveryForm.ts
-    OrderCard.ts
-  services/
-    orderApi.ts
+├── components/
+│   └── order/
+│       ├── DeliveryForm.ts     # Форма доставки
+│       └── OrderSummary.ts     # Сводка заказа
+├── pages/
+│   └── DeliveryPage.ts         # Страница доставки
+├── styles/
+│   └── components/
+│       └── delivery.css        # Стили доставки
 ```
 
 ### Компоненты:
 
 #### DeliveryForm
+- Адрес доставки
+- Телефон
+- Email
+- Способ оплаты (cash, card, online)
+- Атрибут `data-delivery` на форме
 
-Форма оформления доставки с полями:
-- Адрес доставки (textarea)
-- Телефон (input)
-- Email (input)
-- Способ оплаты (radio: cash, card, online)
-- Тип доставки (radio: courier, pickup) - вариант 24
-- Комментарий (textarea) - вариант 24
-- Кнопка "Оформить заказ"
+#### DeliveryPage
+- Только для авторизованных
+- Форма доставки
+- Сводка заказа
+- Кнопка подтверждения
 
-**Атрибут:** `data-delivery` на элементе `<form>`
-
-#### OrdersPage
-
-Список заказов пользователя (опционально).
-
-### Data-атрибуты:
-
-На форме доставки:
-- `data-delivery` - на элементе формы
+### Важно:
+- Используй существующую инфраструктуру (Component, Router, Store, API)
 
 ## Git
 

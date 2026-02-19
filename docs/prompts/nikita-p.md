@@ -201,47 +201,46 @@ app.use('/api/products', productRoutes);
 
 ## Frontend
 
-### Структура файлов:
+### Структура файлов для создания:
 
 ```
 src/frontend/
-  pages/
-    MainPage.ts
-  components/
-    ProductCard.ts
-    Filters.ts
-    SearchBar.ts
-  services/
-    productApi.ts
-  types/
-    product.ts
+├── components/
+│   └── product/
+│       ├── ProductCard.ts      # Карточка товара
+│       ├── ProductList.ts      # Список товаров
+│       └── ProductFilters.ts   # Фильтры товаров
+├── pages/
+│   └── MainPage.ts             # Обновить главную страницу
+├── styles/
+│   └── components/
+│       └── product-card.css    # Стили карточки товара
 ```
 
 ### Компоненты:
 
 #### ProductCard
+- Изображение (или заглушка)
+- Название с атрибутом `data-title`
+- Цена с атрибутом `data-price`
+- Рейтинг и отзывы (вариант 17)
+- Кнопка "В корзину" (только для авторизованных)
 
-Карточка продукта с:
-- Изображением (или заглушкой)
-- Названием (с атрибутом `data-title`)
-- Ценой (с атрибутом `data-price`)
-- Рейтингом и количеством отзывов (вариант 17)
-- Кнопкой "Добавить в корзину" (для авторизованных пользователей)
+#### ProductFilters
+- Поле поиска
+- Select сортировки (price_asc, price_desc)
+- Select категории
+- Чекбокс "В наличии"
+- Поле минимального рейтинга (вариант 17)
 
-#### Filters
+### Важно:
+- Используй базовый класс Component из `src/frontend/components/base/Component.ts`
+- Используй Router из `src/frontend/router/router.ts`
+- Используй Store из `src/frontend/store/store.ts`
+- Используй API клиент из `src/frontend/services/api.ts`
+- Следуй стилям из CODING_STANDARDS.md
 
-Блок фильтров с:
-- Полем поиска (input)
-- Select для сортировки
-- Select для категории
-- Чекбоксом "Только в наличии"
-- Полем ввода минимального рейтинга (вариант 17)
-
-### Data-атрибуты:
-
-На главной странице:
-- `data-title` - на элементе с названием продукта
-- `data-price` - на элементе с ценой продукта
+### Структура файлов:
 
 ## Git
 

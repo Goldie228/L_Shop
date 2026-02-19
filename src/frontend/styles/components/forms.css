@@ -1,0 +1,388 @@
+/**
+ * Form Component Styles - L_Shop
+ * Auth forms, validation, error states
+ */
+
+/* ====== Auth Form Container ====== */
+.auth-form {
+  width: 100%;
+}
+
+.auth-form__header {
+  text-align: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+.auth-form__title {
+  margin: 0 0 var(--spacing-xs);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.auth-form__subtitle {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+/* ====== Form Tabs ====== */
+.auth-form__tabs {
+  display: flex;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-lg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.auth-form__tab {
+  flex: 1;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.auth-form__tab:hover {
+  color: var(--color-text-primary);
+}
+
+.auth-form__tab--active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+.auth-form__tab:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+
+/* ====== Form Fields ====== */
+.auth-form__fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.auth-form__row {
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+.auth-form__row .form-group {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+/* ====== Form Field ====== */
+.form-field {
+  position: relative;
+}
+
+.form-field__label {
+  display: block;
+  margin-bottom: var(--spacing-xs);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.form-field__label--required::after {
+  content: ' *';
+  color: var(--color-error);
+}
+
+.form-field__input-wrapper {
+  position: relative;
+}
+
+.form-field__input {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: var(--font-size-base);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.form-field__input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.form-field__input:hover:not(:disabled):not(:focus) {
+  border-color: var(--color-border-hover);
+}
+
+.form-field__input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+.form-field__input:disabled {
+  background-color: var(--color-bg-tertiary);
+  cursor: not-allowed;
+}
+
+/* Error State */
+.form-field--error .form-field__input {
+  border-color: var(--color-error);
+}
+
+.form-field--error .form-field__input:focus {
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 3px var(--color-error-light);
+}
+
+/* Success State */
+.form-field--success .form-field__input {
+  border-color: var(--color-success);
+}
+
+.form-field--success .form-field__input:focus {
+  border-color: var(--color-success);
+  box-shadow: 0 0 0 3px var(--color-success-light);
+}
+
+/* ====== Helper & Error Text ====== */
+.form-field__helper {
+  margin-top: var(--spacing-xs);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.form-field__error {
+  margin-top: var(--spacing-xs);
+  font-size: var(--font-size-xs);
+  color: var(--color-error);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.form-field__error-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+/* ====== Password Field ====== */
+.form-field--password .form-field__input {
+  padding-right: 2.5rem;
+}
+
+.form-field__toggle-password {
+  position: absolute;
+  right: var(--spacing-sm);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  padding: var(--spacing-xs);
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.form-field__toggle-password:hover {
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-secondary);
+}
+
+.form-field__toggle-password:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.form-field__toggle-password-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* ====== Form Actions ====== */
+.auth-form__actions {
+  margin-top: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.auth-form__submit {
+  width: 100%;
+}
+
+.auth-form__link {
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.auth-form__link a {
+  color: var(--color-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+.auth-form__link a:hover {
+  text-decoration: underline;
+}
+
+/* ====== Form Divider ====== */
+.auth-form__divider {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin: var(--spacing-lg) 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.auth-form__divider::before,
+.auth-form__divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background-color: var(--color-border);
+}
+
+/* ====== Form Error Banner ====== */
+.auth-form__error-banner {
+  padding: var(--spacing-sm) var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  background-color: var(--color-error-light);
+  border: 1px solid var(--color-error);
+  border-radius: var(--radius-md);
+  color: var(--color-error);
+  font-size: var(--font-size-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.auth-form__error-banner-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+/* ====== Form Success Banner ====== */
+.auth-form__success-banner {
+  padding: var(--spacing-sm) var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  background-color: var(--color-success-light);
+  border: 1px solid var(--color-success);
+  border-radius: var(--radius-md);
+  color: var(--color-success);
+  font-size: var(--font-size-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+/* ====== Checkbox Field ====== */
+.form-field--checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+}
+
+.form-field--checkbox .form-field__input {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.form-field--checkbox .form-field__label {
+  margin-bottom: 0;
+  font-weight: var(--font-weight-normal);
+  cursor: pointer;
+}
+
+/* ====== Phone Input ====== */
+.form-field--phone .form-field__input-wrapper {
+  display: flex;
+}
+
+.form-field__phone-prefix {
+  display: flex;
+  align-items: center;
+  padding: 0 var(--spacing-sm);
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-right: none;
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.form-field--phone .form-field__input {
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+/* ====== Loading State ====== */
+.auth-form--loading .form-field__input {
+  pointer-events: none;
+}
+
+.auth-form--loading .auth-form__submit {
+  position: relative;
+  color: transparent;
+  pointer-events: none;
+}
+
+.auth-form--loading .auth-form__submit::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--color-text-inverse);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* ====== Registration Form Specific ====== */
+[data-registration] .auth-form__title {
+  font-size: var(--font-size-lg);
+}
+
+[data-registration] .auth-form__fields {
+  gap: var(--spacing-sm);
+}
+
+[data-registration] .form-field__input {
+  font-size: var(--font-size-sm);
+}
+
+/* ====== Responsive ====== */
+@media (max-width: 480px) {
+  .auth-form__row {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+  
+  .auth-form__title {
+    font-size: var(--font-size-lg);
+  }
+  
+  .form-field__input {
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+}
+
+@media (min-width: 481px) {
+  .auth-form__row--name {
+    flex-direction: row;
+  }
+}
