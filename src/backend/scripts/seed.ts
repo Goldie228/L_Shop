@@ -13,14 +13,14 @@ async function seedUsers(): Promise<void> {
 
   const testUsers = [
     {
-      name: 'Test User',
+      name: 'Тестовый Пользователь',
       email: 'test@example.com',
       login: 'testuser',
       phone: '+375291234567',
       password: 'password123',
     },
     {
-      name: 'Admin User',
+      name: 'Администратор',
       email: 'admin@example.com',
       login: 'admin',
       phone: '+375297654321',

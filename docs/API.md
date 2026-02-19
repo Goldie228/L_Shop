@@ -11,7 +11,7 @@
 **Request body:**
 ```json
 {
-  "name": "Ivan Ivanov",
+  "name": "Иван Иванов",
   "email": "ivan@example.com",
   "login": "ivan123",
   "phone": "+375291234567",
@@ -22,10 +22,10 @@
 **Response 201:**
 ```json
 {
-  "message": "Registered successfully",
+  "message": "Регистрация успешна",
   "user": {
     "id": "uuid",
-    "name": "Ivan Ivanov",
+    "name": "Иван Иванов",
     "email": "ivan@example.com"
   }
 }
@@ -52,10 +52,10 @@
 **Response 200:**
 ```json
 {
-  "message": "Logged in",
+  "message": "Вход выполнен",
   "user": {
     "id": "uuid",
-    "name": "Ivan Ivanov",
+    "name": "Иван Иванов",
     "email": "ivan@example.com"
   }
 }
@@ -74,7 +74,7 @@
 **Response 200:**
 ```json
 {
-  "message": "Logged out"
+  "message": "Выход выполнен"
 }
 ```
 
@@ -90,7 +90,7 @@
 ```json
 {
   "id": "uuid",
-  "name": "Ivan Ivanov",
+  "name": "Иван Иванов",
   "email": "ivan@example.com",
   "login": "ivan123",
   "phone": "+375291234567"

@@ -4,6 +4,72 @@
 
 Ты разрабатываешь модуль продуктов для интернет-магазина L_Shop. Проект уже содержит базовую инфраструктуру, созданную тимлидом (Глебом). Твоя задача — реализовать backend и frontend для работы с продуктами.
 
+## Комментарии
+
+### Хорошие комментарии (использовать)
+
+- **Юридические** — лицензии, заявления о правах
+- **Информативные** — пояснения к сложному коду и регулярным выражениям
+- **Пояснения намерений** — объяснение бизнес-логики
+- **TODO** — пометки на будущее
+- **JSDoc** — документация публичных API и методов
+- **Усиление** — подчёркивание важного
+- **Предупреждения** — о возможных последствиях
+
+```typescript
+// Юридический комментарий
+// License: MIT
+
+// Информативный комментарий
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // валидация email
+
+// Пояснение намерений
+// Используем бинарный поиск для производительности O(log n)
+function findProduct(products: Product[], id: string) { ... }
+
+// TODO комментарий
+// TODO: добавить кэширование после релиза
+
+// JSDoc для публичного API
+/**
+ * Получает продукт по ID
+ * @param id - уникальный идентификатор продукта
+ * @returns продукт или null
+ */
+function getProductById(id: string): Product | null { ... }
+```
+
+### Плохие комментарии (избегать)
+
+- **Бормотание, шутки, шум** — бессмысленный текст
+- **Избыточные** — дублирование того, что и так видно из кода
+- **Журнальные** — авторы, задачи (есть Git)
+- **Закомментированный код** — удалять, не хранить
+- **Позиционные маркеры** — выносить в отдельные методы
+- **За закрывающей скобкой** — нечитаемо
+- **Недостоверные** — устаревшие, вводят в заблуждение
+- **Обязательные** — не заставлять писать
+
+```typescript
+// ❌ Плохо:
+// iterate through products
+for (const product of products) { }
+
+// ❌ Журнальный:
+// Created by John on 19 февраля 2026 года
+// Fixed bug #123
+
+// ❌ Закомментированный код:
+// const oldFilter = products.filter(...);
+
+// ❌ Позиционный маркер:
+// } // end for
+
+// ✅ Хорошо:
+// Фильтруем только активные продукты
+const activeProducts = products.filter(p => p.isActive);
+```
+
 ## Вариант 17 - Особенности
 
 Для твоего варианта добавь дополнительные поля в модель Product:
@@ -45,7 +111,7 @@ GET /api/products?search=phone&sort=price_asc&category=electronics&inStock=true&
   {
     "id": "uuid",
     "name": "iPhone 15",
-    "description": "Smartphone from Apple",
+    "description": "Смартфон от Apple",
     "price": 999,
     "category": "electronics",
     "inStock": true,
@@ -206,7 +272,7 @@ describe('ProductService', () => {
     {
       id: '1',
       name: 'iPhone 15',
-      description: 'Smartphone from Apple',
+      description: 'Смартфон от Apple',
       price: 999,
       category: 'electronics',
       inStock: true,
@@ -216,7 +282,7 @@ describe('ProductService', () => {
     {
       id: '2',
       name: 'Samsung Galaxy',
-      description: 'Smartphone from Samsung',
+      description: 'Смартфон от Samsung',
       price: 799,
       category: 'electronics',
       inStock: false,

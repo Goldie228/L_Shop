@@ -28,13 +28,13 @@ describe('UserService', () => {
       const mockUsers: User[] = [
         {
           id: '1',
-          name: 'Test',
+          name: 'Тест',
           email: 'test@example.com',
           login: 'test',
           phone: '+1234567890',
           password: 'hash',
-          createdAt: '2024-01-01',
-          updatedAt: '2024-01-01',
+          createdAt: '2026-02-19',
+          updatedAt: '2026-02-19',
         },
       ];
       mockReadJsonFile.mockResolvedValue(mockUsers);
@@ -51,13 +51,13 @@ describe('UserService', () => {
       const mockUsers: User[] = [
         {
           id: 'user-1',
-          name: 'Test',
+          name: 'Тест',
           email: 'test@example.com',
           login: 'test',
           phone: '+1234567890',
           password: 'hash',
-          createdAt: '2024-01-01',
-          updatedAt: '2024-01-01',
+          createdAt: '2026-02-19',
+          updatedAt: '2026-02-19',
         },
       ];
       mockReadJsonFile.mockResolvedValue(mockUsers);
@@ -81,13 +81,13 @@ describe('UserService', () => {
       const mockUsers: User[] = [
         {
           id: '1',
-          name: 'Test',
+          name: 'Тест',
           email: 'test@example.com',
           login: 'test',
           phone: '+1234567890',
           password: 'hash',
-          createdAt: '2024-01-01',
-          updatedAt: '2024-01-01',
+          createdAt: '2026-02-19',
+          updatedAt: '2026-02-19',
         },
       ];
       mockReadJsonFile.mockResolvedValue(mockUsers);
@@ -101,13 +101,13 @@ describe('UserService', () => {
       const mockUsers: User[] = [
         {
           id: '1',
-          name: 'Test',
+          name: 'Тест',
           email: 'test@example.com',
           login: 'testuser',
           phone: '+1234567890',
           password: 'hash',
-          createdAt: '2024-01-01',
-          updatedAt: '2024-01-01',
+          createdAt: '2026-02-19',
+          updatedAt: '2026-02-19',
         },
       ];
       mockReadJsonFile.mockResolvedValue(mockUsers);
@@ -131,13 +131,13 @@ describe('UserService', () => {
       const mockUsers: User[] = [
         {
           id: '1',
-          name: 'Test',
+          name: 'Тест',
           email: 'test@example.com',
           login: 'testuser',
           phone: '+1234567890',
           password: 'hash',
-          createdAt: '2024-01-01',
-          updatedAt: '2024-01-01',
+          createdAt: '2026-02-19',
+          updatedAt: '2026-02-19',
         },
       ];
       mockReadJsonFile.mockResolvedValue(mockUsers);
@@ -156,7 +156,7 @@ describe('UserService', () => {
       mockWriteJsonFile.mockResolvedValue();
 
       const userData = {
-        name: '  Test User  ',
+        name: '  Тестовый Пользователь  ',
         email: '  TEST@EXAMPLE.COM  ',
         login: '  testuser  ',
         phone: '  +1234567890  ',
@@ -165,7 +165,7 @@ describe('UserService', () => {
 
       const user = await userService.createUser(userData);
 
-      expect(user.name).toBe('Test User');
+      expect(user.name).toBe('Тестовый Пользователь');
       expect(user.email).toBe('test@example.com');
       expect(user.login).toBe('testuser');
       expect(user.phone).toBe('+1234567890');
@@ -180,28 +180,28 @@ describe('UserService', () => {
       const mockUsers: User[] = [
         {
           id: 'user-1',
-          name: 'Old Name',
+          name: 'Старое Имя',
           email: 'test@example.com',
           login: 'testuser',
           phone: '+1234567890',
           password: 'hash',
-          createdAt: '2024-01-01',
-          updatedAt: '2024-01-01',
+          createdAt: '2026-02-19',
+          updatedAt: '2026-02-19',
         },
       ];
       mockReadJsonFile.mockResolvedValue(mockUsers);
       mockWriteJsonFile.mockResolvedValue();
 
-      const updatedUser = await userService.updateUser('user-1', { name: 'New Name' });
+      const updatedUser = await userService.updateUser('user-1', { name: 'Новое Имя' });
 
-      expect(updatedUser?.name).toBe('New Name');
+      expect(updatedUser?.name).toBe('Новое Имя');
       expect(mockWriteJsonFile).toHaveBeenCalled();
     });
 
     it('должен возвращать null если пользователь не найден', async () => {
       mockReadJsonFile.mockResolvedValue([]);
 
-      const result = await userService.updateUser('non-existent', { name: 'New Name' });
+      const result = await userService.updateUser('non-existent', { name: 'Новое Имя' });
 
       expect(result).toBeNull();
     });

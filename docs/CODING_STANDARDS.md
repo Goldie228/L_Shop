@@ -1,27 +1,27 @@
-# Standarty oformlenija koda L_Shop
+# Стандарты оформления кода L_Shop
 
-## Soderzhanie
+## Содержание
 
-1. [Obshhie principy](#obshhie-principy)
-2. [TypeScript soglashenija](#typescript-soglashenija)
-3. [Imenovanie](#imenovanie)
-4. [Formatirovanie koda](#formatirovanie-koda)
-5. [Kommentarii](#kommentarii)
-6. [Rabota s oshibkami](#rabota-s-oshibkami)
-7. [Testirovanie](#testirovanie)
-8. [Git commity](#git-commity)
-9. [Code review cheklist](#code-review-cheklist)
+1. [Общие принципы](#общие-принципы)
+2. [TypeScript соглашения](#typescript-соглашения)
+3. [Именование](#именование)
+4. [Форматирование кода](#форматирование-кода)
+5. [Комментарии](#комментарии)
+6. [Работа с ошибками](#работа-с-ошибками)
+7. [Тестирование](#тестирование)
+8. [Git коммиты](#git-коммиты)
+9. [Code review чеклист](#code-review-чеклист)
 
 ---
 
-## Obshhie principy
+## Общие принципы
 
 ### DRY (Don't Repeat Yourself)
 
-Ne povtorjajte kod. Esli logika ispol'zuetsja bolee 2 raz - vydelite v funkciju.
+Не повторяйте код. Если логика используется более 2 раз - выделите в функцию.
 
 ```typescript
-// PLOHO
+// ПЛОХО
 function validateEmail(email: string): boolean {
   const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return regex.test(email);
@@ -32,7 +32,7 @@ function validateUserEmail(email: string): boolean {
   return regex.test(email);
 }
 
-// HOROSHO
+// ХОРОШО
 function validateEmail(email: string): boolean {
   const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return regex.test(email);
@@ -41,61 +41,61 @@ function validateEmail(email: string): boolean {
 
 ### KISS (Keep It Simple, Stupid)
 
-Derzhite kod prostym. Ne uslozhnjajte tam, gde eto ne nuzhno.
+Держите код простым. Не усложняйте там, где это не нужно.
 
 ```typescript
-// PLOHO
+// ПЛОХО
 const getUserName = (user: User): string => {
   return user && user.name ? user.name : 'Unknown';
 };
 
-// HOROSHO
+// ХОРОШО
 const getUserName = (user: User): string => user?.name ?? 'Unknown';
 ```
 
 ### SOLID
 
-Principy SOLID dlja chistoj arhitektury:
+Принципы SOLID для чистой архитектуры:
 
-| Princip | Opisanie |
+| Принцип | Описание |
 |---------|----------|
-| **S**ingle Responsibility | Odin klass/funkcija - odna otvetstvennost' |
-| **O**pen/Closed | Otkryt dlja rasshirenija, zakryt dlja izmenenija |
-| **L**iskov Substitution | Podtipy dolzhny zamenjat' bazovye tipy |
-| **I**nterface Segregation | Mnogo specializirovannyh interfejsov luchshe odnogo obshhego |
-| **D**ependency Inversion | Zavisimost' ot abstrakcij, ne ot konkretnyh klassov |
+| **S**ingle Responsibility | Один класс/функция - одна ответственность |
+| **O**pen/Closed | Открыт для расширения, закрыт для изменения |
+| **L**iskov Substitution | Подтипы должны заменять базовые типы |
+| **I**nterface Segregation | Много специализированных интерфейсов лучше одного общего |
+| **D**ependency Inversion | Зависимость от абстракций, не от конкретных классов |
 
 ---
 
-## TypeScript soglashenija
+## TypeScript соглашения
 
-### Tipizacija
+### Типизация
 
-Vsegda ukazyvajte tipy dlja funkcij i peremennyh.
+Всегда указывайте типы для функций и переменных.
 
 ```typescript
-// PLOHO
+// ПЛОХО
 function getUser(id) {
   return users.find(u => u.id === id);
 }
 
-// HOROSHO
+// ХОРОШО
 function getUser(id: string): User | undefined {
   return users.find((u: User) => u.id === id);
 }
 ```
 
-### Zapret any
+### Запрет any
 
-Ispol'zovanie `any` zapreshheno. Ispol'zujte konkretnye tipy ili `unknown`.
+Использование `any` запрещено. Используйте конкретные типы или `unknown`.
 
 ```typescript
-// PLOHO
+// ПЛОХО
 function processData(data: any): void {
   console.log(data.value);
 }
 
-// HOROSHO
+// ХОРОШО
 interface ProcessData {
   value: string;
 }
@@ -104,7 +104,7 @@ function processData(data: ProcessData): void {
   console.log(data.value);
 }
 
-// Esli tip neizvesten
+// Если тип неизвестен
 function processUnknown(data: unknown): void {
   if (typeof data === 'object' && data !== null && 'value' in data) {
     console.log((data as { value: string }).value);
@@ -112,53 +112,53 @@ function processUnknown(data: unknown): void {
 }
 ```
 
-### Interface vs Type
+### Interface и Type
 
-Ispol'zujte `interface` dlja ob'ektov i `type` dlja ob'edinenij/primитивov.
+Используйте `interface` для объектов и `type` для объединений/примитивов.
 
 ```typescript
-// Interface dlja ob'ektov
+// Interface для объектов
 interface User {
   id: string;
   name: string;
   email: string;
 }
 
-// Type dlja ob'edinenij
+// Type для объединений
 type Status = 'pending' | 'completed' | 'cancelled';
 
-// Type dlja primenija utility
+// Type для применения utility
 type ReadonlyUser = Readonly<User>;
 ```
 
-### Vozvrashhaemye znachenija
+### Возвращаемые значения
 
-Vsegda ukazyvajte vozvrashhaemyj tip funkcii.
+Всегда указывайте возвращаемый тип функции.
 
 ```typescript
-// PLOHO
+// ПЛОХО
 function calculateTotal(items) {
   return items.reduce((sum, item) => sum + item.price, 0);
 }
 
-// HOROSHO
+// ХОРОШО
 function calculateTotal(items: CartItem[]): number {
   return items.reduce((sum: number, item: CartItem) => sum + item.price, 0);
 }
 ```
 
-### Null i Undefined
+### Null и Undefined
 
-Ispol'zujte `strictNullChecks`. Javno obrabatyvajte `null` i `undefined`.
+Используйте `strictNullChecks`. Явно обрабатывайте `null` и `undefined`.
 
 ```typescript
-// Ispol'zujte optional chaining
+// Используйте optional chaining
 const userName = user?.name;
 
-// Ispol'zujte nullish coalescing
+// Используйте nullish coalescing
 const displayName = userName ?? 'Guest';
 
-// Javnaja proverka
+// Явная проверка
 if (user !== null && user !== undefined) {
   // ...
 }
@@ -166,60 +166,60 @@ if (user !== null && user !== undefined) {
 
 ---
 
-## Imenovanie
+## Именование
 
-### Peremennye
+### Переменные
 
-Ispol'zujte camelCase. Imena dolzhny byt' osmyslennymi.
+Используйте camelCase. Имена должны быть осмысленными.
 
 ```typescript
-// PLOHO
+// ПЛОХО
 const d = new Date();
 const u = getUser(id);
 const flag = true;
 
-// HOROSHO
+// ХОРОШО
 const currentDate = new Date();
 const foundUser = getUser(id);
 const isAuthenticated = true;
 ```
 
-### Funkcii
+### Функции
 
-Ispol'zujte camelCase. Imena funkcij dolzhny nachinat'sja s glagola.
+Используйте camelCase. Имена функций должны начинаться с глагола.
 
 ```typescript
-// PLOHO
+// ПЛОХО
 function user() { }
 function data() { }
 
-// HOROSHO
+// ХОРОШО
 function getUser() { }
 function fetchData() { }
 function calculateTotal() { }
 function validateEmail() { }
 ```
 
-### Klassy i Interfejsy
+### Классы и Интерфейсы
 
-Ispol'zujte PascalCase.
+Используйте PascalCase.
 
 ```typescript
-// Klassy
+// Классы
 class UserService { }
 class AuthMiddleware { }
 
-// Interfejsy (bez prefiksa I)
+// Интерфейсы (без префикса I)
 interface User { }
 interface CartItem { }
 ```
 
-### Konstanty
+### Константы
 
-Ispol'zujte UPPER_SNAKE_CASE dlja global'nyh konstant.
+Используйте UPPER_SNAKE_CASE для глобальных констант.
 
 ```typescript
-// Global'nye konstanty
+// Глобальные константы
 const SESSION_DURATION_MINUTES = 10;
 const MAX_CART_ITEMS = 100;
 const HTTP_STATUS = {
@@ -231,30 +231,30 @@ const HTTP_STATUS = {
   INTERNAL_ERROR: 500,
 } as const;
 
-// Lokal'nye konstanty - camelCase
+// Локальные константы - camelCase
 const maxRetries = 3;
 const defaultTimeout = 5000;
 ```
 
-### Fajly
+### Файлы
 
-Ispol'zujte kebab-case dlja imen fajlov.
+Используйте kebab-case для имен файлов.
 
 ```
-// PLOHO
+// ПЛОХО
 UserService.ts
 authMiddleware.ts
 auth-request.ts
 
-// HOROSHO
+// ХОРОШО
 user.service.ts
 auth.middleware.ts
 auth-request.ts
 ```
 
-### Peremennye okruzhenija
+### Переменные окружения
 
-Ispol'zujte UPPER_SNAKE_CASE.
+Используйте UPPER_SNAKE_CASE.
 
 ```env
 DATABASE_URL=http://localhost:5432
@@ -264,14 +264,14 @@ NODE_ENV=development
 
 ---
 
-## Formatirovanie koda
+## Форматирование кода
 
-### Otstupy
+### Отступы
 
-Ispol'zujte 2 probela dlja otstupov.
+Используйте 2 пробела для отступов.
 
 ```typescript
-// PLOHO (4 probela)
+// ПЛОХО (4 пробела)
 function example() {
     const x = 1;
     if (x > 0) {
@@ -279,7 +279,7 @@ function example() {
     }
 }
 
-// HOROSHO (2 probela)
+// ХОРОШО (2 пробела)
 function example() {
   const x = 1;
   if (x > 0) {
@@ -288,32 +288,32 @@ function example() {
 }
 ```
 
-### Skobki
+### Скобки
 
-Otkryvajushhaja skobka na toj zhe stroke.
+Открывающая скобка на той же строке.
 
 ```typescript
-// PLOHO
+// ПЛОХО
 if (condition)
 {
   // ...
 }
 
-// HOROSHO
+// ХОРОШО
 if (condition) {
   // ...
 }
 ```
 
-### Stroki
+### Строки
 
-Maksimal'naja dlina stroki - 100 simvolov.
+Максимальная длина строки - 100 символов.
 
 ```typescript
-// PLOHO
+// ПЛОХО
 const veryLongVariableName = someFunctionWithLongName(param1, param2, param3, param4, param5);
 
-// HOROSHO
+// ХОРОШО
 const veryLongVariableName = someFunctionWithLongName(
   param1,
   param2,
@@ -323,11 +323,11 @@ const veryLongVariableName = someFunctionWithLongName(
 );
 ```
 
-### Perenosy strok
+### Переносы строк
 
-- Pustaja strova mezhdu funkcijami
-- Pustaja stroka pered `return`
-- Gruppirovka svjazannogo koda
+- Пустая строка между функциями
+- Пустая строка перед `return`
+- Группировка связанного кода
 
 ```typescript
 function getUser(id: string): User | undefined {
@@ -355,75 +355,75 @@ function createUser(data: CreateUserData): User {
 }
 ```
 
-### Importy
+### Импорты
 
-Gruppirujte importy:
-1. Vneshnie moduli
-2. Vnutrennie moduli
-3. Tipy
+Группируйте импорты:
+1. Внешние модули
+2. Внутренние модули
+3. Типы
 
 ```typescript
-// Vneshnie moduli
+// Внешние модули
 import express, { Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
 
-// Vnutrennie moduli
+// Внутренние модули
 import { User } from '../models/user.model';
 import { createUser, findUserByEmail } from '../services/user.service';
 
-// Tipy
+// Типы
 import type { AuthRequest } from '../middleware/auth-request';
 ```
 
-### Kavychki
+### Кавычки
 
-Ispol'zujte odinarnye kavychki dlja strok.
+Используйте одинарные кавычки для строк.
 
 ```typescript
-// PLOHO
+// ПЛОХО
 const message = "Hello, World!";
 
-// HOROSHO
+// ХОРОШО
 const message = 'Hello, World!';
 
-// Iskljuchenie: stroki s vstavkami
+// Исключение: строки с вставками
 const greeting = `Hello, ${name}!`;
 ```
 
-### Tochka s zapjatoj
+### Точка с запятой
 
-Ne stav'te točku s zapjatoj v konce strok (esli ispol'zuetsja Prettier).
+Не ставьте точку с запятой в конце строк (если используется Prettier).
 
 ```typescript
-// PLOHO
+// ПЛОХО
 const x = 1;
 const y = 2;
 
-// HOROSHO (Prettier avtomaticheski dobavljaet)
+// ХОРОШО (Prettier автоматически добавляет)
 const x = 1
 const y = 2
 ```
 
 ---
 
-## Kommentarii
+## Комментарии
 
-### JSDoc dlja funkcij
+### JSDoc для функций
 
-Vse publichnye funkcii dolzhny imet' JSDoc kommentarij.
+Все публичные функции должны иметь JSDoc комментарий.
 
 ```typescript
 /**
- * Sozdaet novogo pol'zovatelja v sisteme.
+ * Создает нового пользователя в системе.
  * 
- * @param data - Dannye dlja sozdanija pol'zovatelja
- * @returns Sozdannyj pol'zovatel'
- * @throws {Error} Esli pol'zovatel' s takim email uzhe sushhestvuet
+ * @param data - Данные для создания пользователя
+ * @returns Созданный пользователь
+ * @throws {Error} Если пользователь с таким email уже существует
  * 
  * @example
  * ```typescript
  * const user = createUser({
- *   name: 'Ivan',
+ *   name: 'Иван',
  *   email: 'ivan@example.com',
  *   password: 'secret123'
  * });
@@ -434,54 +434,310 @@ function createUser(data: CreateUserData): User {
 }
 ```
 
-### Russkie kommentarii
+### Русские комментарии
 
-Vse kommentarii v kode dolzhny byt' na russkom jazyke.
+Все комментарии в коде должны быть на русском языке.
 
 ```typescript
-// PLOHO
+// ПЛОХО
 // Check if user exists
 if (!user) {
   return null;
 }
 
-// HOROSHO
-// Proverjaem sushhestvovanie pol'zovatelja
+// ХОРОШО
+// Проверяем существование пользователя
 if (!user) {
   return null;
 }
 ```
 
-### Kommentarii dlja slozhnoj logiki
+### Комментарии для сложной логики
 
 ```typescript
-// Heshiruem parol' per sohraneniem v bazu
-// Ispol'zuem bcrypt s 10 rundami soli
+// Хешируем пароль перед сохранением в базу
+// Используем bcrypt с 10 раундами соли
 const hashedPassword = await bcrypt.hash(password, 10);
 
-// Fil'truem tovary po kategorii i cene
-// Sortiruem po vozrastaniju ceny
+// Фильтруем товары по категории и цене
+// Сортируем по возрастанию цены
 const filteredProducts = products
   .filter(p => p.category === category)
   .filter(p => p.price >= minPrice && p.price <= maxPrice)
   .sort((a, b) => a.price - b.price);
 ```
 
-### TODO kommentarii
+### TODO комментарии
 
 ```typescript
-// TODO: Dobavit' validaciju telefona
-// FIXME: Ispol'zovat' transakcii pri sozdanii zakaza
-// HACK: Vremennoe reshenie, perepisat' pri vozmozhnosti
+// TODO: Добавить валидацию телефона
+// FIXME: Использовать транзакции при создании заказа
+// HACK: Временное решение, переписать при возможности
+```
+
+### Хорошие комментарии (использовать)
+
+#### 1. Юридические комментарии
+
+Заявления о правах в начале файлов, ссылки на лицензии.
+
+```typescript
+/*
+ * Copyright (c) 2026 L_Shop
+ * Licensed under the MIT License
+ * See LICENSE file for details
+ */
+```
+
+#### 2. Информативные комментарии
+
+Пояснения к сложным частям кода, особенно к регулярным выражениям.
+
+```typescript
+// Format daty: DD.MM.YYYY HH:mm
+const dateRegex = /^(\d{2})\.(\d{2})\.(\d{4})\s(\d{2}):(\d{2})$/;
+
+// URL validation: protocol + domain + optional path
+const urlRegex = /^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w-./?%&=]*)?$/;
+```
+
+#### 3. Комментарии с пояснением намерений
+
+Объяснение бизнес-логики и причин неочевидных решений.
+
+```typescript
+// Используем 10 раундов соли для баланса между безопасностью и производительностью
+// См. https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html
+const SALT_ROUNDS = 10;
+
+// Session istekaet cherez 10 minut neaktivnosti v sootvetstvii s trebovanijami bezopasnosti
+const SESSION_DURATION_MINUTES = 10;
+```
+
+#### 4. TODO комментарии
+
+Пометки на будущее для рефакторинга или нереализованной функциональности.
+
+```typescript
+// TODO: Perenesti v konfiguraciju pri migracii na .env
+// FIXME: Dobavit' obrabotku krajnih sluchaev
+// TODO(auth): Implement password reset functionality
+```
+
+#### 5. JSDoc в публичных API
+
+Документация методов и классов для автогенерации документации.
+
+```typescript
+/**
+ * Sozdaet novuju sessiju dlja pol'zovatelja.
+ * 
+ * @param userId - ID pol'zovatelja
+ * @param userAgent - User-Agent browsera
+ * @returns Sozdannaja sessija s tokenom
+ * @throws {Error} Esli pol'zovatel' ne najden
+ * 
+ * @example
+ * ```typescript
+ * const session = await createSession('user-123', 'Mozilla/5.0...');
+ * console.log(session.token);
+ * ```
+ */
+export async function createSession(
+  userId: string,
+  userAgent: string,
+): Promise<Session> {
+  // ...
+}
+```
+
+#### 6. Комментарии усиления
+
+Подчёркивание важности неочевидных обстоятельств.
+
+```typescript
+// VAZHNO: Ne izmenjat' porjadok proverok!
+// Snachala proverjaem prava, potom sushhestvovanie resursa
+// Inache vozmozhna utechka informacii o sushhestvovanii ob'ektov
+
+// VNIMANIE: Eto kritichno dlja bezopasnosti!
+// Pri izmenenii etoj logiki objazatel'no provesti security review
+```
+
+#### 7. Предупреждения о последствиях
+
+Предупреждения о возможных проблемах при изменениях.
+
+```typescript
+// OSTOROZHNO: Izmenenie etoj funkcii povlijaet na vse moduli avtorizacii
+// Pered izmeneniem proverit' zavisimosti: auth.middleware.ts, session.service.ts
+
+// WARNING: Ehtot kod vyzyvaetsja v neskol'kih potokah
+// Izbegajte izmenenija global'nogo sostojanija
+```
+
+### Плохие комментарии (избегать)
+
+#### 1. Бормотание и шум
+
+Непонятные комментарии, шутки, возмущения.
+
+```typescript
+// ПЛОХО
+// Это просто ужасный код, но мне лень его переписывать
+// TODO: как-нибудь разберусь
+// Magic happens here :)
+
+// ХОРОШО - просто удалить такие комментарии
+```
+
+#### 2. Избыточные комментарии
+
+Дублирование того, что очевидно из кода.
+
+```typescript
+// ПЛОХО
+// Получаем пользователя по ID
+function getUserById(id: string) {
+  return users.find(u => u.id === id); // Ищем пользователя
+}
+
+// ХОРОШО
+function getUserById(id: string) {
+  return users.find(u => u.id === id);
+}
+```
+
+#### 3. Журнальные комментарии
+
+Указание авторов и задач (есть Git для этого).
+
+```typescript
+// ПЛОХО
+// Added by Ivan 19 февраля 2026 года
+// Fixed bug #123 - John 19 февраля 2026 года
+// Refactored - Mike 19 февраля 2026 года
+
+// ХОРОШО - используйте git blame и git history
+```
+
+#### 4. Закомментированный код
+
+Старый код должен удаляться, а не комментироваться.
+
+```typescript
+// ПЛОХО
+function calculateTotal(items: CartItem[]): number {
+  // const oldWay = items.reduce((sum, item) => sum + item.price, 0);
+  // console.log('debug:', oldWay);
+  // if (oldWay > 1000) {
+  //   return oldWay * 0.9;
+  // }
+  return items.reduce((sum, item) => sum + item.total, 0);
+}
+
+// ХОРОШО - просто удалить старый код (он есть в Git)
+function calculateTotal(items: CartItem[]): number {
+  return items.reduce((sum, item) => sum + item.total, 0);
+}
+```
+
+#### 5. Позиционные маркеры
+
+Разделители блоков (лучше вынести в метод).
+
+```typescript
+// ПЛОХО
+function processOrder(order: Order) {
+  // ==================== VALIDATION ====================
+  if (!order.items.length) throw new Error('Empty order');
+  if (!order.userId) throw new Error('No user');
+  
+  // ==================== CALCULATION ====================
+  const total = calculateTotal(order.items);
+  const tax = total * 0.2;
+  
+  // ==================== SAVING ====================
+  saveOrder(order);
+}
+
+// ХОРОШО - вынести в отдельные методы
+function processOrder(order: Order) {
+  validateOrder(order);
+  const { total, tax } = calculateOrderTotals(order);
+  saveOrder(order);
+}
+```
+
+#### 6. Комментарии за закрывающей скобкой
+
+Вместо этого использовать методы.
+
+```typescript
+// ПЛОХО
+if (user.isAuthenticated) {
+  if (user.hasPermission('admin')) {
+    if (user.isActive) {
+      // ... много кода ...
+    } // if user.isActive
+  } // if hasPermission
+} // if isAuthenticated
+
+// ХОРОШО - вынести в метод с говорящим именем
+if (canUserAccessAdminPanel(user)) {
+  // ... код ...
+}
+```
+
+#### 7. Недостоверные комментарии
+
+Устаревшие или неверные комментарии.
+
+```typescript
+// ПЛОХО
+// Возвращает список всех пользователей
+function getActiveUsers(): User[] {
+  return users.filter(u => u.isActive); // А комментарий говорит "всех"!
+}
+
+// ХОРОШО
+// Возвращает список активных пользователей
+function getActiveUsers(): User[] {
+  return users.filter(u => u.isActive);
+}
+```
+
+#### 8. Обязательные комментарии
+
+Не заставлять писать комментарии ради комментариев.
+
+```typescript
+// ПЛОХО - комментарий ради комментария
+/**
+ * Имя пользователя.
+ */
+name: string;
+
+/**
+ * Email пользователя.
+ */
+email: string;
+
+// ХОРОШО - комментарий только если добавляет ценность
+/**
+ * Email пользователя. Используется для авторизации и уведомлений.
+ * Должен быть уникальным в рамках системы.
+ */
+email: string;
 ```
 
 ---
 
-## Rabota s oshibkami
+## Работа с ошибками
 
 ### Try-Catch
 
-Vse async funkcii dolzhny imet' obrabotku oshibok.
+Все async функции должны иметь обработку ошибок.
 
 ```typescript
 // PLOHO
@@ -490,7 +746,7 @@ async function getUser(id: string): Promise<User> {
   return response.json();
 }
 
-// HOROSHO
+// ХОРОШО
 async function getUser(id: string): Promise<User | null> {
   try {
     const response = await fetch(`/api/users/${id}`);
@@ -507,12 +763,12 @@ async function getUser(id: string): Promise<User | null> {
 }
 ```
 
-### Pol'zovatel'skie oshibki
+### Пользовательские ошибки
 
-Sozdavajte specifichnye oshibki dlja raznyh situacij.
+Создавайте специфические ошибки для разных ситуаций.
 
 ```typescript
-// Klassy oshibok
+// Классы ошибок
 class ValidationError extends Error {
   constructor(message: string) {
     super(message);
@@ -535,7 +791,7 @@ class AuthenticationError extends Error {
 }
 ```
 
-### Obrabotka v middleware
+### Обработка в middleware
 
 ```typescript
 // error.middleware.ts
@@ -562,18 +818,18 @@ export function errorHandler(
     return;
   }
 
-  // Neizvestnaja oshibka
+  // Неизвестная ошибка
   res.status(500).json({ error: 'Internal server error' });
 }
 ```
 
 ---
 
-## Testirovanie
+## Тестирование
 
-### Struktura testa
+### Структура теста
 
-Ispol'zujte pattern AAA (Arrange, Act, Assert).
+Используйте паттерн AAA (Arrange, Act, Assert).
 
 ```typescript
 describe('UserService', () => {
@@ -598,33 +854,33 @@ describe('UserService', () => {
 });
 ```
 
-### Imenovanie testov
+### Именование тестов
 
-Testy dolzhny opisyvat' ozhidaemoe povedenie.
+Тесты должны описывать ожидаемое поведение.
 
 ```typescript
-// PLOHO
+// ПЛОХО
 it('test1', () => { });
 it('works', () => { });
 
-// HOROSHO
-it('dolzhen vernut polzovatelja po ID', () => { });
-it('dolzhen vykinut oshibku pri nekorrektnom email', () => { });
-it('pri pustom spiske dolzhen vernut pustoj massiv', () => { });
+// ХОРОШО
+it('должен вернуть пользователя по ID', () => { });
+it('должен выкинуть ошибку при некорректном email', () => { });
+it('при пустом списке должен вернуть пустой массив', () => { });
 ```
 
-### Pokrytie testami
+### Покрытие тестами
 
-Minimal'noe pokrytie - 80%.
+Минимальное покрытие - 80%.
 
 ```bash
-# Proverka pokrytija
+# Проверка покрытия
 npm run test:coverage
 ```
 
-### Mocki
+### Mockи
 
-Ispol'zujte mocki dlja vneshnih zavisimostej.
+Используйте mockи для внешних зависимостей.
 
 ```typescript
 // Mock funkcii
@@ -635,42 +891,42 @@ jest.mock('../utils/file.utils', () => ({
 
 // Mock vremeni
 jest.useFakeTimers();
-jest.setSystemTime(new Date('2024-01-01'));
+jest.setSystemTime(new Date('2026-02-19'));
 ```
 
 ---
 
-## Git commity
+## Git коммиты
 
 ### Conventional Commits
 
-Format: `<tip>(<oblast'>): <opisanie>`
+Формат: `<тип>(<область>): <описание>`
 
-### Tipy commitov
+### Типы коммитов
 
-| Tip | Opisanie | Primer |
+| Тип | Описание | Пример |
 |-----|----------|--------|
-| `feat` | Novaja funkcija | `feat(auth): add password reset` |
-| `fix` | Ispravlenie baga | `fix(cart): correct total calculation` |
-| `docs` | Dokumentacija | `docs(api): update endpoints` |
-| `style` | Formatirovanie | `style: fix indentation` |
-| `refactor` | Refaktoring | `refactor(user): extract validation` |
-| `test` | Testy | `test(auth): add login tests` |
-| `chore` | Obsluzhivanie | `chore: update dependencies` |
+| `feat` | Новая функция | `feat(auth): add password reset` |
+| `fix` | Исправление бага | `fix(cart): correct total calculation` |
+| `docs` | Документация | `docs(api): update endpoints` |
+| `style` | Форматирование | `style: fix indentation` |
+| `refactor` | Рефакторинг | `refactor(user): extract validation` |
+| `test` | Тесты | `test(auth): add login tests` |
+| `chore` | Обслуживание | `chore: update dependencies` |
 
-### Pravila
+### Правила
 
-1. **Edinica izmenenij**: Odin commit - odno logicheskoe izmenenie
-2. **Opisanie**: Na russkom jazyke, v povestitel'nom naklonenii
-3. **Dlina**: Ne bolee 72 simvolov v zagolovke
+1. **Единица изменений**: Один коммит - одно логическое изменение
+2. **Описание**: На русском языке, в повествовательном наклонении
+3. **Длина**: Не более 72 символов в заголовке
 
 ```bash
-# PLOHO
+# ПЛОХО
 git commit -m "fix"
-git commit -m "ispravil bagi"
-git commit -m "feat: dobavil novuju funkcionalnost kotoraja pozvoljaet polzovateljam..."
+git commit -m "исправил баги"
+git commit -m "feat: добавил новую функциональность которая позволяет пользователям..."
 
-# HOROSHO
+# ХОРОШО
 git commit -m "feat(auth): add session expiration check"
 git commit -m "fix(cart): correct item quantity validation"
 git commit -m "docs: add development guide"
@@ -678,55 +934,55 @@ git commit -m "docs: add development guide"
 
 ---
 
-## Code review cheklist
+## Code review чеклист
 
-### Pered otpravkoj na review
+### Перед отправкой на review
 
-- [ ] Kod prohodit `npm run lint` bez oshibok
-- [ ] Kod otformatirovan `npm run format`
-- [ ] Vse testy prohodjat `npm test`
-- [ ] Net `any` tipov
-- [ ] Vse funkcii tipizirovany
-- [ ] Dobavleny kommentarii k slozhnoj logike
-- [ ] Obnovlena dokumentacija (esli nuzhno)
+- [ ] Код проходит `npm run lint` без ошибок
+- [ ] Код отформатирован `npm run format`
+- [ ] Все тесты проходят `npm test`
+- [ ] Нет `any` типов
+- [ ] Все функции типизированы
+- [ ] Добавлены комментарии к сложной логике
+- [ ] Обновлена документация (если нужно)
 
-### Pri prosmotre koda
+### При просмотре кода
 
-- [ ] Kod chitaetsja legko
-- [ ] Imena peremennyh i funkcij ponjatny
-- [ ] Net dublirovanija koda
-- [ ] Obrabotany vse vozmozhnye oshibki
-- [ ] Net utechek pamjati (v async funkcijah)
-- [ ] Logika razbita na funkcii
-- [ ] Testy pokryvajut novyj kod
-- [ ] Net hardcoded znachenij (ispol'zujte konstanty)
+- [ ] Код читается легко
+- [ ] Имена переменных и функций понятны
+- [ ] Нет дублирования кода
+- [ ] Обработаны все возможные ошибки
+- [ ] Нет утечек памяти (в async функциях)
+- [ ] Логика разбита на функции
+- [ ] Тесты покрывают новый код
+- [ ] Нет hardcoded значений (используйте константы)
 
-### Posle review
+### После review
 
-- [ ] Vse zamechanija ispravleny
-- [ ] Provedena samoproverka
-- [ ] Commit sootvetstvuet conventional commits
+- [ ] Все замечания исправлены
+- [ ] Проведена самопроверка
+- [ ] Коммит соответствует conventional commits
 
 ---
 
-## Primer kachestvennogo koda
+## Пример качественного кода
 
 ```typescript
 /**
- * Servis dlja raboty s pol'zovateljami.
- * Soderzhit metody dlja sozdanija, poiska i obnovlenija pol'zovatelej.
+ * Сервис для работы с пользователями.
+ * Содержит методы для создания, поиска и обновления пользователей.
  */
 import bcrypt from 'bcryptjs';
 import { User } from '../models/user.model';
 import { readJsonFile, writeJsonFile } from '../utils/file.utils';
 import { generateId } from '../utils/id.utils';
 
-// Konstanty
+// Константы
 const USERS_FILE = 'users.json';
 const SALT_ROUNDS = 10;
 
 /**
- * Dannye dlja sozdanija novogo pol'zovatelja.
+ * Данные для создания нового пользователя.
  */
 interface CreateUserData {
   name: string;
@@ -737,27 +993,27 @@ interface CreateUserData {
 }
 
 /**
- * Sozdaet novogo pol'zovatelja v sisteme.
+ * Создает нового пользователя в системе.
  * 
- * @param data - Dannye dlja sozdanija pol'zovatelja
- * @returns Sozdannyj pol'zovatel'
- * @throws {Error} Esli pol'zovatel' s takim email uzhe sushhestvuet
+ * @param data - Данные для создания пользователя
+ * @returns Созданный пользователь
+ * @throws {Error} Если пользователь с таким email уже существует
  */
 export async function createUser(data: CreateUserData): Promise<User> {
   try {
-    // Poluchaem spisok sushhestvujushhih pol'zovatelej
+    // Получаем список существующих пользователей
     const users = await readJsonFile<User[]>(USERS_FILE);
     
-    // Proverjaem unikal'nost' email
+    // Проверяем уникальность email
     const existingUser = users.find((u: User) => u.email === data.email);
     if (existingUser) {
-      throw new Error('Polzovatel s takim email uzhe sushhestvuet');
+      throw new Error('Пользователь с таким email уже существует');
     }
     
-    // Heshiruem parol'
+    // Хешируем пароль
     const hashedPassword = await bcrypt.hash(data.password, SALT_ROUNDS);
     
-    // Sozdaem novogo pol'zovatelja
+    // Создаем нового пользователя
     const newUser: User = {
       id: generateId(),
       name: data.name,
@@ -768,7 +1024,7 @@ export async function createUser(data: CreateUserData): Promise<User> {
       createdAt: new Date().toISOString(),
     };
     
-    // Sohranjaem v fajl
+    // Сохраняем в файл
     users.push(newUser);
     await writeJsonFile(USERS_FILE, users);
     
@@ -780,10 +1036,10 @@ export async function createUser(data: CreateUserData): Promise<User> {
 }
 
 /**
- * Ishhet pol'zovatelja po email.
+ * Ищет пользователя по email.
  * 
- * @param email - Email pol'zovatelja
- * @returns Pol'zovatel' ili undefined, esli ne najden
+ * @param email - Email пользователя
+ * @returns Пользователь или undefined, если не найден
  */
 export async function findUserByEmail(email: string): Promise<User | undefined> {
   try {
@@ -798,7 +1054,7 @@ export async function findUserByEmail(email: string): Promise<User | undefined> 
 
 ---
 
-## Dopolnitel'nye resursy
+## Дополнительные ресурсы
 
 - [TypeScript Best Practices](https://www.typescriptlang.org/docs/handbook/declaration-files/do-s-and-don-ts.html)
 - [ESLint Rules](https://eslint.org/docs/rules/)
