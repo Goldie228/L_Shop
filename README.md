@@ -65,9 +65,45 @@ L_Shop/
 npm install
 ```
 
+### Конфигурация окружения
+Скопируйте файл `.env.example` в `.env` и настройте при необходимости:
+
+```bash
+cp .env.example .env
+```
+
+#### Переменные окружения
+
+| Переменная | По умолчанию | Описание |
+|------------|--------------|----------|
+| `PORT` | `3001` | Порт backend сервера |
+| `FRONTEND_PORT` | `3000` | Порт frontend сервера |
+| `FRONTEND_URL` | `http://localhost:3000` | URL frontend для CORS |
+| `VITE_API_URL` | `http://localhost:3001` | URL API для frontend |
+| `NODE_ENV` | `development` | Режим работы |
+| `SESSION_DURATION_MINUTES` | `10` | Время жизни сессии (минуты) |
+| `DATA_DIR` | `./src/backend/data` | Директория для JSON-файлов |
+
 ### Запуск в режиме разработки
+
+**Рекомендуемый способ** — одновременный запуск frontend и backend:
+
 ```bash
 npm run dev
+```
+
+Эта команда запускает оба сервера параллельно через `concurrently`:
+- Backend: `http://localhost:3001`
+- Frontend: `http://localhost:3000`
+
+**Альтернативные способы:**
+
+```bash
+# Только backend с автоперезагрузкой
+npm run dev:backend
+
+# Только frontend
+npm run dev:frontend
 ```
 
 ### Компиляция

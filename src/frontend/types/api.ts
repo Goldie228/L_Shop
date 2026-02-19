@@ -3,7 +3,7 @@
  * TypeScript interfaces for API requests and responses
  */
 
-import { User } from './user';
+import { User } from './user.js';
 
 /**
  * Base API response structure

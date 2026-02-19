@@ -71,3 +71,6 @@ coverage/
 *.tmp
 *.temp
 .cache/
+
+.kilocode/
+.plans/

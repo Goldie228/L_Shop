@@ -1,14 +1,22 @@
 /**
  * Компонент Modal - L_Shop Frontend
- * Переиспользуемое модальное окно с фоном
+ * Переиспользуемое модальное окно с анимациями и accessibility
+ * 
+ * @see src/frontend/styles/components/modal.css - стили модального окна
+ * @see docs/DESIGN_SYSTEM.md - документация дизайн-системы
  */
 
-import { Component, ComponentProps } from '../base/Component';
+import { Component, ComponentProps } from '../base/Component.js';
 
 /**
  * Типы размеров модального окна
  */
-export type ModalSize = 'sm' | 'md' | 'lg' | 'xl' | 'fullscreen';
+export type ModalSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
+
+/**
+ * Типы анимаций модального окна
+ */
+export type ModalAnimation = 'scale' | 'slide-up' | 'fade' | 'none';
 
 /**
  * Интерфейс пропсов модального окна
@@ -18,6 +26,8 @@ export interface ModalProps extends ComponentProps {
   title?: string;
   /** Размер модального окна */
   size?: ModalSize;
+  /** Тип анимации */
+  animation?: ModalAnimation;
   /** Открыто ли модальное окно */
   isOpen?: boolean;
   /** Показать кнопку закрытия */
@@ -28,12 +38,43 @@ export interface ModalProps extends ComponentProps {
   closeOnEscape?: boolean;
   /** Кастомный класс модального окна */
   modalClass?: string;
+  /** Идентификатор для тестирования */
+  testId?: string;
   /** Обработчик закрытия */
   onClose?: () => void;
+  /** Обработчик открытия */
+  onOpen?: () => void;
 }
 
 /**
+ * SVG иконка закрытия
+ */
+const CLOSE_ICON = `
+  <svg class="modal__close-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="18" y1="6" x2="6" y2="18"></line>
+    <line x1="6" y1="6" x2="18" y2="18"></line>
+  </svg>
+`;
+
+/**
  * Класс компонента модального окна
+ * 
+ * @example
+ * ```typescript
+ * // Создание модального окна
+ * const modal = new Modal({
+ *   title: 'Подтверждение',
+ *   size: 'md',
+ *   animation: 'scale',
+ *   onClose: () => console.log('Modal closed')
+ * });
+ * 
+ * // Добавление содержимого
+ * modal.setContent('<p>Вы уверены?</p>');
+ * 
+ * // Открытие
+ * modal.open();
+ * ```
  */
 export class Modal extends Component<ModalProps> {
   /** Элемент фона */
@@ -44,6 +85,18 @@ export class Modal extends Component<ModalProps> {
   
   /** Ранее сфокусированный элемент */
   private previousFocus: HTMLElement | null = null;
+  
+  /** Элементы для focus trap */
+  private focusableElements: HTMLElement[] = [];
+  
+  /** Первый фокусируемый элемент */
+  private firstFocusable: HTMLElement | null = null;
+  
+  /** Последний фокусируемый элемент */
+  private lastFocusable: HTMLElement | null = null;
+  
+  /** Уникальный ID для aria-labelledby */
+  private titleId: string;
 
   /**
    * Получить пропсы по умолчанию
@@ -52,11 +105,21 @@ export class Modal extends Component<ModalProps> {
     return {
       ...super.getDefaultProps(),
       size: 'md',
+      animation: 'scale',
       isOpen: false,
       showClose: true,
       closeOnBackdrop: true,
-      closeOnEscape: true
+      closeOnEscape: true,
     };
+  }
+
+  /**
+   * Создать экземпляр модального окна
+   */
+  constructor(props: ModalProps) {
+    super(props);
+    // Генерируем уникальный ID для заголовка
+    this.titleId = `modal-title-${Math.random().toString(36).substr(2, 9)}`;
   }
 
   /**
@@ -64,10 +127,13 @@ export class Modal extends Component<ModalProps> {
    * @returns Элемент фона
    */
   public render(): HTMLDivElement {
+    const { testId, isOpen } = this.props;
+    
     // Создать фон
     this.backdrop = this.createElement('div', {
-      className: `modal-backdrop ${this.props.isOpen ? 'modal-backdrop--visible' : ''}`,
-      'aria-hidden': !this.props.isOpen
+      className: `modal-backdrop${isOpen ? ' modal-backdrop--visible' : ''}`,
+      'aria-hidden': !isOpen,
+      'data-testid': testId ? `${testId}-backdrop` : 'modal-backdrop',
     });
     
     // Создать модальное окно
@@ -92,23 +158,29 @@ export class Modal extends Component<ModalProps> {
    * @returns Элемент модального окна
    */
   private createModal(): HTMLDivElement {
-    const { size, modalClass, isOpen, title } = this.props;
+    const { size, modalClass, isOpen, title, animation, testId } = this.props;
     
     // Построить классы модального окна
-    const classes = ['modal'];
-    classes.push(`modal--${size}`);
+    const classes = ['modal', `modal--${size}`];
+    
+    // Добавить класс анимации
+    if (animation !== 'none') {
+      classes.push(`modal--animate-${animation}`);
+    }
+    
     if (modalClass) classes.push(modalClass);
     if (isOpen) classes.push('modal--visible');
     
-    // Создать контейнер модального окна
+    // Создать атрибуты
     const attrs: Record<string, string | boolean> = {
       className: classes.join(' '),
       role: 'dialog',
-      'aria-modal': 'true'
+      'aria-modal': 'true',
+      'data-testid': testId ?? 'modal',
     };
     
     if (title) {
-      attrs['aria-labelledby'] = 'modal-title';
+      attrs['aria-labelledby'] = this.titleId;
     }
     
     const modal = this.createElement('div', attrs);
@@ -123,11 +195,17 @@ export class Modal extends Component<ModalProps> {
     }
     
     // Добавить слот для тела
-    const body = this.createElement('div', { className: 'modal__body' });
+    const body = this.createElement('div', { 
+      className: 'modal__body',
+      'data-testid': 'modal-body',
+    });
     modal.appendChild(body);
     
     // Добавить слот для футера (опционально)
-    const footer = this.createElement('div', { className: 'modal__footer' });
+    const footer = this.createElement('div', { 
+      className: 'modal__footer',
+      'data-testid': 'modal-footer',
+    });
     modal.appendChild(footer);
     
     return modal;
@@ -140,7 +218,10 @@ export class Modal extends Component<ModalProps> {
   private createHeader(): HTMLDivElement {
     const { title, showClose } = this.props;
     
-    const header = this.createElement('div', { className: 'modal__header' });
+    const header = this.createElement('div', { 
+      className: 'modal__header',
+      'data-testid': 'modal-header',
+    });
     
     // Добавить заголовок
     if (title) {
@@ -148,7 +229,7 @@ export class Modal extends Component<ModalProps> {
         'h2',
         {
           className: 'modal__title',
-          id: 'modal-title'
+          id: this.titleId,
         },
         [title]
       );
@@ -174,17 +255,13 @@ export class Modal extends Component<ModalProps> {
       {
         type: 'button',
         className: 'modal__close',
-        'aria-label': 'Закрыть модальное окно'
+        'aria-label': 'Закрыть модальное окно',
+        'data-testid': 'modal-close',
       }
     );
     
     // Добавить иконку закрытия
-    button.innerHTML = `
-      <svg class="modal__close-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="18" y1="6" x2="6" y2="18"></line>
-        <line x1="6" y1="6" x2="18" y2="18"></line>
-      </svg>
-    `;
+    button.innerHTML = CLOSE_ICON;
     
     this.addEventListener(button, 'click', this.close);
     
@@ -209,7 +286,57 @@ export class Modal extends Component<ModalProps> {
     if (event.key === 'Escape' && this.props.isOpen) {
       this.close();
     }
+    
+    // Focus trap - Tab
+    if (event.key === 'Tab' && this.props.isOpen) {
+      this.handleTabKey(event);
+    }
   };
+
+  /**
+   * Обработать клавишу Tab для focus trap
+   * @param event - Событие клавиатуры
+   */
+  private handleTabKey(event: KeyboardEvent): void {
+    if (!this.modalElement) return;
+    
+    // Обновляем список фокусируемых элементов
+    this.updateFocusableElements();
+    
+    if (this.focusableElements.length === 0) return;
+    
+    if (event.shiftKey) {
+      // Shift + Tab
+      if (document.activeElement === this.firstFocusable) {
+        event.preventDefault();
+        this.lastFocusable?.focus();
+      }
+    } else {
+      // Tab
+      if (document.activeElement === this.lastFocusable) {
+        event.preventDefault();
+        this.firstFocusable?.focus();
+      }
+    }
+  }
+
+  /**
+   * Обновить список фокусируемых элементов
+   */
+  private updateFocusableElements(): void {
+    if (!this.modalElement) return;
+    
+    this.focusableElements = Array.from(
+      this.modalElement.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), [href], input:not([disabled]), ' +
+        'select:not([disabled]), textarea:not([disabled]), ' +
+        '[tabindex]:not([tabindex="-1"]):not([disabled])'
+      )
+    );
+    
+    this.firstFocusable = this.focusableElements[0] || null;
+    this.lastFocusable = this.focusableElements[this.focusableElements.length - 1] || null;
+  }
 
   /**
    * Открыть модальное окно
@@ -219,18 +346,33 @@ export class Modal extends Component<ModalProps> {
       // Сохранить текущий фокус
       this.previousFocus = document.activeElement as HTMLElement;
       
-      // Показать модальное окно
+      // Показать модальное окно с анимацией
+      // Сначала показываем backdrop
       this.backdrop.classList.add('modal-backdrop--visible');
-      this.modalElement.classList.add('modal--visible');
+      
+      // Затем с небольшой задержкой показываем модальное окно
+      // Это создаёт плавную анимацию
+      requestAnimationFrame(() => {
+        this.modalElement?.classList.add('modal--visible');
+      });
+      
       this.backdrop.setAttribute('aria-hidden', 'false');
       
       // Заблокировать прокрутку страницы
       document.body.classList.add('modal-open');
       
-      // Сфокусировать первый фокусируемый элемент
-      this.focusFirst();
+      // Сфокусировать первый фокусируемый элемент после анимации
+      setTimeout(() => {
+        this.updateFocusableElements();
+        this.focusFirst();
+      }, 150);
       
       this.props.isOpen = true;
+      
+      // Вызвать обработчик открытия
+      if (this.props.onOpen) {
+        this.props.onOpen();
+      }
     }
   }
 
@@ -239,10 +381,14 @@ export class Modal extends Component<ModalProps> {
    */
   public close = (): void => {
     if (this.backdrop && this.modalElement) {
-      // Скрыть модальное окно
-      this.backdrop.classList.remove('modal-backdrop--visible');
+      // Сначала скрываем модальное окно
       this.modalElement.classList.remove('modal--visible');
-      this.backdrop.setAttribute('aria-hidden', 'true');
+      
+      // Затем с задержкой скрываем backdrop
+      setTimeout(() => {
+        this.backdrop?.classList.remove('modal-backdrop--visible');
+        this.backdrop?.setAttribute('aria-hidden', 'true');
+      }, 150);
       
       // Разблокировать прокрутку страницы
       document.body.classList.remove('modal-open');
@@ -265,14 +411,12 @@ export class Modal extends Component<ModalProps> {
    * Сфокусировать первый фокусируемый элемент
    */
   private focusFirst(): void {
-    if (!this.modalElement) return;
-    
-    const focusable = this.modalElement.querySelectorAll<HTMLElement>(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-    );
-    
-    if (focusable.length > 0) {
-      focusable[0].focus();
+    if (this.firstFocusable) {
+      this.firstFocusable.focus();
+    } else if (this.modalElement) {
+      // Если нет фокусируемых элементов, фокусируем само модальное окно
+      this.modalElement.setAttribute('tabindex', '-1');
+      this.modalElement.focus();
     }
   }
 
@@ -292,6 +436,9 @@ export class Modal extends Component<ModalProps> {
       } else {
         body.appendChild(content);
       }
+      
+      // Обновляем список фокусируемых элементов
+      this.updateFocusableElements();
     }
   }
 
@@ -311,6 +458,9 @@ export class Modal extends Component<ModalProps> {
       } else {
         footer.appendChild(content);
       }
+      
+      // Обновляем список фокусируемых элементов
+      this.updateFocusableElements();
     }
   }
 
@@ -347,6 +497,19 @@ export class Modal extends Component<ModalProps> {
    */
   public isOpen(): boolean {
     return this.props.isOpen || false;
+  }
+
+  /**
+   * Установить заголовок модального окна
+   * @param title - Новый заголовок
+   */
+  public setTitle(title: string): void {
+    if (!this.modalElement) return;
+    
+    const titleElement = this.modalElement.querySelector('.modal__title');
+    if (titleElement) {
+      titleElement.textContent = title;
+    }
   }
 
   /**

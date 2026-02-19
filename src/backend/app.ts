@@ -13,10 +13,48 @@ import { config } from './config/constants';
 
 const app: Express = express();
 
+/**
+ * Проверяет, разрешён ли origin для CORS запросов.
+ * В development режиме разрешает все localhost origins.
+ * В production режиме использует строгую проверку по whitelist.
+ *
+ * @param origin - Заголовок Origin из запроса
+ * @param callback - Callback для возврата результата
+ */
+function corsOriginValidator(
+  origin: string | undefined,
+  callback: (err: Error | null, allow?: boolean) => void,
+): void {
+  // Разрешаем запросы без origin (например, от Postman, мобильных приложений)
+  if (!origin) {
+    callback(null, true);
+    return;
+  }
+
+  // В production режиме используем строгую проверку
+  if (config.isProduction) {
+    const allowedOrigins = [config.frontendUrl];
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'), false);
+    }
+    return;
+  }
+
+  // В development режиме разрешаем любой localhost origin
+  const localhostRegex = /^http:\/\/localhost(:\d+)?$/;
+  if (localhostRegex.test(origin)) {
+    callback(null, true);
+  } else {
+    callback(new Error('Not allowed by CORS'), false);
+  }
+}
+
 // CORS с поддержкой credentials для передачи httpOnly cookies
 app.use(
   cors({
-    origin: config.frontendUrl,
+    origin: corsOriginValidator,
     credentials: true,
   }),
 );

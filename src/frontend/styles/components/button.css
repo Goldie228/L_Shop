@@ -1,6 +1,9 @@
 /**
  * Button Component Styles - L_Shop
  * Primary, secondary, ghost buttons with variants
+ * 
+ * @see src/frontend/styles/design-tokens.css - источник токенов
+ * @see docs/DESIGN_SYSTEM.md - документация дизайн-системы
  */
 
 /* ====== Base Button ====== */
@@ -8,9 +11,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-sm) var(--spacing-md);
-  font-family: var(--font-family);
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-4);
+  font-family: var(--font-family-primary);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   line-height: 1;
@@ -18,14 +21,28 @@
   border: 1px solid transparent;
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: 
+    background-color var(--transition-button),
+    border-color var(--transition-button),
+    color var(--transition-button),
+    box-shadow var(--transition-button),
+    transform var(--duration-fast) var(--ease-out);
   white-space: nowrap;
   user-select: none;
+  box-shadow: var(--shadow-button);
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(0);
 }
 
 .btn:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: var(--shadow-focus);
 }
 
 .btn:disabled {
@@ -38,35 +55,37 @@
 
 /* Primary Button */
 .btn--primary {
-  background-color: var(--color-primary);
+  background-color: var(--color-primary-600);
   color: var(--color-text-inverse);
-  border-color: var(--color-primary);
+  border-color: var(--color-primary-600);
 }
 
 .btn--primary:hover:not(:disabled) {
-  background-color: var(--color-primary-hover);
-  border-color: var(--color-primary-hover);
+  background-color: var(--color-primary-700);
+  border-color: var(--color-primary-700);
+  box-shadow: var(--shadow-button-hover);
 }
 
 .btn--primary:active:not(:disabled) {
-  background-color: var(--color-primary-dark);
-  border-color: var(--color-primary-dark);
+  background-color: var(--color-primary-800);
+  border-color: var(--color-primary-800);
 }
 
 /* Secondary Button */
 .btn--secondary {
-  background-color: var(--color-bg-primary);
+  background-color: var(--color-surface-primary);
   color: var(--color-text-primary);
-  border-color: var(--color-border);
+  border-color: var(--color-border-primary);
 }
 
 .btn--secondary:hover:not(:disabled) {
-  background-color: var(--color-bg-secondary);
-  border-color: var(--color-border-hover);
+  background-color: var(--color-surface-secondary);
+  border-color: var(--color-border-secondary);
+  box-shadow: var(--shadow-2);
 }
 
 .btn--secondary:active:not(:disabled) {
-  background-color: var(--color-bg-tertiary);
+  background-color: var(--color-surface-tertiary);
 }
 
 /* Ghost Button */
@@ -74,77 +93,88 @@
   background-color: transparent;
   color: var(--color-text-secondary);
   border-color: transparent;
+  box-shadow: none;
 }
 
 .btn--ghost:hover:not(:disabled) {
-  background-color: var(--color-bg-secondary);
+  background-color: var(--color-surface-secondary);
   color: var(--color-text-primary);
+  box-shadow: none;
 }
 
 .btn--ghost:active:not(:disabled) {
-  background-color: var(--color-bg-tertiary);
+  background-color: var(--color-surface-tertiary);
 }
 
 /* Danger Button */
 .btn--danger {
-  background-color: var(--color-error);
+  background-color: var(--color-error-600);
   color: var(--color-text-inverse);
-  border-color: var(--color-error);
+  border-color: var(--color-error-600);
 }
 
 .btn--danger:hover:not(:disabled) {
-  background-color: #dc2626;
-  border-color: #dc2626;
+  background-color: var(--color-error-700);
+  border-color: var(--color-error-700);
+  box-shadow: var(--shadow-button-hover);
 }
 
 .btn--danger:active:not(:disabled) {
-  background-color: #b91c1c;
-  border-color: #b91c1c;
+  background-color: var(--color-error-800);
+  border-color: var(--color-error-800);
 }
 
 /* Success Button */
 .btn--success {
-  background-color: var(--color-success);
+  background-color: var(--color-success-600);
   color: var(--color-text-inverse);
-  border-color: var(--color-success);
+  border-color: var(--color-success-600);
 }
 
 .btn--success:hover:not(:disabled) {
-  background-color: #16a34a;
-  border-color: #16a34a;
+  background-color: var(--color-success-700);
+  border-color: var(--color-success-700);
+  box-shadow: var(--shadow-button-hover);
+}
+
+.btn--success:active:not(:disabled) {
+  background-color: var(--color-success-800);
+  border-color: var(--color-success-800);
 }
 
 /* Link Button */
 .btn--link {
   background-color: transparent;
-  color: var(--color-primary);
+  color: var(--color-primary-600);
   border-color: transparent;
   padding: 0;
+  box-shadow: none;
 }
 
 .btn--link:hover:not(:disabled) {
-  color: var(--color-primary-hover);
+  color: var(--color-primary-700);
   text-decoration: underline;
+  transform: none;
 }
 
 /* ====== Button Sizes ====== */
 
 /* Small */
 .btn--sm {
-  padding: var(--spacing-xs) var(--spacing-sm);
+  padding: var(--spacing-1) var(--spacing-2);
   font-size: var(--font-size-xs);
   border-radius: var(--radius-sm);
 }
 
 /* Medium (default) */
 .btn--md {
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: var(--spacing-2) var(--spacing-4);
   font-size: var(--font-size-sm);
 }
 
 /* Large */
 .btn--lg {
-  padding: var(--spacing-md) var(--spacing-lg);
+  padding: var(--spacing-4) var(--spacing-6);
   font-size: var(--font-size-base);
   border-radius: var(--radius-lg);
 }
@@ -166,7 +196,7 @@
   border: 2px solid currentColor;
   border-top-color: transparent;
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  animation: spin var(--duration-slower) linear infinite;
 }
 
 .btn--primary.btn--loading::after {
@@ -187,22 +217,22 @@
 
 /* Icon Only */
 .btn--icon {
-  padding: var(--spacing-sm);
+  padding: var(--spacing-2);
   aspect-ratio: 1;
 }
 
 .btn--icon.btn--sm {
-  padding: var(--spacing-xs);
+  padding: var(--spacing-1);
 }
 
 .btn--icon.btn--lg {
-  padding: var(--spacing-md);
+  padding: var(--spacing-4);
 }
 
 /* ====== Button Groups ====== */
 .btn-group {
   display: inline-flex;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-2);
 }
 
 .btn-group--vertical {

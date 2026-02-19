@@ -77,22 +77,70 @@ cp .env.example .env
 
 ### Konfiguracija okruzhenija (.env)
 
-```env
-# Port servera
-PORT=3000
+Proekt ispol'zuet fajl `.env` dlja konfiguracii. Skopirujte primer i nastrojte pri neobhodimosti:
 
-# Rezhim razrabotki
+```bash
+cp .env.example .env
+```
+
+#### Peremennye okruzhenija
+
+| Peremennaja | Po umolchaniju | Opisanie |
+|-------------|----------------|----------|
+| `PORT` | `3001` | Port backend servera |
+| `FRONTEND_PORT` | `3000` | Port frontend servera |
+| `FRONTEND_URL` | `http://localhost:3000` | URL frontend dlja CORS |
+| `VITE_API_URL` | `http://localhost:3001` | URL API dlja frontend (ispol'zuetsja v Vite) |
+| `NODE_ENV` | `development` | Rezhim raboty |
+| `SESSION_DURATION_MINUTES` | `10` | Vremja zhizni sessii (minuty) |
+| `DATA_DIR` | `./src/backend/data` | Direktorija dlja JSON-fajlov |
+
+#### Primer .env fajla
+
+```env
+# Server Configuration
+PORT=3001
 NODE_ENV=development
+
+# Frontend Configuration
+FRONTEND_PORT=3000
+FRONTEND_URL=http://localhost:3000
+
+# API Configuration (for Vite frontend)
+VITE_API_URL=http://localhost:3001
+
+# Session Configuration
+SESSION_DURATION_MINUTES=10
+
+# Data Storage
+DATA_DIR=./src/backend/data
 ```
 
 ### Zapusk v rezhime razrabotki
 
+**Rekomenduemyj sposob** — odnovremennyj zapusk frontend i backend:
+
 ```bash
-# Zapusk s avtoperezagruzkoj (nodemon)
+# Zapusk frontend i backend parallel'no (cherez concurrently)
 npm run dev
 ```
 
-Server budet dostupen po adresu: `http://localhost:3000`
+Eta komanda zapuskaet oba servera:
+- Backend: `http://localhost:3001`
+- Frontend: `http://localhost:3000`
+
+**Al'ternativnye sposoby:**
+
+```bash
+# Tol'ko backend s avtoperezagruzkoj (nodemon)
+npm run dev:backend
+
+# Tol'ko frontend
+npm run dev:frontend
+
+# Zapusk frontend na konkretnom portu
+FRONTEND_PORT=8080 npm run dev:frontend
+```
 
 ### Kompiljacija proekta
 
@@ -438,8 +486,17 @@ npm run format
 ### Razrabotka
 
 ```bash
-# Zapusk servera v rezhime razrabotki
+# Odnovremennyj zapusk frontend i backend (rekomenduetsja)
 npm run dev
+
+# Zapusk tol'ko backend s avtoperezagruzkoj
+npm run dev:backend
+
+# Zapusk tol'ko frontend
+npm run dev:frontend
+
+# Zapusk frontend na konkretnom portu
+FRONTEND_PORT=8080 npm run dev:frontend
 
 # Proverka koda
 npm run lint
@@ -450,6 +507,17 @@ npm run format
 # Kompiljacija
 npm run build
 ```
+
+### Dostupnye URL
+
+Pri zapuske `npm run dev`:
+
+| Servis | URL | Opisanie |
+|--------|-----|----------|
+| Backend API | `http://localhost:3001` | Express server |
+| Frontend | `http://localhost:3000` | SPA prilozhenie |
+
+**Primechanie:** Porty mozhno izmenit' cherez peremennye okruzhenija v `.env` faile.
 
 ### Testirovanie
 

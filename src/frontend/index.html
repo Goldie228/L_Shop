@@ -14,13 +14,17 @@
   <!-- Google Fonts - Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- CSS Styles -->
-  <!-- Variables -->
+  <!-- Design Tokens (должен быть загружен первым) -->
+  <link rel="stylesheet" href="styles/design-tokens.css">
+  <!-- Variables (алиасы к токенам для обратной совместимости) -->
   <link rel="stylesheet" href="styles/variables.css">
   <!-- Main styles -->
   <link rel="stylesheet" href="styles/main.css">
+  <!-- Utility classes -->
+  <link rel="stylesheet" href="styles/utilities.css">
   <!-- Component styles -->
   <link rel="stylesheet" href="styles/components/button.css">
   <link rel="stylesheet" href="styles/components/input.css">
@@ -49,6 +53,6 @@
   </noscript>
   
   <!-- TypeScript compiled to JavaScript -->
-  <script src="app.js" type="module"></script>
+  <script src="dist/app.js" type="module"></script>
 </body>
 </html>

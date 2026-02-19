@@ -3,7 +3,7 @@
  * Клиентский SPA роутер с History API
  */
 
-import { store } from '../store/store';
+import { store } from '../store/store.js';
 
 /**
  * Конфигурация маршрута

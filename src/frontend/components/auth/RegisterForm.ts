@@ -3,11 +3,11 @@
  * Form for user registration with data-registration attribute
  */
 
-import { Component, ComponentProps } from '../base/Component';
-import { Input } from '../ui/Input';
-import { Button } from '../ui/Button';
-import { AuthService } from '../../services/auth.service';
-import { store } from '../../store/store';
+import { Component, ComponentProps } from '../base/Component.js';
+import { Input, InputState } from '../ui/Input.js';
+import { Button } from '../ui/Button.js';
+import { AuthService } from '../../services/auth.service.js';
+import { store } from '../../store/store.js';
 import {
   RegisterUserData,
   validateName,
@@ -16,8 +16,8 @@ import {
   validatePhone,
   validatePassword,
   validatePasswordConfirmation
-} from '../../types/user';
-import { ApiError, NetworkError } from '../../types/api';
+} from '../../types/user.js';
+import { ApiError, NetworkError } from '../../types/api.js';
 
 /**
  * Register form props
@@ -28,6 +28,11 @@ export interface RegisterFormProps extends ComponentProps {
   /** Callback to switch to login form */
   onSwitchToLogin?: () => void;
 }
+
+/**
+ * Уровень силы пароля
+ */
+type PasswordStrength = 'weak' | 'medium' | 'strong' | 'very-strong';
 
 /**
  * Register form state
@@ -55,6 +60,12 @@ interface RegisterFormState {
   submitError: string | null;
   /** Loading state */
   isLoading: boolean;
+  /** Password visibility */
+  showPassword: boolean;
+  /** Confirm password visibility */
+  showConfirmPassword: boolean;
+  /** Password strength */
+  passwordStrength: PasswordStrength;
 }
 
 /**
@@ -74,7 +85,10 @@ export class RegisterForm extends Component<RegisterFormProps> {
     },
     errors: {},
     submitError: null,
-    isLoading: false
+    isLoading: false,
+    showPassword: false,
+    showConfirmPassword: false,
+    passwordStrength: 'weak'
   };
   
   /** Input components */
@@ -220,10 +234,14 @@ export class RegisterForm extends Component<RegisterFormProps> {
     this.inputs.set('phone', phoneInput);
     container.appendChild(phoneInput.render());
     
-    // Password input
+    // Password input container (для toggle и индикатора силы)
+    const passwordContainer = this.createElement('div', {
+      className: 'form-field__password-container'
+    });
+
     const passwordInput = new Input({
       name: 'password',
-      type: 'password',
+      type: this.state.showPassword ? 'text' : 'password',
       label: 'Пароль',
       placeholder: 'Минимум 6 символов',
       required: true,
@@ -232,28 +250,51 @@ export class RegisterForm extends Component<RegisterFormProps> {
       value: this.state.values.password,
       error: this.state.errors.password,
       inputState: this.state.errors.password ? 'error' : 'default',
-      onChange: (value) => this.handleInputChange('password', value),
+      onChange: (value) => {
+        this.handleInputChange('password', value);
+        this.updatePasswordStrength(value);
+      },
       onBlur: (value) => this.handleInputBlur('password', value)
     });
     this.inputs.set('password', passwordInput);
-    container.appendChild(passwordInput.render());
-    
-    // Confirm password input
+    passwordContainer.appendChild(passwordInput.render());
+
+    // Кнопка toggle password visibility
+    const passwordToggle = this.createPasswordToggle('password');
+    passwordContainer.appendChild(passwordToggle);
+
+    // Индикатор силы пароля
+    const strengthIndicator = this.createPasswordStrengthIndicator();
+    passwordContainer.appendChild(strengthIndicator);
+
+    container.appendChild(passwordContainer);
+
+    // Confirm password input container
+    const confirmPasswordContainer = this.createElement('div', {
+      className: 'form-field__password-container'
+    });
+
     const confirmPasswordInput = new Input({
       name: 'confirmPassword',
-      type: 'password',
+      type: this.state.showConfirmPassword ? 'text' : 'password',
       label: 'Подтверждение пароля',
       placeholder: 'Повторите пароль',
       required: true,
       autocomplete: 'new-password',
       value: this.state.values.confirmPassword,
       error: this.state.errors.confirmPassword,
-      inputState: this.state.errors.confirmPassword ? 'error' : 'default',
+      inputState: this.getConfirmPasswordState(),
       onChange: (value) => this.handleInputChange('confirmPassword', value),
       onBlur: (value) => this.handleInputBlur('confirmPassword', value)
     });
     this.inputs.set('confirmPassword', confirmPasswordInput);
-    container.appendChild(confirmPasswordInput.render());
+    confirmPasswordContainer.appendChild(confirmPasswordInput.render());
+
+    // Кнопка toggle confirm password visibility
+    const confirmPasswordToggle = this.createPasswordToggle('confirmPassword');
+    confirmPasswordContainer.appendChild(confirmPasswordToggle);
+
+    container.appendChild(confirmPasswordContainer);
     
     return container;
   }
@@ -456,6 +497,197 @@ export class RegisterForm extends Component<RegisterFormProps> {
   };
 
   /**
+   * Обновляет индикатор силы пароля.
+   * 
+   * @param password - Пароль для анализа
+   */
+  private updatePasswordStrength(password: string): void {
+    let score = 0
+
+    // Длина пароля
+    if (password.length >= 6) score++
+    if (password.length >= 8) score++
+    if (password.length >= 12) score++
+
+    // Наличие разных типов символов
+    if (/[a-z]/.test(password)) score++
+    if (/[A-Z]/.test(password)) score++
+    if (/[0-9]/.test(password)) score++
+    if (/[^a-zA-Z0-9]/.test(password)) score++
+
+    // Определяем уровень силы
+    if (score <= 2) {
+      this.state.passwordStrength = 'weak'
+    } else if (score <= 4) {
+      this.state.passwordStrength = 'medium'
+    } else if (score <= 6) {
+      this.state.passwordStrength = 'strong'
+    } else {
+      this.state.passwordStrength = 'very-strong'
+    }
+
+    // Обновляем UI индикатора
+    this.updateStrengthIndicator()
+  }
+
+  /**
+   * Обновляет визуальный индикатор силы пароля.
+   */
+  private updateStrengthIndicator(): void {
+    const indicator = this.element?.querySelector('.password-strength')
+    if (!indicator) return
+
+    // Обновляем класс силы
+    indicator.className = 'password-strength'
+    indicator.classList.add(`password-strength--${this.state.passwordStrength}`)
+
+    // Обновляем текст
+    const textMap: Record<PasswordStrength, string> = {
+      'weak': 'Слабый пароль',
+      'medium': 'Средний пароль',
+      'strong': 'Надёжный пароль',
+      'very-strong': 'Очень надёжный пароль',
+    }
+
+    const textElement = indicator.querySelector('.password-strength__text')
+    if (textElement) {
+      textElement.textContent = textMap[this.state.passwordStrength]
+    }
+  }
+
+  /**
+   * Создаёт кнопку переключения видимости пароля.
+   * 
+   * @param field - Поле пароля ('password' или 'confirmPassword')
+   * @returns HTML-элемент кнопки
+   */
+  private createPasswordToggle(field: 'password' | 'confirmPassword'): HTMLElement {
+    const button = this.createElement('button', {
+      type: 'button',
+      className: 'form-field__password-toggle',
+      ariaLabel: field === 'password' ? 'Показать пароль' : 'Показать подтверждение пароля',
+    })
+
+    // Иконка глаза (закрытый - пароль скрыт)
+    button.innerHTML = `
+      <svg class="icon icon--eye-closed" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+        <line x1="1" y1="1" x2="23" y2="23"/>
+      </svg>
+      <svg class="icon icon--eye-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+        <circle cx="12" cy="12" r="3"/>
+      </svg>
+    `
+
+    // Обработчик клика
+    button.addEventListener('click', (e) => {
+      e.preventDefault()
+      this.togglePasswordVisibility(field)
+    })
+
+    return button
+  }
+
+  /**
+   * Переключает видимость пароля.
+   * 
+   * @param field - Поле пароля
+   */
+  private togglePasswordVisibility(field: 'password' | 'confirmPassword'): void {
+    const isPassword = field === 'password'
+    const currentState = isPassword ? this.state.showPassword : this.state.showConfirmPassword
+    const newState = !currentState
+
+    if (isPassword) {
+      this.state.showPassword = newState
+    } else {
+      this.state.showConfirmPassword = newState
+    }
+
+    // Обновляем тип input
+    const input = this.inputs.get(field)
+    if (input) {
+      input.setType(newState ? 'text' : 'password')
+    }
+
+    // Обновляем иконку
+    const container = input?.getElement()?.parentElement
+    const toggleBtn = container?.querySelector('.form-field__password-toggle')
+    const closedEye = toggleBtn?.querySelector('.icon--eye-closed') as HTMLElement
+    const openEye = toggleBtn?.querySelector('.icon--eye-open') as HTMLElement
+
+    if (closedEye && openEye) {
+      closedEye.style.display = newState ? 'none' : 'block'
+      openEye.style.display = newState ? 'block' : 'none'
+    }
+
+    // Обновляем aria-label
+    if (toggleBtn) {
+      toggleBtn.setAttribute(
+        'aria-label',
+        isPassword
+          ? (newState ? 'Скрыть пароль' : 'Показать пароль')
+          : (newState ? 'Скрыть подтверждение пароля' : 'Показать подтверждение пароля')
+      )
+    }
+  }
+
+  /**
+   * Создаёт индикатор силы пароля.
+   * 
+   * @returns HTML-элемент индикатора
+   */
+  private createPasswordStrengthIndicator(): HTMLElement {
+    const container = this.createElement('div', {
+      className: `password-strength password-strength--${this.state.passwordStrength}`,
+    })
+
+    // Бары индикатора
+    const barsContainer = this.createElement('div', {
+      className: 'password-strength__bars',
+    })
+
+    for (let i = 0; i < 4; i++) {
+      barsContainer.appendChild(this.createElement('div', {
+        className: 'password-strength__bar',
+      }))
+    }
+
+    container.appendChild(barsContainer)
+
+    // Текстовое описание
+    const text = this.createElement('span', {
+      className: 'password-strength__text',
+      textContent: 'Введите пароль',
+    })
+
+    container.appendChild(text)
+
+    return container
+  }
+
+  /**
+   * Получает состояние для поля подтверждения пароля.
+   * 
+   * @returns Состояние input ('default', 'error', 'success')
+   */
+  private getConfirmPasswordState(): InputState {
+    // Если есть ошибка валидации - ошибка
+    if (this.state.errors.confirmPassword) {
+      return 'error'
+    }
+
+    // Если пароли совпадают и оба не пустые - успех
+    const { password, confirmPassword } = this.state.values
+    if (confirmPassword && password === confirmPassword) {
+      return 'success'
+    }
+
+    return 'default'
+  }
+
+  /**
    * Handle submission error
    * @param error - Error object
    */
@@ -511,14 +743,17 @@ export class RegisterForm extends Component<RegisterFormProps> {
       },
       errors: {},
       submitError: null,
-      isLoading: false
+      isLoading: false,
+      showPassword: false,
+      showConfirmPassword: false,
+      passwordStrength: 'weak'
     };
-    
+
     this.inputs.forEach(input => {
       input.setValue('');
       input.clearError();
     });
-    
+
     this.update();
   }
 }

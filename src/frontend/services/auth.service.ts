@@ -3,13 +3,13 @@
  * Service for authentication operations
  */
 
-import { api } from './api';
-import { AUTH_ENDPOINTS } from '../types/api';
+import { api } from './api.js';
+import { AUTH_ENDPOINTS } from '../types/api.js';
 import {
   User,
   LoginUserData,
   RegisterUserData
-} from '../types/user';
+} from '../types/user.js';
 
 /**
  * Login response from API
@@ -53,7 +53,7 @@ export class AuthService {
    */
   public static async login(credentials: LoginUserData): Promise<User> {
     const response = await api.post<LoginApiResponse>(AUTH_ENDPOINTS.LOGIN, {
-      loginOrEmail: credentials.loginOrEmail,
+      login: credentials.loginOrEmail,
       password: credentials.password
     });
     

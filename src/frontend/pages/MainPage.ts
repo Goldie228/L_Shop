@@ -1,11 +1,14 @@
 /**
  * Main Page Component - L_Shop Frontend
- * Home page with welcome content
+ * Главная страница магазина с приветственным контентом
+ * 
+ * @see src/frontend/styles/pages/main-page.css - стили страницы
+ * @see src/frontend/styles/utilities.css - утилитарные классы
  */
 
-import { Component, ComponentProps } from '../components/base/Component';
-import { Button } from '../components/ui/Button';
-import { store } from '../store/store';
+import { Component, ComponentProps } from '../components/base/Component.js';
+import { Button } from '../components/ui/Button.js';
+import { store } from '../store/store.js';
 
 /**
  * Main page props
@@ -38,19 +41,21 @@ export class MainPage extends Component<MainPageProps> {
    */
   public render(): HTMLElement {
     const state = store.getState();
-    
+
+    // Создаём страницу с анимацией появления
     const page = this.createElement('div', {
-      className: 'page main-page'
+      className: 'page main-page animate-fade-in',
     });
-    
-    // Hero section
+    page.setAttribute('data-testid', 'main-page');
+
+    // Hero section с анимацией
     const hero = this.createHeroSection(state.user.isAuthenticated);
     page.appendChild(hero);
-    
-    // Features section
+
+    // Features section с анимированными карточками
     const features = this.createFeaturesSection();
     page.appendChild(features);
-    
+
     this.element = page;
     return page;
   }
@@ -62,31 +67,32 @@ export class MainPage extends Component<MainPageProps> {
    */
   private createHeroSection(isAuthenticated: boolean): HTMLElement {
     const hero = this.createElement('section', {
-      className: 'hero'
+      className: 'hero animate-slide-up',
     });
-    
+    hero.setAttribute('data-testid', 'hero-section');
+
     const container = this.createElement('div', {
-      className: 'container'
+      className: 'container',
     });
-    
+
     // Hero content
     const content = this.createElement('div', {
-      className: 'hero__content'
+      className: 'hero__content',
     });
-    
-    // Title
+
+    // Title с утилитарным классом типографики
     const title = this.createElement(
       'h1',
-      { className: 'hero__title' },
-      ['Добро пожаловать в L_Shop']
+      { className: 'hero__title text-hero' },
+      ['Добро пожаловать в L_Shop'],
     );
     content.appendChild(title);
-    
-    // Subtitle
+
+    // Subtitle с утилитарным классом типографики
     const subtitle = this.createElement(
       'p',
-      { className: 'hero__subtitle' },
-      ['Интернет-магазин с широким ассортиментом товаров и удобным сервисом']
+      { className: 'hero__subtitle text-body-lg' },
+      ['Интернет-магазин с широким ассортиментом товаров и удобным сервисом'],
     );
     content.appendChild(subtitle);
     
@@ -147,61 +153,65 @@ export class MainPage extends Component<MainPageProps> {
    */
   private createFeaturesSection(): HTMLElement {
     const section = this.createElement('section', {
-      className: 'features'
+      className: 'features',
     });
-    
+    section.setAttribute('data-testid', 'features-section');
+
     const container = this.createElement('div', {
-      className: 'container'
+      className: 'container',
     });
-    
-    // Section title
+
+    // Section title с утилитарным классом типографики
     const title = this.createElement(
       'h2',
-      { className: 'features__title' },
-      ['Почему выбирают нас']
+      { className: 'features__title text-h2' },
+      ['Почему выбирают нас'],
     );
     container.appendChild(title);
-    
+
     // Features grid
     const grid = this.createElement('div', {
-      className: 'features__grid'
+      className: 'features__grid',
     });
-    
-    // Feature 1
-    const feature1 = this.createFeatureCard(
-      '🚚',
-      'Быстрая доставка',
-      'Доставляем заказы по всей стране в кратчайшие сроки'
-    );
-    grid.appendChild(feature1);
-    
-    // Feature 2
-    const feature2 = this.createFeatureCard(
-      '💳',
-      'Удобная оплата',
-      'Принимаем все виды карт и электронных платежей'
-    );
-    grid.appendChild(feature2);
-    
-    // Feature 3
-    const feature3 = this.createFeatureCard(
-      '🔒',
-      'Безопасность',
-      'Гарантируем безопасность ваших данных и платежей'
-    );
-    grid.appendChild(feature3);
-    
-    // Feature 4
-    const feature4 = this.createFeatureCard(
-      '📞',
-      'Поддержка 24/7',
-      'Наши специалисты всегда готовы помочь вам'
-    );
-    grid.appendChild(feature4);
-    
+
+    // Feature cards с hover эффектами и анимацией появления
+    // CSS уже содержит staggered animation через nth-child
+    const features: Array<{ icon: string; title: string; description: string }> = [
+      {
+        icon: '🚚',
+        title: 'Быстрая доставка',
+        description: 'Доставляем заказы по всей стране в кратчайшие сроки',
+      },
+      {
+        icon: '💳',
+        title: 'Удобная оплата',
+        description: 'Принимаем все виды карт и электронных платежей',
+      },
+      {
+        icon: '🔒',
+        title: 'Безопасность',
+        description: 'Гарантируем безопасность ваших данных и платежей',
+      },
+      {
+        icon: '📞',
+        title: 'Поддержка 24/7',
+        description: 'Наши специалисты всегда готовы помочь вам',
+      },
+    ];
+
+    features.forEach((feature, index) => {
+      const card = this.createFeatureCard(
+        feature.icon,
+        feature.title,
+        feature.description,
+        index,
+      );
+      grid.appendChild(card);
+    });
+
     container.appendChild(grid);
     section.appendChild(container);
-    
+
     return section;
   }
 
@@ -210,41 +220,45 @@ export class MainPage extends Component<MainPageProps> {
    * @param icon - Icon emoji
    * @param title - Feature title
    * @param description - Feature description
+   * @param index - Card index for test id
    * @returns Card element
    */
   private createFeatureCard(
     icon: string,
     title: string,
-    description: string
+    description: string,
+    index: number,
   ): HTMLElement {
+    // Добавляем классы для hover эффекта и анимации
     const card = this.createElement('div', {
-      className: 'feature-card card'
+      className: 'feature-card card card--hover animate-slide-up',
     });
-    
+    card.setAttribute('data-testid', `feature-card-${index}`);
+
     // Icon
     const iconEl = this.createElement(
       'div',
       { className: 'feature-card__icon' },
-      [icon]
+      [icon],
     );
     card.appendChild(iconEl);
-    
-    // Title
+
+    // Title с утилитарным классом типографики
     const titleEl = this.createElement(
       'h3',
-      { className: 'feature-card__title' },
-      [title]
+      { className: 'feature-card__title text-h4' },
+      [title],
     );
     card.appendChild(titleEl);
-    
-    // Description
+
+    // Description с утилитарным классом типографики
     const descEl = this.createElement(
       'p',
-      { className: 'feature-card__description' },
-      [description]
+      { className: 'feature-card__description text-body' },
+      [description],
     );
     card.appendChild(descEl);
-    
+
     return card;
   }
 

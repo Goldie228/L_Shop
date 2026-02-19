@@ -1,6 +1,9 @@
 /**
  * Form Component Styles - L_Shop
  * Auth forms, validation, error states
+ * 
+ * @see src/frontend/styles/design-tokens.css - источник токенов
+ * @see docs/DESIGN_SYSTEM.md - документация дизайн-системы
  */
 
 /* ====== Auth Form Container ====== */
@@ -10,11 +13,11 @@
 
 .auth-form__header {
   text-align: center;
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: var(--spacing-6);
 }
 
 .auth-form__title {
-  margin: 0 0 var(--spacing-xs);
+  margin: 0 0 var(--spacing-1);
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
@@ -29,37 +32,46 @@
 /* ====== Form Tabs ====== */
 .auth-form__tabs {
   display: flex;
-  gap: var(--spacing-xs);
-  margin-bottom: var(--spacing-lg);
-  border-bottom: 1px solid var(--color-border);
+  gap: var(--spacing-1);
+  margin-bottom: var(--spacing-6);
+  border-bottom: 1px solid var(--color-border-primary);
 }
 
 .auth-form__tab {
   flex: 1;
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: var(--spacing-2) var(--spacing-4);
   background: none;
   border: none;
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
+  font-family: var(--font-family-primary);
   color: var(--color-text-secondary);
   cursor: pointer;
-  transition: color var(--transition-fast), border-color var(--transition-fast);
+  transition: 
+    color var(--transition-fast),
+    border-color var(--transition-fast),
+    background-color var(--transition-fast);
 }
 
 .auth-form__tab:hover {
   color: var(--color-text-primary);
+  background-color: var(--color-surface-secondary);
 }
 
 .auth-form__tab--active {
-  color: var(--color-primary);
-  border-bottom-color: var(--color-primary);
+  color: var(--color-primary-600);
+  border-bottom-color: var(--color-primary-600);
+}
+
+.auth-form__tab--active:hover {
+  background-color: var(--color-primary-50);
 }
 
 .auth-form__tab:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: var(--shadow-focus);
   border-radius: var(--radius-sm) var(--radius-sm) 0 0;
 }
 
@@ -67,12 +79,12 @@
 .auth-form__fields {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
+  gap: var(--spacing-4);
 }
 
 .auth-form__row {
   display: flex;
-  gap: var(--spacing-md);
+  gap: var(--spacing-4);
 }
 
 .auth-form__row .form-group {
@@ -87,7 +99,7 @@
 
 .form-field__label {
   display: block;
-  margin-bottom: var(--spacing-xs);
+  margin-bottom: var(--spacing-1);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-primary);
@@ -95,7 +107,7 @@
 
 .form-field__label--required::after {
   content: ' *';
-  color: var(--color-error);
+  color: var(--color-error-500);
 }
 
 .form-field__input-wrapper {
@@ -104,13 +116,17 @@
 
 .form-field__input {
   width: 100%;
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: var(--spacing-2) var(--spacing-4);
   font-size: var(--font-size-base);
-  border: 1px solid var(--color-border);
+  font-family: var(--font-family-primary);
+  border: 1px solid var(--color-border-primary);
   border-radius: var(--radius-md);
-  background-color: var(--color-bg-primary);
+  background-color: var(--color-surface-primary);
   color: var(--color-text-primary);
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  transition: 
+    border-color var(--transition-input),
+    box-shadow var(--transition-input),
+    background-color var(--transition-input);
 }
 
 .form-field__input::placeholder {
@@ -123,49 +139,57 @@
 
 .form-field__input:focus {
   outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px var(--color-primary-light);
+  border-color: var(--color-primary-500);
+  box-shadow: var(--shadow-focus);
 }
 
 .form-field__input:disabled {
-  background-color: var(--color-bg-tertiary);
+  background-color: var(--color-surface-tertiary);
   cursor: not-allowed;
+  opacity: 0.6;
 }
 
-/* Error State */
+/* Error State - с анимацией появления */
 .form-field--error .form-field__input {
-  border-color: var(--color-error);
+  border-color: var(--color-error-500);
+  animation: shake var(--duration-fast) var(--ease-out);
 }
 
 .form-field--error .form-field__input:focus {
-  border-color: var(--color-error);
-  box-shadow: 0 0 0 3px var(--color-error-light);
+  border-color: var(--color-error-500);
+  box-shadow: 0 0 0 3px var(--color-error-100);
 }
 
-/* Success State */
+/* Success State - с анимацией */
 .form-field--success .form-field__input {
-  border-color: var(--color-success);
+  border-color: var(--color-success-500);
 }
 
 .form-field--success .form-field__input:focus {
-  border-color: var(--color-success);
-  box-shadow: 0 0 0 3px var(--color-success-light);
+  border-color: var(--color-success-500);
+  box-shadow: 0 0 0 3px var(--color-success-100);
+}
+
+/* Анимация валидации - успешное состояние */
+.form-field--success .form-field__input:not(:focus) {
+  animation: pulse-success var(--duration-normal) var(--ease-out);
 }
 
 /* ====== Helper & Error Text ====== */
 .form-field__helper {
-  margin-top: var(--spacing-xs);
+  margin-top: var(--spacing-1);
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
 }
 
 .form-field__error {
-  margin-top: var(--spacing-xs);
+  margin-top: var(--spacing-1);
   font-size: var(--font-size-xs);
-  color: var(--color-error);
+  color: var(--color-error-600);
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-1);
+  animation: slideInUp var(--duration-fast) var(--ease-out);
 }
 
 .form-field__error-icon {
@@ -181,28 +205,30 @@
 
 .form-field__toggle-password {
   position: absolute;
-  right: var(--spacing-sm);
+  right: var(--spacing-2);
   top: 50%;
   transform: translateY(-50%);
   width: 32px;
   height: 32px;
-  padding: var(--spacing-xs);
+  padding: var(--spacing-1);
   background: none;
   border: none;
   border-radius: var(--radius-sm);
   color: var(--color-text-muted);
   cursor: pointer;
-  transition: color var(--transition-fast), background-color var(--transition-fast);
+  transition: 
+    color var(--transition-fast),
+    background-color var(--transition-fast);
 }
 
 .form-field__toggle-password:hover {
   color: var(--color-text-primary);
-  background-color: var(--color-bg-secondary);
+  background-color: var(--color-surface-secondary);
 }
 
 .form-field__toggle-password:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: var(--shadow-focus);
 }
 
 .form-field__toggle-password-icon {
@@ -212,10 +238,10 @@
 
 /* ====== Form Actions ====== */
 .auth-form__actions {
-  margin-top: var(--spacing-lg);
+  margin-top: var(--spacing-6);
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-2);
 }
 
 .auth-form__submit {
@@ -229,11 +255,13 @@
 }
 
 .auth-form__link a {
-  color: var(--color-primary);
+  color: var(--color-primary-600);
   font-weight: var(--font-weight-medium);
+  transition: color var(--transition-fast);
 }
 
 .auth-form__link a:hover {
+  color: var(--color-primary-700);
   text-decoration: underline;
 }
 
@@ -241,8 +269,8 @@
 .auth-form__divider {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
-  margin: var(--spacing-lg) 0;
+  gap: var(--spacing-4);
+  margin: var(--spacing-6) 0;
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
 }
@@ -252,21 +280,22 @@
   content: '';
   flex: 1;
   height: 1px;
-  background-color: var(--color-border);
+  background-color: var(--color-border-primary);
 }
 
 /* ====== Form Error Banner ====== */
 .auth-form__error-banner {
-  padding: var(--spacing-sm) var(--spacing-md);
-  margin-bottom: var(--spacing-md);
-  background-color: var(--color-error-light);
-  border: 1px solid var(--color-error);
+  padding: var(--spacing-2) var(--spacing-4);
+  margin-bottom: var(--spacing-4);
+  background-color: var(--color-error-50);
+  border: 1px solid var(--color-error-200);
   border-radius: var(--radius-md);
-  color: var(--color-error);
+  color: var(--color-error-700);
   font-size: var(--font-size-sm);
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-2);
+  animation: slideInDown var(--duration-normal) var(--ease-out);
 }
 
 .auth-form__error-banner-icon {
@@ -277,23 +306,30 @@
 
 /* ====== Form Success Banner ====== */
 .auth-form__success-banner {
-  padding: var(--spacing-sm) var(--spacing-md);
-  margin-bottom: var(--spacing-md);
-  background-color: var(--color-success-light);
-  border: 1px solid var(--color-success);
+  padding: var(--spacing-2) var(--spacing-4);
+  margin-bottom: var(--spacing-4);
+  background-color: var(--color-success-50);
+  border: 1px solid var(--color-success-200);
   border-radius: var(--radius-md);
-  color: var(--color-success);
+  color: var(--color-success-700);
   font-size: var(--font-size-sm);
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-2);
+  animation: slideInDown var(--duration-normal) var(--ease-out);
+}
+
+.auth-form__success-banner-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
 }
 
 /* ====== Checkbox Field ====== */
 .form-field--checkbox {
   display: flex;
   align-items: flex-start;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-2);
 }
 
 .form-field--checkbox .form-field__input {
@@ -301,6 +337,8 @@
   height: 18px;
   margin-top: 2px;
   flex-shrink: 0;
+  accent-color: var(--color-primary-600);
+  cursor: pointer;
 }
 
 .form-field--checkbox .form-field__label {
@@ -317,9 +355,9 @@
 .form-field__phone-prefix {
   display: flex;
   align-items: center;
-  padding: 0 var(--spacing-sm);
-  background-color: var(--color-bg-secondary);
-  border: 1px solid var(--color-border);
+  padding: 0 var(--spacing-2);
+  background-color: var(--color-surface-secondary);
+  border: 1px solid var(--color-border-primary);
   border-right: none;
   border-radius: var(--radius-md) 0 0 var(--radius-md);
   font-size: var(--font-size-sm);
@@ -333,6 +371,7 @@
 /* ====== Loading State ====== */
 .auth-form--loading .form-field__input {
   pointer-events: none;
+  opacity: 0.7;
 }
 
 .auth-form--loading .auth-form__submit {
@@ -349,7 +388,7 @@
   border: 2px solid var(--color-text-inverse);
   border-top-color: transparent;
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  animation: spin var(--duration-slow) linear infinite;
 }
 
 /* ====== Registration Form Specific ====== */
@@ -358,18 +397,80 @@
 }
 
 [data-registration] .auth-form__fields {
-  gap: var(--spacing-sm);
+  gap: var(--spacing-2);
 }
 
 [data-registration] .form-field__input {
   font-size: var(--font-size-sm);
 }
 
+/* ====== Анимации для валидации ====== */
+
+/* Анимация тряски при ошибке */
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  20%, 60% {
+    transform: translateX(-4px);
+  }
+  40%, 80% {
+    transform: translateX(4px);
+  }
+}
+
+/* Анимация пульсации при успехе */
+@keyframes pulse-success {
+  0% {
+    box-shadow: 0 0 0 0 var(--color-success-200);
+  }
+  50% {
+    box-shadow: 0 0 0 4px var(--color-success-100);
+  }
+  100% {
+    box-shadow: 0 0 0 0 var(--color-success-200);
+  }
+}
+
+/* Анимация появления сверху */
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Анимация появления снизу */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Анимация вращения для спиннера */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* ====== Responsive ====== */
 @media (max-width: 480px) {
   .auth-form__row {
     flex-direction: column;
-    gap: var(--spacing-sm);
+    gap: var(--spacing-2);
   }
   
   .auth-form__title {

@@ -3,13 +3,13 @@
  * Main application initialization
  */
 
-import { store } from './store/store';
-import { router, APP_ROUTES } from './router/router';
-import { AuthService } from './services/auth.service';
-import { Header } from './components/layout/Header';
-import { AuthModal } from './components/auth/AuthModal';
-import { MainPage } from './pages/MainPage';
-import { Route } from './router/router';
+import { store } from './store/store.js';
+import { router, APP_ROUTES } from './router/router.js';
+import { AuthService } from './services/auth.service.js';
+import { Header } from './components/layout/Header.js';
+import { AuthModal } from './components/auth/AuthModal.js';
+import { MainPage } from './pages/MainPage.js';
+import { Route } from './router/router.js';
 
 /**
  * Application class

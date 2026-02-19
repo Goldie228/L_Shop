@@ -1,14 +1,17 @@
 /**
  * Header Component - L_Shop Frontend
- * Site header with navigation and user section
+ * Site header with navigation, user section, and scroll effects
+ * 
+ * @see src/frontend/styles/components/header.css - стили хедера
+ * @see docs/DESIGN_SYSTEM.md - документация дизайн-системы
  */
 
-import { Component, ComponentProps } from '../base/Component';
-import { Button } from '../ui/Button';
-import { store } from '../../store/store';
-import { User, getUserDisplayInfo } from '../../types/user';
-import { AuthService } from '../../services/auth.service';
-import { router } from '../../router/router';
+import { Component, ComponentProps } from '../base/Component.js';
+import { Button } from '../ui/Button.js';
+import { store } from '../../store/store.js';
+import { User, getUserDisplayInfo } from '../../types/user.js';
+import { AuthService } from '../../services/auth.service.js';
+import { router } from '../../router/router.js';
 
 /**
  * Header props
@@ -16,10 +19,38 @@ import { router } from '../../router/router';
 export interface HeaderProps extends ComponentProps {
   /** Callback when login button clicked */
   onLoginClick?: () => void;
+  /** Threshold for scrolled state in pixels */
+  scrollThreshold?: number;
 }
 
 /**
+ * SVG иконки
+ */
+const MENU_ICON = `
+  <svg class="header__menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line class="header__menu-line header__menu-line--top" x1="3" y1="6" x2="21" y2="6"></line>
+    <line class="header__menu-line header__menu-line--middle" x1="3" y1="12" x2="21" y2="12"></line>
+    <line class="header__menu-line header__menu-line--bottom" x1="3" y1="18" x2="21" y2="18"></line>
+  </svg>
+`;
+
+const CHEVRON_DOWN_ICON = `
+  <svg class="header__dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="6 9 12 15 18 9"></polyline>
+  </svg>
+`;
+
+/**
  * Header component class
+ * 
+ * @example
+ * ```typescript
+ * const header = new Header({
+ *   onLoginClick: () => openAuthModal(),
+ *   scrollThreshold: 50
+ * });
+ * document.body.prepend(header.render());
+ * ```
  */
 export class Header extends Component<HeaderProps> {
   /** User section element */
@@ -30,13 +61,23 @@ export class Header extends Component<HeaderProps> {
   
   /** Store unsubscribe function */
   private unsubscribe: (() => void) | null = null;
+  
+  /** Scroll handler reference */
+  private scrollHandler: (() => void) | null = null;
+  
+  /** User dropdown element */
+  private userDropdown: HTMLElement | null = null;
+  
+  /** Is dropdown open */
+  private isDropdownOpen: boolean = false;
 
   /**
    * Get default props
    */
   protected getDefaultProps(): HeaderProps {
     return {
-      ...super.getDefaultProps()
+      ...super.getDefaultProps(),
+      scrollThreshold: 50,
     };
   }
 
@@ -47,11 +88,12 @@ export class Header extends Component<HeaderProps> {
   public render(): HTMLElement {
     const header = this.createElement('header', {
       className: 'header',
-      role: 'banner'
+      role: 'banner',
+      'data-testid': 'header',
     });
     
     const container = this.createElement('div', {
-      className: 'header__container'
+      className: 'header__container',
     });
     
     // Logo
@@ -89,11 +131,12 @@ export class Header extends Component<HeaderProps> {
       'a',
       {
         href: '/',
-        className: 'header__logo'
+        className: 'header__logo',
+        'data-testid': 'header-logo',
       },
       [
         `<span class="header__logo-icon">L</span>`,
-        `<span>L_Shop</span>`
+        `<span>L_Shop</span>`,
       ]
     );
     
@@ -113,11 +156,11 @@ export class Header extends Component<HeaderProps> {
     const nav = this.createElement('nav', {
       className: 'header__nav',
       role: 'navigation',
-      'aria-label': 'Main navigation'
+      'aria-label': 'Main navigation',
     });
     
     const list = this.createElement('ul', {
-      className: 'header__nav-list'
+      className: 'header__nav-list',
     });
     
     // Home link
@@ -142,7 +185,8 @@ export class Header extends Component<HeaderProps> {
       'a',
       {
         href,
-        className: `header__nav-link ${isActive ? 'header__nav-link--active' : ''}`
+        className: `header__nav-link${isActive ? ' header__nav-link--active' : ''}`,
+        'data-testid': `nav-link-${text.toLowerCase()}`,
       },
       [text]
     );
@@ -162,28 +206,22 @@ export class Header extends Component<HeaderProps> {
   private createUserSection(): HTMLElement {
     const state = store.getState();
     const section = this.createElement('div', {
-      className: 'header__user'
+      className: 'header__user',
+      'data-testid': 'header-user-section',
     });
     
     if (state.user.isAuthenticated && state.user.user) {
-      // User is logged in
-      const userInfo = this.createUserInfo(state.user.user);
-      section.appendChild(userInfo);
-      
-      const logoutButton = new Button({
-        text: 'Выйти',
-        variant: 'ghost',
-        size: 'sm',
-        onClick: () => this.handleLogout()
-      });
-      section.appendChild(logoutButton.render());
+      // User is logged in - create dropdown
+      const userDropdown = this.createUserDropdown(state.user.user);
+      section.appendChild(userDropdown);
     } else {
       // User is not logged in
       const loginButton = new Button({
         text: 'Войти',
         variant: 'primary',
         size: 'sm',
-        onClick: () => this.handleLoginClick()
+        testId: 'header-login-btn',
+        onClick: () => this.handleLoginClick(),
       });
       section.appendChild(loginButton.render());
     }
@@ -192,15 +230,25 @@ export class Header extends Component<HeaderProps> {
   }
 
   /**
-   * Create user info display
+   * Create user dropdown with avatar and menu
    * @param user - User object
-   * @returns User info element
+   * @returns Dropdown element
    */
-  private createUserInfo(user: User): HTMLElement {
+  private createUserDropdown(user: User): HTMLElement {
     const info = getUserDisplayInfo(user);
     
-    const container = this.createElement('div', {
-      className: 'header__user-info'
+    const dropdown = this.createElement('div', {
+      className: 'header__user-dropdown',
+      'data-testid': 'user-dropdown',
+    });
+    
+    // Trigger button
+    const trigger = this.createElement('button', {
+      type: 'button',
+      className: 'header__user-trigger',
+      'aria-expanded': 'false',
+      'aria-haspopup': 'true',
+      'data-testid': 'user-dropdown-trigger',
     });
     
     // Avatar
@@ -209,7 +257,7 @@ export class Header extends Component<HeaderProps> {
       { className: 'header__user-avatar' },
       [info.initials]
     );
-    container.appendChild(avatar);
+    trigger.appendChild(avatar);
     
     // Name
     const name = this.createElement(
@@ -217,9 +265,110 @@ export class Header extends Component<HeaderProps> {
       { className: 'header__user-name' },
       [info.displayName]
     );
-    container.appendChild(name);
+    trigger.appendChild(name);
     
-    return container;
+    // Chevron icon
+    const chevron = this.createElement('span', { className: 'header__dropdown-chevron' });
+    chevron.innerHTML = CHEVRON_DOWN_ICON;
+    trigger.appendChild(chevron);
+    
+    this.addEventListener(trigger, 'click', () => this.toggleDropdown());
+    
+    dropdown.appendChild(trigger);
+    
+    // Dropdown menu
+    this.userDropdown = this.createElement('div', {
+      className: 'header__dropdown-menu',
+      role: 'menu',
+      'aria-hidden': 'true',
+      'data-testid': 'user-dropdown-menu',
+    });
+    
+    // User info in dropdown
+    const userInfo = this.createElement('div', { className: 'header__dropdown-user-info' });
+    const userName = this.createElement(
+      'span',
+      { className: 'header__dropdown-user-name' },
+      [info.displayName]
+    );
+    const userEmail = this.createElement(
+      'span',
+      { className: 'header__dropdown-user-email' },
+      [user.email]
+    );
+    userInfo.appendChild(userName);
+    userInfo.appendChild(userEmail);
+    this.userDropdown.appendChild(userInfo);
+    
+    // Divider
+    const divider = this.createElement('div', { className: 'header__dropdown-divider' });
+    this.userDropdown.appendChild(divider);
+    
+    // Logout button
+    const logoutItem = this.createElement('div', { className: 'header__dropdown-item' });
+    const logoutButton = new Button({
+      text: 'Выйти',
+      variant: 'ghost',
+      size: 'sm',
+      testId: 'header-logout-btn',
+      onClick: () => this.handleLogout(),
+    });
+    logoutItem.appendChild(logoutButton.render());
+    this.userDropdown.appendChild(logoutItem);
+    
+    dropdown.appendChild(this.userDropdown);
+    
+    // Close dropdown on outside click
+    document.addEventListener('click', (e) => {
+      if (this.isDropdownOpen && !dropdown.contains(e.target as Node)) {
+        this.closeDropdown();
+      }
+    });
+    
+    return dropdown;
+  }
+
+  /**
+   * Toggle user dropdown
+   */
+  private toggleDropdown(): void {
+    if (this.isDropdownOpen) {
+      this.closeDropdown();
+    } else {
+      this.openDropdown();
+    }
+  }
+
+  /**
+   * Open user dropdown
+   */
+  private openDropdown(): void {
+    if (!this.userDropdown || !this.element) return;
+    
+    this.isDropdownOpen = true;
+    this.userDropdown.classList.add('header__dropdown-menu--open');
+    this.userDropdown.setAttribute('aria-hidden', 'false');
+    
+    const trigger = this.element.querySelector('.header__user-trigger');
+    if (trigger) {
+      trigger.setAttribute('aria-expanded', 'true');
+    }
+  }
+
+  /**
+   * Close user dropdown
+   */
+  private closeDropdown(): void {
+    if (!this.userDropdown || !this.element) return;
+    
+    this.isDropdownOpen = false;
+    this.userDropdown.classList.remove('header__dropdown-menu--open');
+    this.userDropdown.setAttribute('aria-hidden', 'true');
+    
+    const trigger = this.element.querySelector('.header__user-trigger');
+    if (trigger) {
+      trigger.setAttribute('aria-expanded', 'false');
+    }
   }
 
   /**
@@ -232,17 +381,14 @@ export class Header extends Component<HeaderProps> {
       {
         type: 'button',
         className: 'header__menu-toggle',
-        'aria-label': 'Toggle menu',
-        'aria-expanded': 'false'
-      },
-      [
-        `<svg class="header__menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="3" y1="6" x2="21" y2="6"></line>
-          <line x1="3" y1="12" x2="21" y2="12"></line>
-          <line x1="3" y1="18" x2="21" y2="18"></line>
-        </svg>`
-      ]
+        'aria-label': 'Открыть меню',
+        'aria-expanded': 'false',
+        'aria-controls': 'mobile-menu',
+        'data-testid': 'mobile-menu-toggle',
+      }
     );
+    
+    toggle.innerHTML = MENU_ICON;
     
     this.addEventListener(toggle, 'click', () => this.toggleMobileMenu());
     
@@ -255,12 +401,15 @@ export class Header extends Component<HeaderProps> {
    */
   private createMobileMenu(): HTMLElement {
     const menu = this.createElement('div', {
-      className: 'header__mobile-menu'
+      className: 'header__mobile-menu',
+      id: 'mobile-menu',
+      'aria-hidden': 'true',
+      'data-testid': 'mobile-menu',
     });
     
     // Navigation links
     const navList = this.createElement('ul', {
-      className: 'header__mobile-nav-list'
+      className: 'header__mobile-nav-list',
     });
     
     const homeItem = this.createElement('li');
@@ -273,18 +422,25 @@ export class Header extends Component<HeaderProps> {
     // User section for mobile
     const state = store.getState();
     const mobileUser = this.createElement('div', {
-      className: 'header__mobile-user'
+      className: 'header__mobile-user',
     });
     
     if (state.user.isAuthenticated && state.user.user) {
-      const userInfo = this.createUserInfo(state.user.user);
+      const info = getUserDisplayInfo(state.user.user);
+      
+      const userInfo = this.createElement('div', { className: 'header__mobile-user-info' });
+      const avatar = this.createElement('span', { className: 'header__user-avatar' }, [info.initials]);
+      const name = this.createElement('span', { className: 'header__user-name' }, [info.displayName]);
+      userInfo.appendChild(avatar);
+      userInfo.appendChild(name);
       mobileUser.appendChild(userInfo);
       
       const logoutButton = new Button({
         text: 'Выйти',
         variant: 'secondary',
         block: true,
-        onClick: () => this.handleLogout()
+        testId: 'mobile-logout-btn',
+        onClick: () => this.handleLogout(),
       });
       mobileUser.appendChild(logoutButton.render());
     } else {
@@ -292,7 +448,8 @@ export class Header extends Component<HeaderProps> {
         text: 'Войти',
         variant: 'primary',
         block: true,
-        onClick: () => this.handleLoginClick()
+        testId: 'mobile-login-btn',
+        onClick: () => this.handleLoginClick(),
       });
       mobileUser.appendChild(loginButton.render());
     }
@@ -313,7 +470,8 @@ export class Header extends Component<HeaderProps> {
       'a',
       {
         href,
-        className: 'header__mobile-nav-link'
+        className: 'header__mobile-nav-link',
+        'data-testid': `mobile-nav-${text.toLowerCase()}`,
       },
       [text]
     );
@@ -349,11 +507,14 @@ export class Header extends Component<HeaderProps> {
     if (!this.mobileMenu || !this.element) return;
     
     this.mobileMenu.classList.add('header__mobile-menu--open');
+    this.mobileMenu.setAttribute('aria-hidden', 'false');
     document.body.classList.add('menu-open');
     
     const toggle = this.element.querySelector('.header__menu-toggle');
     if (toggle) {
       toggle.setAttribute('aria-expanded', 'true');
+      toggle.setAttribute('aria-label', 'Закрыть меню');
+      toggle.classList.add('header__menu-toggle--active');
     }
   }
 
@@ -364,11 +525,30 @@ export class Header extends Component<HeaderProps> {
     if (!this.mobileMenu || !this.element) return;
     
     this.mobileMenu.classList.remove('header__mobile-menu--open');
+    this.mobileMenu.setAttribute('aria-hidden', 'true');
     document.body.classList.remove('menu-open');
     
     const toggle = this.element.querySelector('.header__menu-toggle');
     if (toggle) {
       toggle.setAttribute('aria-expanded', 'false');
+      toggle.setAttribute('aria-label', 'Открыть меню');
+      toggle.classList.remove('header__menu-toggle--active');
+    }
+  }
+
+  /**
+   * Handle scroll for header background change
+   */
+  private handleScroll(): void {
+    if (!this.element) return;
+    
+    const { scrollThreshold } = this.props;
+    const isScrolled = window.scrollY > (scrollThreshold ?? 50);
+    
+    if (isScrolled) {
+      this.element.classList.add('header--scrolled');
+    } else {
+      this.element.classList.remove('header--scrolled');
     }
   }
 
@@ -377,6 +557,7 @@ export class Header extends Component<HeaderProps> {
    */
   private handleLoginClick(): void {
     this.closeMobileMenu();
+    this.closeDropdown();
     
     if (this.props.onLoginClick) {
       this.props.onLoginClick();
@@ -391,9 +572,10 @@ export class Header extends Component<HeaderProps> {
       await AuthService.logout();
       store.setUser(null);
       this.closeMobileMenu();
+      this.closeDropdown();
       this.updateUserSection();
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('[Header] Logout error:', error);
     }
   }
 
@@ -422,6 +604,13 @@ export class Header extends Component<HeaderProps> {
     this.unsubscribe = store.subscribe('user', () => {
       this.updateUserSection();
     });
+    
+    // Add scroll listener for header background
+    this.scrollHandler = () => this.handleScroll();
+    window.addEventListener('scroll', this.scrollHandler, { passive: true });
+    
+    // Initial scroll check
+    this.handleScroll();
   }
 
   /**
@@ -432,6 +621,12 @@ export class Header extends Component<HeaderProps> {
     if (this.unsubscribe) {
       this.unsubscribe();
       this.unsubscribe = null;
+    }
+    
+    // Remove scroll listener
+    if (this.scrollHandler) {
+      window.removeEventListener('scroll', this.scrollHandler);
+      this.scrollHandler = null;
     }
     
     // Close mobile menu

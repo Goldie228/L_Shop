@@ -3,7 +3,7 @@
  * Простое управление состоянием с подписками
  */
 
-import { User, UserState } from '../types/user';
+import { User, UserState } from '../types/user.js';
 
 /**
  * Интерфейс состояния приложения

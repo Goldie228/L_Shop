@@ -1,11 +1,14 @@
 /**
  * Input Component Styles - L_Shop
  * Text inputs, textareas, select with validation states
+ * 
+ * @see src/frontend/styles/design-tokens.css - источник токенов
+ * @see docs/DESIGN_SYSTEM.md - документация дизайн-системы
  */
 
 /* ====== Form Group ====== */
 .form-group {
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-4);
 }
 
 .form-group:last-child {
@@ -15,7 +18,7 @@
 /* ====== Label ====== */
 .form-label {
   display: block;
-  margin-bottom: var(--spacing-xs);
+  margin-bottom: var(--spacing-1);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-primary);
@@ -23,22 +26,25 @@
 
 .form-label--required::after {
   content: ' *';
-  color: var(--color-error);
+  color: var(--color-error-500);
 }
 
 /* ====== Base Input ====== */
 .input {
   display: block;
   width: 100%;
-  padding: var(--spacing-sm) var(--spacing-md);
-  font-family: var(--font-family);
+  padding: var(--spacing-2) var(--spacing-4);
+  font-family: var(--font-family-primary);
   font-size: var(--font-size-base);
   line-height: var(--line-height-normal);
   color: var(--color-text-primary);
-  background-color: var(--color-bg-primary);
-  border: 1px solid var(--color-border);
+  background-color: var(--color-surface-primary);
+  border: 1px solid var(--color-border-primary);
   border-radius: var(--radius-md);
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  transition: 
+    border-color var(--transition-input),
+    box-shadow var(--transition-input),
+    background-color var(--transition-input);
 }
 
 .input::placeholder {
@@ -47,17 +53,17 @@
 }
 
 .input:hover:not(:disabled):not(:focus) {
-  border-color: var(--color-border-hover);
+  border-color: var(--color-border-secondary);
 }
 
 .input:focus {
   outline: none;
-  border-color: var(--color-border-focus);
-  box-shadow: 0 0 0 3px var(--color-primary-light);
+  border-color: var(--color-primary-500);
+  box-shadow: var(--shadow-focus);
 }
 
 .input:disabled {
-  background-color: var(--color-bg-tertiary);
+  background-color: var(--color-surface-tertiary);
   color: var(--color-text-muted);
   cursor: not-allowed;
 }
@@ -66,40 +72,40 @@
 
 /* Error State */
 .input--error {
-  border-color: var(--color-error);
+  border-color: var(--color-error-500);
 }
 
 .input--error:hover:not(:disabled):not(:focus) {
-  border-color: #dc2626;
+  border-color: var(--color-error-600);
 }
 
 .input--error:focus {
-  border-color: var(--color-error);
-  box-shadow: 0 0 0 3px var(--color-error-light);
+  border-color: var(--color-error-500);
+  box-shadow: var(--shadow-focus-error);
 }
 
 /* Success State */
 .input--success {
-  border-color: var(--color-success);
+  border-color: var(--color-success-500);
 }
 
 .input--success:focus {
-  border-color: var(--color-success);
-  box-shadow: 0 0 0 3px var(--color-success-light);
+  border-color: var(--color-success-500);
+  box-shadow: var(--shadow-focus-success);
 }
 
 /* ====== Input Sizes ====== */
 
 /* Small */
 .input--sm {
-  padding: var(--spacing-xs) var(--spacing-sm);
+  padding: var(--spacing-1) var(--spacing-2);
   font-size: var(--font-size-sm);
   border-radius: var(--radius-sm);
 }
 
 /* Large */
 .input--lg {
-  padding: var(--spacing-md) var(--spacing-lg);
+  padding: var(--spacing-4) var(--spacing-6);
   font-size: var(--font-size-lg);
   border-radius: var(--radius-lg);
 }
@@ -115,24 +121,25 @@
 }
 
 .input-wrapper .input--icon-right {
-  padding-left: var(--spacing-md);
+  padding-left: var(--spacing-4);
   padding-right: 2.5rem;
 }
 
 .input-icon {
   position: absolute;
-  left: var(--spacing-md);
+  left: var(--spacing-4);
   top: 50%;
   transform: translateY(-50%);
   width: 18px;
   height: 18px;
   color: var(--color-text-muted);
   pointer-events: none;
+  transition: color var(--transition-fast);
 }
 
 .input-icon--right {
   left: auto;
-  right: var(--spacing-md);
+  right: var(--spacing-4);
 }
 
 /* ====== Textarea ====== */
@@ -150,7 +157,7 @@
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right var(--spacing-sm) center;
+  background-position: right var(--spacing-2) center;
   background-size: 16px;
   padding-right: 2.5rem;
 }
@@ -164,7 +171,7 @@
 .radio {
   display: inline-flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-2);
   cursor: pointer;
   user-select: none;
 }
@@ -174,10 +181,13 @@
   appearance: none;
   width: 18px;
   height: 18px;
-  border: 2px solid var(--color-border);
-  background-color: var(--color-bg-primary);
+  border: 2px solid var(--color-border-primary);
+  background-color: var(--color-surface-primary);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: 
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
   flex-shrink: 0;
 }
 
@@ -191,20 +201,20 @@
 
 .checkbox__input:hover,
 .radio__input:hover {
-  border-color: var(--color-primary);
+  border-color: var(--color-primary-500);
 }
 
 .checkbox__input:focus,
 .radio__input:focus {
   outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px var(--color-primary-light);
+  border-color: var(--color-primary-500);
+  box-shadow: var(--shadow-focus);
 }
 
 .checkbox__input:checked,
 .radio__input:checked {
-  background-color: var(--color-primary);
-  border-color: var(--color-primary);
+  background-color: var(--color-primary-600);
+  border-color: var(--color-primary-600);
 }
 
 .checkbox__input:checked::after {
@@ -229,8 +239,8 @@
 
 .checkbox__input:disabled,
 .radio__input:disabled {
-  background-color: var(--color-bg-tertiary);
-  border-color: var(--color-border);
+  background-color: var(--color-surface-tertiary);
+  border-color: var(--color-border-primary);
   cursor: not-allowed;
 }
 
@@ -242,17 +252,17 @@
 
 /* ====== Helper Text ====== */
 .form-helper {
-  margin-top: var(--spacing-xs);
+  margin-top: var(--spacing-1);
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
 }
 
 .form-helper--error {
-  color: var(--color-error);
+  color: var(--color-error-500);
 }
 
 .form-helper--success {
-  color: var(--color-success);
+  color: var(--color-success-500);
 }
 
 /* ====== Input with Button ====== */
@@ -294,10 +304,10 @@
 /* ====== Password Toggle ====== */
 .password-toggle {
   position: absolute;
-  right: var(--spacing-sm);
+  right: var(--spacing-2);
   top: 50%;
   transform: translateY(-50%);
-  padding: var(--spacing-xs);
+  padding: var(--spacing-1);
   background: none;
   border: none;
   color: var(--color-text-muted);
@@ -310,8 +320,8 @@
 }
 
 .password-toggle:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: var(--shadow-focus);
   border-radius: var(--radius-sm);
 }
 

@@ -1,13 +1,17 @@
 /**
  * Auth Modal Component - L_Shop Frontend
- * Modal with login/register forms and tab switching
+ * Modal with login/register forms and animated tab switching
+ * 
+ * @see src/frontend/styles/components/modal.css - стили модального окна
+ * @see src/frontend/styles/components/forms.css - стили форм
+ * @see docs/DESIGN_SYSTEM.md - документация дизайн-системы
  */
 
-import { Component, ComponentProps } from '../base/Component';
-import { Modal } from '../ui/Modal';
-import { LoginForm } from './LoginForm';
-import { RegisterForm } from './RegisterForm';
-import { store } from '../../store/store';
+import { Component, ComponentProps } from '../base/Component.js';
+import { Modal } from '../ui/Modal.js';
+import { LoginForm } from './LoginForm.js';
+import { RegisterForm } from './RegisterForm.js';
+import { store } from '../../store/store.js';
 
 /**
  * Auth modal mode
@@ -26,7 +30,21 @@ export interface AuthModalProps extends ComponentProps {
 
 /**
  * Auth modal component
- * Contains login and register forms with tab switching
+ * Contains login and register forms with animated tab switching
+ * 
+ * @example
+ * ```typescript
+ * const authModal = new AuthModal({
+ *   initialMode: 'login',
+ *   onAuth: () => console.log('User authenticated')
+ * });
+ * 
+ * // Open modal
+ * authModal.open();
+ * 
+ * // Switch to register
+ * authModal.setMode('register');
+ * ```
  */
 export class AuthModal extends Component<AuthModalProps> {
   /** Modal instance */
@@ -43,6 +61,12 @@ export class AuthModal extends Component<AuthModalProps> {
   
   /** Tab buttons */
   private tabButtons: Map<string, HTMLButtonElement> = new Map();
+  
+  /** Form container element */
+  private formContainer: HTMLDivElement | null = null;
+  
+  /** Is currently animating */
+  private isAnimating: boolean = false;
 
   /**
    * Create auth modal
@@ -58,7 +82,7 @@ export class AuthModal extends Component<AuthModalProps> {
   protected getDefaultProps(): AuthModalProps {
     return {
       ...super.getDefaultProps(),
-      initialMode: 'login'
+      initialMode: 'login',
     };
   }
 
@@ -74,7 +98,8 @@ export class AuthModal extends Component<AuthModalProps> {
       showClose: true,
       closeOnBackdrop: true,
       closeOnEscape: true,
-      onClose: () => this.handleClose()
+      testId: 'auth-modal',
+      onClose: () => this.handleClose(),
     });
     
     const modalElement = this.modal.render();
@@ -92,38 +117,39 @@ export class AuthModal extends Component<AuthModalProps> {
    * @returns Content element
    */
   private createContent(): HTMLDivElement {
-    const container = this.createElement('div');
+    const container = this.createElement('div', {
+      className: 'auth-modal',
+    });
     
     // Create tabs
     const tabs = this.createTabs();
     container.appendChild(tabs);
     
-    // Create form container
-    const formContainer = this.createElement('div', {
-      className: 'auth-modal__form-container'
+    // Create form container with animation wrapper
+    this.formContainer = this.createElement('div', {
+      className: 'auth-modal__form-container',
+      'data-testid': 'auth-form-container',
     });
     
     // Create forms
     this.loginForm = new LoginForm({
       onSuccess: () => this.handleAuthSuccess(),
-      onSwitchToRegister: () => this.switchToRegister()
+      onSwitchToRegister: () => this.switchToRegister(),
     });
     
     this.registerForm = new RegisterForm({
       onSuccess: () => this.handleAuthSuccess(),
-      onSwitchToLogin: () => this.switchToLogin()
+      onSwitchToLogin: () => this.switchToLogin(),
     });
     
     // Show initial form
     if (this.mode === 'login') {
-      formContainer.appendChild(this.loginForm.render());
-      this.registerForm.render(); // Pre-render but don't attach
+      this.formContainer.appendChild(this.loginForm.render());
     } else {
-      formContainer.appendChild(this.registerForm.render());
-      this.loginForm.render(); // Pre-render but don't attach
+      this.formContainer.appendChild(this.registerForm.render());
     }
     
-    container.appendChild(formContainer);
+    container.appendChild(this.formContainer);
     
     return container;
   }
@@ -134,7 +160,9 @@ export class AuthModal extends Component<AuthModalProps> {
    */
   private createTabs(): HTMLDivElement {
     const tabs = this.createElement('div', {
-      className: 'auth-form__tabs'
+      className: 'auth-form__tabs',
+      role: 'tablist',
+      'aria-label': 'Выбор формы авторизации',
     });
     
     // Login tab
@@ -142,9 +170,11 @@ export class AuthModal extends Component<AuthModalProps> {
       'button',
       {
         type: 'button',
-        className: `auth-form__tab ${this.mode === 'login' ? 'auth-form__tab--active' : ''}`,
+        className: `auth-form__tab${this.mode === 'login' ? ' auth-form__tab--active' : ''}`,
         role: 'tab',
-        'aria-selected': this.mode === 'login'
+        'aria-selected': String(this.mode === 'login'),
+        'aria-controls': 'login-panel',
+        'data-testid': 'tab-login',
       },
       ['Вход']
     );
@@ -157,9 +187,11 @@ export class AuthModal extends Component<AuthModalProps> {
       'button',
       {
         type: 'button',
-        className: `auth-form__tab ${this.mode === 'register' ? 'auth-form__tab--active' : ''}`,
+        className: `auth-form__tab${this.mode === 'register' ? ' auth-form__tab--active' : ''}`,
         role: 'tab',
-        'aria-selected': this.mode === 'register'
+        'aria-selected': String(this.mode === 'register'),
+        'aria-controls': 'register-panel',
+        'data-testid': 'tab-register',
       },
       ['Регистрация']
     );
@@ -167,29 +199,69 @@ export class AuthModal extends Component<AuthModalProps> {
     this.tabButtons.set('register', registerTab);
     tabs.appendChild(registerTab);
     
+    // Tab indicator (animated underline)
+    const indicator = this.createElement('div', {
+      className: 'auth-form__tab-indicator',
+    });
+    tabs.appendChild(indicator);
+    
+    // Set initial indicator position
+    requestAnimationFrame(() => {
+      this.updateTabIndicator(false);
+    });
+    
     return tabs;
+  }
+
+  /**
+   * Update tab indicator position
+   * @param animate - Whether to animate the transition
+   */
+  private updateTabIndicator(animate: boolean = true): void {
+    const indicator = this.element?.querySelector('.auth-form__tab-indicator') as HTMLElement | null;
+    const activeTab = this.tabButtons.get(this.mode);
+    
+    if (indicator && activeTab) {
+      const tabRect = activeTab.getBoundingClientRect();
+      const tabsRect = activeTab.parentElement?.getBoundingClientRect();
+      
+      if (tabsRect) {
+        const left = activeTab.offsetLeft;
+        const width = tabRect.width;
+        
+        indicator.style.setProperty('--indicator-left', `${left}px`);
+        indicator.style.setProperty('--indicator-width', `${width}px`);
+        
+        if (!animate) {
+          indicator.classList.add('auth-form__tab-indicator--no-transition');
+          requestAnimationFrame(() => {
+            indicator.classList.remove('auth-form__tab-indicator--no-transition');
+          });
+        }
+      }
+    }
   }
 
   /**
    * Switch to login mode
    */
   private switchToLogin(): void {
-    if (this.mode === 'login') return;
+    if (this.mode === 'login' || this.isAnimating) return;
     
     this.mode = 'login';
     this.updateTabs();
-    this.updateForm();
+    this.animateFormSwitch('login');
   }
 
   /**
    * Switch to register mode
    */
   private switchToRegister(): void {
-    if (this.mode === 'register') return;
+    if (this.mode === 'register' || this.isAnimating) return;
     
     this.mode = 'register';
     this.updateTabs();
-    this.updateForm();
+    this.animateFormSwitch('register');
   }
 
   /**
@@ -201,28 +273,70 @@ export class AuthModal extends Component<AuthModalProps> {
       button.classList.toggle('auth-form__tab--active', isActive);
       button.setAttribute('aria-selected', String(isActive));
     });
+    
+    // Update indicator position
+    this.updateTabIndicator();
   }
 
   /**
-   * Update displayed form
+   * Animate form switch
+   * @param newMode - New mode to show
+   */
+  private animateFormSwitch(newMode: AuthMode): void {
+    const container = this.formContainer;
+    if (!container) return;
+    
+    this.isAnimating = true;
+    
+    // Add exit animation class
+    container.classList.add('auth-modal__form-container--exit');
+    
+    // Wait for exit animation
+    setTimeout(() => {
+      // Clear container
+      container.innerHTML = '';
+      
+      // Add enter animation class
+      container.classList.remove('auth-modal__form-container--exit');
+      container.classList.add('auth-modal__form-container--enter');
+      
+      // Add appropriate form
+      if (newMode === 'login' && this.loginForm) {
+        const formElement = this.loginForm.getElement() || this.loginForm.render();
+        formElement.setAttribute('id', 'login-panel');
+        formElement.setAttribute('role', 'tabpanel');
+        formElement.setAttribute('aria-labelledby', 'tab-login');
+        container.appendChild(formElement);
+      } else if (newMode === 'register' && this.registerForm) {
+        const formElement = this.registerForm.getElement() || this.registerForm.render();
+        formElement.setAttribute('id', 'register-panel');
+        formElement.setAttribute('role', 'tabpanel');
+        formElement.setAttribute('aria-labelledby', 'tab-register');
+        container.appendChild(formElement);
+      }
+      
+      // Remove enter animation class after animation completes
+      setTimeout(() => {
+        container.classList.remove('auth-modal__form-container--enter');
+        this.isAnimating = false;
+      }, 200);
+    }, 150);
+  }
+
+  /**
+   * Update displayed form (without animation)
    */
   private updateForm(): void {
-    if (!this.modal) return;
-    
-    const body = this.modal.getBody();
-    if (!body) return;
-    
-    const formContainer = body.querySelector('.auth-modal__form-container');
-    if (!formContainer) return;
+    if (!this.formContainer) return;
     
     // Clear container
-    formContainer.innerHTML = '';
+    this.formContainer.innerHTML = '';
     
     // Add appropriate form
     if (this.mode === 'login' && this.loginForm) {
-      formContainer.appendChild(this.loginForm.getElement() || this.loginForm.render());
+      this.formContainer.appendChild(this.loginForm.getElement() || this.loginForm.render());
     } else if (this.mode === 'register' && this.registerForm) {
-      formContainer.appendChild(this.registerForm.getElement() || this.registerForm.render());
+      this.formContainer.appendChild(this.registerForm.getElement() || this.registerForm.render());
     }
   }
 
@@ -260,7 +374,7 @@ export class AuthModal extends Component<AuthModalProps> {
    * @param mode - Optional mode to open with
    */
   public open(mode?: AuthMode): void {
-    if (mode) {
+    if (mode && mode !== this.mode) {
       this.mode = mode;
       this.updateTabs();
       this.updateForm();
@@ -302,10 +416,10 @@ export class AuthModal extends Component<AuthModalProps> {
    * @param mode - Auth mode
    */
   public setMode(mode: AuthMode): void {
-    if (this.mode !== mode) {
+    if (this.mode !== mode && !this.isAnimating) {
       this.mode = mode;
       this.updateTabs();
-      this.updateForm();
+      this.animateFormSwitch(mode);
     }
   }
 

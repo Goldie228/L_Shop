@@ -1,15 +1,18 @@
 /**
  * Login Form Component - L_Shop Frontend
- * Form for user authentication
+ * Form for user authentication with animations and password toggle
+ * 
+ * @see src/frontend/styles/components/forms.css - стили форм
+ * @see docs/DESIGN_SYSTEM.md - документация дизайн-системы
  */
 
-import { Component, ComponentProps } from '../base/Component';
-import { Input } from '../ui/Input';
-import { Button } from '../ui/Button';
-import { AuthService } from '../../services/auth.service';
-import { store } from '../../store/store';
-import { LoginUserData, validateLogin, validatePassword } from '../../types/user';
-import { ApiError, NetworkError } from '../../types/api';
+import { Component, ComponentProps } from '../base/Component.js';
+import { Input } from '../ui/Input.js';
+import { Button } from '../ui/Button.js';
+import { AuthService } from '../../services/auth.service.js';
+import { store } from '../../store/store.js';
+import { LoginUserData, validateLogin, validatePassword } from '../../types/user.js';
+import { ApiError, NetworkError } from '../../types/api.js';
 
 /**
  * Login form props
@@ -39,21 +42,35 @@ interface LoginFormState {
   submitError: string | null;
   /** Loading state */
   isLoading: boolean;
+  /** Password visibility */
+  showPassword: boolean;
 }
 
 /**
  * Login form component
+ * Provides user authentication with validation and animations
+ * 
+ * @example
+ * ```typescript
+ * const loginForm = new LoginForm({
+ *   onSuccess: () => console.log('Logged in!'),
+ *   onSwitchToRegister: () => showRegisterForm()
+ * });
+ * 
+ * document.body.appendChild(loginForm.render());
+ * ```
  */
 export class LoginForm extends Component<LoginFormProps> {
   /** Form state */
   private state: LoginFormState = {
     values: {
       loginOrEmail: '',
-      password: ''
+      password: '',
     },
     errors: {},
     submitError: null,
-    isLoading: false
+    isLoading: false,
+    showPassword: false,
   };
   
   /** Input components */
@@ -61,13 +78,19 @@ export class LoginForm extends Component<LoginFormProps> {
   
   /** Submit button */
   private submitButton: Button | null = null;
+  
+  /** Form element reference */
+  private formElement: HTMLFormElement | null = null;
+  
+  /** Password toggle button */
+  private passwordToggleButton: HTMLButtonElement | null = null;
 
   /**
    * Get default props
    */
   protected getDefaultProps(): LoginFormProps {
     return {
-      ...super.getDefaultProps()
+      ...super.getDefaultProps(),
     };
   }
 
@@ -78,7 +101,8 @@ export class LoginForm extends Component<LoginFormProps> {
   public render(): HTMLFormElement {
     const form = this.createElement('form', {
       className: 'auth-form',
-      novalidate: true
+      novalidate: true,
+      'data-testid': 'login-form',
     });
     
     // Add error banner if exists
@@ -98,25 +122,36 @@ export class LoginForm extends Component<LoginFormProps> {
     // Add form submit handler
     this.addEventListener(form, 'submit', this.handleSubmit);
     
+    this.formElement = form;
     this.element = form;
     return form;
   }
 
   /**
-   * Create error banner
+   * Create error banner with animation
    * @returns Error banner element
    */
   private createErrorBanner(): HTMLDivElement {
-    return this.createElement(
+    const banner = this.createElement(
       'div',
-      { className: 'auth-form__error-banner' },
+      {
+        className: 'auth-form__error-banner',
+        role: 'alert',
+        'aria-live': 'polite',
+        'data-testid': 'login-error-banner',
+      },
       [
-        `<svg class="auth-form__error-banner-icon" viewBox="0 0 24 24" fill="currentColor">
+        `<svg class="auth-form__error-banner-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
           <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
         </svg>`,
-        this.state.submitError!
+        this.state.submitError!,
       ]
     );
+    
+    // Add shake animation
+    banner.classList.add('auth-form__error-banner--shake');
+    
+    return banner;
   }
 
   /**
@@ -125,7 +160,7 @@ export class LoginForm extends Component<LoginFormProps> {
    */
   private createFormFields(): HTMLDivElement {
     const container = this.createElement('div', {
-      className: 'auth-form__fields'
+      className: 'auth-form__fields',
     });
     
     // Login or Email input
@@ -140,15 +175,31 @@ export class LoginForm extends Component<LoginFormProps> {
       error: this.state.errors.loginOrEmail,
       inputState: this.state.errors.loginOrEmail ? 'error' : 'default',
       onChange: (value) => this.handleInputChange('loginOrEmail', value),
-      onBlur: (value) => this.handleInputBlur('loginOrEmail', value)
+      onBlur: (value) => this.handleInputBlur('loginOrEmail', value),
     });
     this.inputs.set('loginOrEmail', loginInput);
     container.appendChild(loginInput.render());
     
+    // Password input with toggle
+    const passwordContainer = this.createPasswordField();
+    container.appendChild(passwordContainer);
+    
+    return container;
+  }
+
+  /**
+   * Create password field with toggle button
+   * @returns Password field container
+   */
+  private createPasswordField(): HTMLDivElement {
+    const container = this.createElement('div', {
+      className: 'auth-form__password-field',
+    });
+    
     // Password input
     const passwordInput = new Input({
       name: 'password',
-      type: 'password',
+      type: this.state.showPassword ? 'text' : 'password',
       label: 'Пароль',
       placeholder: 'Введите пароль',
       required: true,
@@ -157,13 +208,83 @@ export class LoginForm extends Component<LoginFormProps> {
       error: this.state.errors.password,
       inputState: this.state.errors.password ? 'error' : 'default',
       onChange: (value) => this.handleInputChange('password', value),
-      onBlur: (value) => this.handleInputBlur('password', value)
+      onBlur: (value) => this.handleInputBlur('password', value),
     });
     this.inputs.set('password', passwordInput);
     container.appendChild(passwordInput.render());
     
+    // Password toggle button
+    this.passwordToggleButton = this.createPasswordToggleButton();
+    container.appendChild(this.passwordToggleButton);
+    
     return container;
   }
+
+  /**
+   * Create password visibility toggle button
+   * @returns Toggle button element
+   */
+  private createPasswordToggleButton(): HTMLButtonElement {
+    const button = this.createElement(
+      'button',
+      {
+        type: 'button',
+        className: 'auth-form__password-toggle',
+        'aria-label': this.state.showPassword ? 'Скрыть пароль' : 'Показать пароль',
+        'data-testid': 'password-toggle',
+      },
+      [this.getPasswordToggleIcon()]
+    );
+    
+    this.addEventListener(button, 'click', this.togglePasswordVisibility);
+    
+    return button;
+  }
+
+  /**
+   * Get password toggle icon SVG
+   * @returns SVG string
+   */
+  private getPasswordToggleIcon(): string {
+    if (this.state.showPassword) {
+      // Eye off icon
+      return `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+          <line x1="1" y1="1" x2="23" y2="23"/>
+        </svg>
+      `;
+    }
+    // Eye icon
+    return `
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+        <circle cx="12" cy="12" r="3"/>
+      </svg>
+    `;
+  }
+
+  /**
+   * Toggle password visibility
+   */
+  private togglePasswordVisibility = (): void => {
+    this.state.showPassword = !this.state.showPassword;
+    
+    // Update input type
+    const passwordInput = this.inputs.get('password');
+    if (passwordInput) {
+      passwordInput.setType(this.state.showPassword ? 'text' : 'password');
+    }
+    
+    // Update toggle button
+    if (this.passwordToggleButton) {
+      this.passwordToggleButton.setAttribute(
+        'aria-label',
+        this.state.showPassword ? 'Скрыть пароль' : 'Показать пароль'
+      );
+      this.passwordToggleButton.innerHTML = this.getPasswordToggleIcon();
+    }
+  };
 
   /**
    * Create form actions
@@ -171,7 +292,7 @@ export class LoginForm extends Component<LoginFormProps> {
    */
   private createFormActions(): HTMLDivElement {
     const container = this.createElement('div', {
-      className: 'auth-form__actions'
+      className: 'auth-form__actions',
     });
     
     // Submit button
@@ -182,7 +303,8 @@ export class LoginForm extends Component<LoginFormProps> {
       size: 'lg',
       block: true,
       loading: this.state.isLoading,
-      onClick: () => {} // Handled by form submit
+      testId: 'login-submit',
+      onClick: () => {}, // Handled by form submit
     });
     container.appendChild(this.submitButton.render());
     
@@ -208,7 +330,8 @@ export class LoginForm extends Component<LoginFormProps> {
       'a',
       {
         href: '#register',
-        role: 'button'
+        role: 'button',
+        'data-testid': 'switch-to-register',
       },
       ['Зарегистрироваться']
     );
@@ -240,6 +363,7 @@ export class LoginForm extends Component<LoginFormProps> {
     // Clear submit error
     if (this.state.submitError) {
       this.state.submitError = null;
+      this.removeErrorBanner();
     }
   };
 
@@ -275,12 +399,30 @@ export class LoginForm extends Component<LoginFormProps> {
     if (!result.isValid) {
       this.state.errors[field] = result.error || undefined;
       this.updateInputState(field);
+      this.triggerShakeAnimation(field);
       return false;
     }
     
     this.state.errors[field] = undefined;
     this.updateInputState(field);
     return true;
+  }
+
+  /**
+   * Trigger shake animation on invalid field
+   * @param field - Field name
+   */
+  private triggerShakeAnimation(field: keyof LoginUserData): void {
+    const input = this.inputs.get(field);
+    if (input) {
+      const inputElement = input.getElement();
+      if (inputElement) {
+        inputElement.classList.add('form-field--shake');
+        setTimeout(() => {
+          inputElement.classList.remove('form-field--shake');
+        }, 500);
+      }
+    }
   }
 
   /**
@@ -293,8 +435,18 @@ export class LoginForm extends Component<LoginFormProps> {
       if (this.state.errors[field]) {
         input.setError(this.state.errors[field]!);
       } else {
-        input.clearError();
+        input.resetState();
       }
+    }
+  }
+
+  /**
+   * Remove error banner from form
+   */
+  private removeErrorBanner(): void {
+    const banner = this.formElement?.querySelector('.auth-form__error-banner');
+    if (banner) {
+      banner.remove();
     }
   }
 
@@ -323,6 +475,7 @@ export class LoginForm extends Component<LoginFormProps> {
     
     // Validate form
     if (!this.validateForm()) {
+      this.triggerFormShakeAnimation();
       return;
     }
     
@@ -351,6 +504,18 @@ export class LoginForm extends Component<LoginFormProps> {
   };
 
   /**
+   * Trigger shake animation on entire form
+   */
+  private triggerFormShakeAnimation(): void {
+    if (this.formElement) {
+      this.formElement.classList.add('auth-form--shake');
+      setTimeout(() => {
+        this.formElement?.classList.remove('auth-form--shake');
+      }, 500);
+    }
+  }
+
+  /**
    * Handle submission error
    * @param error - Error object
    */
@@ -375,6 +540,7 @@ export class LoginForm extends Component<LoginFormProps> {
     }
     
     this.update();
+    this.triggerFormShakeAnimation();
   }
 
   /**
@@ -393,16 +559,17 @@ export class LoginForm extends Component<LoginFormProps> {
     this.state = {
       values: {
         loginOrEmail: '',
-        password: ''
+        password: '',
       },
       errors: {},
       submitError: null,
-      isLoading: false
+      isLoading: false,
+      showPassword: false,
     };
     
-    this.inputs.forEach(input => {
+    this.inputs.forEach((input) => {
       input.setValue('');
-      input.clearError();
+      input.resetState();
     });
     
     this.update();
