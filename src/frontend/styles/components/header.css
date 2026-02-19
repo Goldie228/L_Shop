@@ -60,6 +60,12 @@
     transform var(--transition-fast);
 }
 
+.header__logo-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
 .header__logo:hover .header__logo-icon {
   background-color: var(--color-primary-700);
   transform: scale(1.05);

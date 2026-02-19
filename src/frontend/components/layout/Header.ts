@@ -41,6 +41,16 @@ const CHEVRON_DOWN_ICON = `
 `;
 
 /**
+ * SVG логотип L_Shop
+ * Масштабируемый векторный логотип с буквой L
+ */
+const LOGO_ICON_SVG = `
+  <svg class="header__logo-svg" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+    <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 20px; font-weight: 700;" fill="currentColor">L</text>
+  </svg>
+`;
+
+/**
  * Header component class
  * 
  * @example
@@ -135,7 +145,7 @@ export class Header extends Component<HeaderProps> {
         'data-testid': 'header-logo',
       },
       [
-        `<span class="header__logo-icon">L</span>`,
+        `<span class="header__logo-icon">${LOGO_ICON_SVG}</span>`,
         `<span>L_Shop</span>`,
       ]
     );
