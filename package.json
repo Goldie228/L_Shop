@@ -8,9 +8,9 @@
     "start": "node dist/app.js",
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:backend": "nodemon src/backend/app.ts",
-    "dev:frontend": "tsc -p src/frontend/tsconfig.json && npx serve src/frontend -l 3002",
-    "build:frontend": "tsc -p src/frontend/tsconfig.json",
-    "serve:frontend": "npx serve src/frontend -l 3002",
+    "dev:frontend": "vite",
+    "build:frontend": "vite build",
+    "serve:frontend": "vite preview",
     "lint": "eslint src/backend --ext ts",
     "lint:fix": "eslint src/backend --ext ts --fix",
     "format": "prettier --write src/backend",
@@ -55,7 +55,8 @@
     "prettier": "^2.8.8",
     "ts-jest": "^29.4.6",
     "ts-node": "^10.9.1",
-    "typescript": "^5.1.3"
+    "typescript": "^5.1.3",
+    "vite": "^7.3.1"
   },
   "engines": {
     "node": ">=18.0.0",
