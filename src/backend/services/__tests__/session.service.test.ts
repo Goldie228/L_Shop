@@ -1,8 +1,11 @@
+/**
+ * Тесты для SessionService
+ */
+
 import { SessionService } from '../session.service';
 import { readJsonFile, writeJsonFile } from '../../utils/file.utils';
 import { Session } from '../../models/session.model';
 
-// Мок для утилит работы с файлами
 jest.mock('../../utils/file.utils');
 
 const mockReadJsonFile = readJsonFile as jest.MockedFunction<typeof readJsonFile>;
@@ -87,10 +90,61 @@ describe('SessionService', () => {
 
       await sessionService.deleteSession('token-1');
 
+      expect(mockWriteJsonFile).toHaveBeenCalledWith('sessions.json', [mockSessions[1]]);
+    });
+  });
+
+  describe('cleanExpired', () => {
+    it('должен удалять истёкшие сессии', async () => {
+      const mockSessions: Session[] = [
+        {
+          token: 'valid-token',
+          userId: 'user-1',
+          expiresAt: new Date(Date.now() + 600000).toISOString(),
+        },
+        {
+          token: 'expired-token',
+          userId: 'user-2',
+          expiresAt: new Date(Date.now() - 600000).toISOString(),
+        },
+      ];
+      mockReadJsonFile.mockResolvedValue(mockSessions);
+      mockWriteJsonFile.mockResolvedValue();
+
+      const removedCount = await sessionService.cleanExpired();
+
+      expect(removedCount).toBe(1);
       expect(mockWriteJsonFile).toHaveBeenCalledWith(
         'sessions.json',
-        [mockSessions[1]],
+        [mockSessions[0]],
       );
+    });
+  });
+
+  describe('extendSession', () => {
+    it('должен продлевать сессию', async () => {
+      const mockSessions: Session[] = [
+        {
+          token: 'valid-token',
+          userId: 'user-1',
+          expiresAt: new Date().toISOString(),
+        },
+      ];
+      mockReadJsonFile.mockResolvedValue(mockSessions);
+      mockWriteJsonFile.mockResolvedValue();
+
+      const result = await sessionService.extendSession('valid-token');
+
+      expect(result).toBe(true);
+      expect(mockWriteJsonFile).toHaveBeenCalled();
+    });
+
+    it('должен возвращать false для несуществующего токена', async () => {
+      mockReadJsonFile.mockResolvedValue([]);
+
+      const result = await sessionService.extendSession('non-existent');
+
+      expect(result).toBe(false);
     });
   });
 });

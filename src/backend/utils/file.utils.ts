@@ -1,52 +1,44 @@
+/**
+ * Утилиты для работы с файлами данных
+ */
+
 import fs from 'fs/promises';
 import path from 'path';
 import { config } from '../config/constants';
 
-/**
- * Директория для хранения данных
- */
 const DATA_DIR = config.dataDir;
 
 /**
- * Гарантирует существование папки data и всех необходимых JSON-файлов
- * Выполняется при старте сервера
+ * Создаёт директорию data и инициализирует JSON-файлы при первом запуске
  */
 export async function ensureDataFiles(): Promise<void> {
-  const files = [
-    'users.json',
-    'products.json',
-    'carts.json',
-    'orders.json',
-    'sessions.json',
-  ];
+  const files = ['users.json', 'products.json', 'carts.json', 'orders.json', 'sessions.json'];
 
   try {
-    // Создание директории
     await fs.mkdir(DATA_DIR, { recursive: true });
 
-    // Инициализация файлов с использованием Promise.all
-    await Promise.all(files.map(async (file) => {
-      const filePath = path.join(DATA_DIR, file);
+    await Promise.all(
+      files.map(async (file) => {
+        const filePath = path.join(DATA_DIR, file);
 
-      try {
-        await fs.access(filePath);
-      } catch {
-        // Файл не существует — создаём пустой массив
-        await fs.writeFile(filePath, JSON.stringify([], null, 2));
-        console.warn(`Created: ${file}`);
-      }
-    }));
+        try {
+          await fs.access(filePath);
+        } catch {
+          // Файл не существует — создаём пустой массив
+          await fs.writeFile(filePath, JSON.stringify([], null, 2));
+          console.warn(`[FileUtils] Создан файл: ${file}`);
+        }
+      }),
+    );
   } catch (error) {
-    console.error('Failed to initialize data files:', error);
-    throw new Error('Data initialization failed');
+    console.error('[FileUtils] Ошибка инициализации файлов:', error);
+    throw new Error('Ошибка инициализации данных');
   }
 }
 
 /**
  * Читает JSON-файл и возвращает массив объектов
- * @param filename — Имя файла (например, 'users.json')
- * @returns Массив объектов типа T
- * @throws Error если файл не найден или содержит невалидный JSON
+ * При отсутствии файла возвращает пустой массив
  */
 export async function readJsonFile<T>(filename: string): Promise<T[]> {
   const filePath = path.join(DATA_DIR, filename);
@@ -55,34 +47,30 @@ export async function readJsonFile<T>(filename: string): Promise<T[]> {
     const data = await fs.readFile(filePath, 'utf-8');
 
     if (!data.trim()) {
-      // Пустой файл — возвращаем пустой массив
       return [] as T[];
     }
 
     const parsed: unknown = JSON.parse(data);
 
     if (!Array.isArray(parsed)) {
-      console.warn(`File ${filename} does not contain an array, returning empty array`);
+      console.warn(`[FileUtils] Файл ${filename} не содержит массив`);
       return [] as T[];
     }
 
     return parsed as T[];
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-      console.warn(`File ${filename} not found, returning empty array`);
+      console.warn(`[FileUtils] Файл ${filename} не найден`);
       return [] as T[];
     }
 
-    console.error(`Error reading ${filename}:`, error);
-    throw new Error(`Failed to read ${filename}`);
+    console.error(`[FileUtils] Ошибка чтения ${filename}:`, error);
+    throw new Error(`Ошибка чтения ${filename}`);
   }
 }
 
 /**
  * Записывает массив объектов в JSON-файл
- * @param filename — Имя файла (например, 'users.json')
- * @param data — Массив объектов для записи
- * @throws Error если не удалось записать файл
  */
 export async function writeJsonFile<T>(filename: string, data: T[]): Promise<void> {
   const filePath = path.join(DATA_DIR, filename);
@@ -91,15 +79,13 @@ export async function writeJsonFile<T>(filename: string, data: T[]): Promise<voi
     const jsonData = JSON.stringify(data, null, 2);
     await fs.writeFile(filePath, jsonData, 'utf-8');
   } catch (error) {
-    console.error(`Error writing ${filename}:`, error);
-    throw new Error(`Failed to write ${filename}`);
+    console.error(`[FileUtils] Ошибка записи ${filename}:`, error);
+    throw new Error(`Ошибка записи ${filename}`);
   }
 }
 
 /**
  * Проверяет существование файла
- * @param filename — Имя файла
- * @returns true если файл существует
  */
 export async function fileExists(filename: string): Promise<boolean> {
   const filePath = path.join(DATA_DIR, filename);

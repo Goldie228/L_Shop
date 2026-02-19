@@ -1,3 +1,7 @@
+/**
+ * Middleware для проверки авторизации
+ */
+
 import { Response, NextFunction } from 'express';
 import { AuthRequest } from './auth-request';
 import { SessionService } from '../services/session.service';
@@ -5,9 +9,8 @@ import { SessionService } from '../services/session.service';
 const sessionService = new SessionService();
 
 /**
- * Middleware for authorization check
- * Verifies presence and validity of sessionToken in cookies
- * Adds userId to request on successful verification
+ * Проверяет наличие и валидность sessionToken в cookies
+ * При успехе добавляет userId в request
  */
 export async function authMiddleware(
   req: AuthRequest,
@@ -19,7 +22,7 @@ export async function authMiddleware(
 
     if (!token) {
       res.status(401).json({
-        message: 'Unauthorized',
+        message: 'Не авторизован',
         error: 'NO_TOKEN',
       });
       return;
@@ -28,37 +31,37 @@ export async function authMiddleware(
     const userId = await sessionService.getUserIdByToken(token);
 
     if (!userId) {
+      // Сессия истекла или не найдена - очищаем cookie
       res.clearCookie('sessionToken', {
         httpOnly: true,
         sameSite: 'strict',
       });
 
       res.status(401).json({
-        message: 'Session expired',
+        message: 'Сессия истекла',
         error: 'SESSION_EXPIRED',
       });
       return;
     }
 
-    // Add userId to request
     req.userId = userId;
     next();
   } catch (error) {
-    console.error('Auth middleware error:', error);
+    console.error('[AuthMiddleware] Ошибка:', error);
     res.status(500).json({
-      message: 'Internal server error during authentication',
+      message: 'Ошибка при проверке авторизации',
       error: 'AUTH_ERROR',
     });
   }
 }
 
 /**
- * Optional authorization
- * Does not block the request, but adds userId if present
+ * Опциональная авторизация
+ * Не блокирует запрос, но добавляет userId если токен валиден
  */
 export async function optionalAuth(
   req: AuthRequest,
-  res: Response,
+  _res: Response,
   next: NextFunction,
 ): Promise<void> {
   try {
@@ -73,7 +76,8 @@ export async function optionalAuth(
 
     next();
   } catch (error) {
-    console.error('Optional auth error:', error);
+    // При ошибке просто продолжаем без userId
+    console.error('[OptionalAuth] Ошибка:', error);
     next();
   }
 }

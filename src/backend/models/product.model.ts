@@ -1,4 +1,6 @@
-// Модель товара
+/**
+ * Модель товара
+ */
 export interface Product {
   id: string;
   name: string;
@@ -7,5 +9,5 @@ export interface Product {
   category: string;
   inStock: boolean;
   imageUrl?: string;
-  // Здесь будут добавляться поля из вариантов
+  // TODO: Добавить поля из вариантов (Никита П.)
 }

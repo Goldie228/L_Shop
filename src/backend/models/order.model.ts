@@ -1,6 +1,8 @@
+/**
+ * Модель заказа
+ */
 import { CartItem } from './cart.model';
 
-// Модель заказа
 export interface Order {
   id: string;
   userId: string;

@@ -1,5 +1,9 @@
+/**
+ * Контроллер авторизации
+ * Обрабатывает регистрацию, вход, выход и получение информации о пользователе
+ */
+
 import { Request, Response } from 'express';
-import { User } from '../models/user.model';
 import { SessionService } from '../services/session.service';
 import { UserService } from '../services/user.service';
 import { isValidEmail, isValidPhone } from '../utils/validators';
@@ -10,78 +14,73 @@ const sessionService = new SessionService();
 const userService = new UserService();
 
 /**
- * Registration of a new user
- * Creates a user and sets up a session
+ * Регистрация нового пользователя
+ * Создаёт пользователя и устанавливает сессию
  */
 export async function register(req: Request, res: Response): Promise<void> {
   try {
     const {
-      name, email, login, phone, password,
+      name, email, login: userLogin, phone, password,
     } = req.body;
 
-    // Validation of required fields
-    if (!name || !email || !login || !phone || !password) {
+    if (!name || !email || !userLogin || !phone || !password) {
       res.status(400).json({
-        message: 'All fields are required: name, email, login, phone, password',
+        message: 'Все поля обязательны: name, email, login, phone, password',
         error: 'MISSING_FIELDS',
       });
       return;
     }
 
-    // Email validation
     if (!isValidEmail(email)) {
       res.status(400).json({
-        message: 'Invalid email format',
+        message: 'Некорректный формат email',
         error: 'INVALID_EMAIL',
       });
       return;
     }
 
-    // Phone validation
+    // Формат телефона: +1234567890 (10-15 цифр)
     if (!isValidPhone(phone)) {
       res.status(400).json({
-        message: 'Invalid phone format. Expected: +1234567890 (10-15 digits)',
+        message: 'Некорректный формат телефона. Ожидается: +1234567890 (10-15 цифр)',
         error: 'INVALID_PHONE',
       });
       return;
     }
 
-    // Password length validation
     if (password.length < 6) {
       res.status(400).json({
-        message: 'Password must be at least 6 characters',
+        message: 'Пароль должен содержать минимум 6 символов',
         error: 'WEAK_PASSWORD',
       });
       return;
     }
 
-    // Check uniqueness of email and login
-    const existingUser = await userService.findByEmailOrLogin(email, login);
+    const existingUser = await userService.findByEmailOrLogin(email, userLogin);
     if (existingUser) {
       if (existingUser.email === email) {
         res.status(409).json({
-          message: 'User with this email already exists',
+          message: 'Пользователь с таким email уже существует',
           error: 'EMAIL_EXISTS',
         });
         return;
       }
       res.status(409).json({
-        message: 'User with this login already exists',
+        message: 'Пользователь с таким логином уже существует',
         error: 'LOGIN_EXISTS',
       });
       return;
     }
 
-    // Create user (password is hashed in UserService)
+    // Пароль хешируется внутри UserService
     const newUser = await userService.createUser({
       name,
       email,
-      login,
+      login: userLogin,
       phone,
       password,
     });
 
-    // Create session and set cookie
     const token = await sessionService.createSession(newUser.id);
     res.cookie('sessionToken', token, {
       httpOnly: true,
@@ -91,7 +90,7 @@ export async function register(req: Request, res: Response): Promise<void> {
     });
 
     res.status(201).json({
-      message: 'Registered successfully',
+      message: 'Регистрация успешна',
       user: {
         id: newUser.id,
         name: newUser.name,
@@ -99,54 +98,50 @@ export async function register(req: Request, res: Response): Promise<void> {
       },
     });
   } catch (error) {
-    console.error('Registration error:', error);
+    console.error('[AuthController] Ошибка регистрации:', error);
     res.status(500).json({
-      message: 'Failed to register user',
+      message: 'Ошибка при регистрации',
       error: 'REGISTRATION_ERROR',
     });
   }
 }
 
 /**
- * User login
- * Verifies credentials and creates a session
+ * Вход пользователя в систему
+ * Проверяет учётные данные и создаёт сессию
  */
 export async function login(req: Request, res: Response): Promise<void> {
   try {
-    const { login, password } = req.body;
+    const { login: userLogin, password } = req.body;
 
-    // Check for credentials
-    if (!login || !password) {
+    if (!userLogin || !password) {
       res.status(400).json({
-        message: 'Login and password are required',
+        message: 'Логин и пароль обязательны',
         error: 'MISSING_CREDENTIALS',
       });
       return;
     }
 
-    // Find user
-    const user = await userService.findByLoginOrEmail(login);
+    const user = await userService.findByLoginOrEmail(userLogin);
 
     if (!user) {
       res.status(401).json({
-        message: 'Invalid login or password',
+        message: 'Неверный логин или пароль',
         error: 'INVALID_CREDENTIALS',
       });
       return;
     }
 
-    // Verify password
     const isPasswordValid = await comparePassword(password, user.password);
 
     if (!isPasswordValid) {
       res.status(401).json({
-        message: 'Invalid login or password',
+        message: 'Неверный логин или пароль',
         error: 'INVALID_CREDENTIALS',
       });
       return;
     }
 
-    // Create session and set cookie
     const token = await sessionService.createSession(user.id);
     res.cookie('sessionToken', token, {
       httpOnly: true,
@@ -156,7 +151,7 @@ export async function login(req: Request, res: Response): Promise<void> {
     });
 
     res.json({
-      message: 'Logged in successfully',
+      message: 'Вход выполнен успешно',
       user: {
         id: user.id,
         name: user.name,
@@ -164,17 +159,17 @@ export async function login(req: Request, res: Response): Promise<void> {
       },
     });
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('[AuthController] Ошибка входа:', error);
     res.status(500).json({
-      message: 'Failed to login',
+      message: 'Ошибка при входе',
       error: 'LOGIN_ERROR',
     });
   }
 }
 
 /**
- * User logout
- * Deletes session and clears cookie
+ * Выход пользователя из системы
+ * Удаляет сессию и очищает cookie
  */
 export async function logout(req: Request, res: Response): Promise<void> {
   try {
@@ -188,16 +183,17 @@ export async function logout(req: Request, res: Response): Promise<void> {
       });
     }
 
-    res.json({ message: 'Logged out successfully' });
+    res.json({ message: 'Выход выполнен успешно' });
   } catch (error) {
-    console.error('Logout error:', error);
-    res.json({ message: 'Logged out successfully' });
+    // Даже при ошибке возвращаем успешный ответ, чтобы клиент мог очистить cookie
+    console.error('[AuthController] Ошибка выхода:', error);
+    res.json({ message: 'Выход выполнен успешно' });
   }
 }
 
 /**
- * Get current user info
- * Requires authorization
+ * Получение информации о текущем пользователе
+ * Требует авторизации
  */
 export async function getCurrentUser(req: Request, res: Response): Promise<void> {
   try {
@@ -205,7 +201,7 @@ export async function getCurrentUser(req: Request, res: Response): Promise<void>
 
     if (!userId) {
       res.status(401).json({
-        message: 'Unauthorized',
+        message: 'Не авторизован',
         error: 'UNAUTHORIZED',
       });
       return;
@@ -215,13 +211,13 @@ export async function getCurrentUser(req: Request, res: Response): Promise<void>
 
     if (!user) {
       res.status(404).json({
-        message: 'User not found',
+        message: 'Пользователь не найден',
         error: 'USER_NOT_FOUND',
       });
       return;
     }
 
-    // Return user data without password
+    // Возвращаем данные пользователя без пароля
     res.json({
       id: user.id,
       name: user.name,
@@ -232,9 +228,9 @@ export async function getCurrentUser(req: Request, res: Response): Promise<void>
       updatedAt: user.updatedAt,
     });
   } catch (error) {
-    console.error('Get current user error:', error);
+    console.error('[AuthController] Ошибка получения пользователя:', error);
     res.status(500).json({
-      message: 'Failed to get user info',
+      message: 'Ошибка при получении данных пользователя',
       error: 'GET_USER_ERROR',
     });
   }

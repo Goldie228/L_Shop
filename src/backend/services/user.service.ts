@@ -1,3 +1,7 @@
+/**
+ * Сервис работы с пользователями
+ */
+
 import { readJsonFile, writeJsonFile } from '../utils/file.utils';
 import { User } from '../models/user.model';
 import { generateId } from '../utils/id.utils';
@@ -5,44 +9,29 @@ import { hashPassword } from '../utils/hash.utils';
 
 const USERS_FILE = 'users.json';
 
-/**
- * Сервис для работы с пользователями
- */
 export class UserService {
-  /**
-   * Получить всех пользователей
-   */
   async getAllUsers(): Promise<User[]> {
     return readJsonFile<User>(USERS_FILE);
   }
 
-  /**
-   * Найти пользователя по ID
-   */
   async getUserById(id: string): Promise<User | null> {
     const users = await this.getAllUsers();
     return users.find((u) => u.id === id) || null;
   }
 
-  /**
-   * Найти пользователя по email или login
-   */
   async findByEmailOrLogin(email: string, login: string): Promise<User | null> {
     const users = await this.getAllUsers();
     return users.find((u) => u.email === email || u.login === login) || null;
   }
 
   /**
-   * Найти пользователя по login или email для аутентификации
+   * Поиск пользователя по логину или email для аутентификации
    */
   async findByLoginOrEmail(loginOrEmail: string): Promise<User | null> {
     const users = await this.getAllUsers();
     return users.find((u) => u.login === loginOrEmail || u.email === loginOrEmail) || null;
   }
 
-  /**
-   * Создать нового пользователя
-   */
   async createUser(data: {
     name: string;
     email: string;
@@ -53,6 +42,7 @@ export class UserService {
     const users = await this.getAllUsers();
     const now = new Date().toISOString();
 
+    // Пароль хешируется перед сохранением
     const hashedPassword = await hashPassword(data.password);
 
     const newUser: User = {
@@ -72,9 +62,6 @@ export class UserService {
     return newUser;
   }
 
-  /**
-   * Обновить пользователя
-   */
   async updateUser(id: string, data: Partial<Omit<User, 'id' | 'createdAt'>>): Promise<User | null> {
     const users = await this.getAllUsers();
     const index = users.findIndex((u) => u.id === id);

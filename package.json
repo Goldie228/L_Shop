@@ -1,21 +1,30 @@
 {
   "name": "l_shop",
   "version": "1.0.0",
-  "description": "Online shop prototype",
+  "description": "Прототип интернет-магазина на Express + TypeScript",
   "main": "dist/app.js",
   "scripts": {
     "build": "tsc",
     "start": "node dist/app.js",
     "dev": "nodemon src/backend/app.ts",
     "lint": "eslint src/backend --ext ts",
+    "lint:fix": "eslint src/backend --ext ts --fix",
     "format": "prettier --write src/backend",
+    "format:check": "prettier --check src/backend",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "seed": "ts-node src/backend/scripts/seed.ts"
+    "test:verbose": "jest --verbose",
+    "seed": "ts-node src/backend/scripts/seed.ts",
+    "typecheck": "tsc --noEmit"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "express",
+    "typescript",
+    "ecommerce",
+    "shop"
+  ],
+  "author": "Команда L_Shop",
   "license": "MIT",
   "dependencies": {
     "bcryptjs": "^3.0.3",
@@ -42,5 +51,9 @@
     "ts-jest": "^29.4.6",
     "ts-node": "^10.9.1",
     "typescript": "^5.1.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
   }
 }

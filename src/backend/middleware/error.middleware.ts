@@ -1,9 +1,10 @@
+/**
+ * Обработчик ошибок
+ */
+
 import { Request, Response, NextFunction } from 'express';
 import { config } from '../config/constants';
 
-/**
- * Интерфейс для ошибки с дополнительными полями
- */
 interface AppError extends Error {
   statusCode?: number;
   code?: string;
@@ -11,7 +12,7 @@ interface AppError extends Error {
 }
 
 /**
- * Общий обработчик ошибок
+ * Централизованный обработчик ошибок
  * Должен быть последним middleware в цепочке
  */
 export function errorHandler(
@@ -22,29 +23,27 @@ export function errorHandler(
   _next: NextFunction,
 ): void {
   const statusCode = err.statusCode || 500;
-  const message = err.message || 'Internal Server Error';
+  const message = err.message || 'Внутренняя ошибка сервера';
   const code = err.code || 'INTERNAL_ERROR';
 
-  // Логирование ошибки (в продакшене можно отправлять в систему логирования)
   console.error(`[${new Date().toISOString()}] Error:`, {
     statusCode,
     code,
     message,
+    // Stack trace не показываем в продакшене
     stack: config.isProduction ? undefined : err.stack,
     details: err.details,
   });
 
-  // Ответ клиенту
   res.status(statusCode).json({
     message,
     error: code,
-    // Не показываем stack trace в продакшене
     ...(config.isProduction ? {} : { stack: err.stack }),
   });
 }
 
 /**
- * Функция для создания обработанных ошибок
+ * Создаёт ошибку с дополнительными полями
  */
 export function createError(
   message: string,
@@ -60,7 +59,7 @@ export function createError(
 }
 
 /**
- * Async-обёртка для обработки ошибок в async middleware
+ * Обёртка для async middleware, автоматически передаёт ошибки в next()
  */
 export function asyncHandler(
   fn: (req: Request, res: Response, next: NextFunction) => Promise<void>,

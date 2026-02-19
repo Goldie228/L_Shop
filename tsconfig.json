@@ -7,12 +7,23 @@
     "rootDir": "./src/backend",
     "strict": true,
     "esModuleInterop": true,
+    "resolveJsonModule": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
     "noImplicitAny": true,
-    "strictNullChecks": true
+    "strictNullChecks": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "declaration": true,
+    "sourceMap": true
   },
-  "include": ["src/backend/**/*", "src/backend/types/**/*.d.ts"],
-  "exclude": ["node_modules", "src/frontend"]
+  "include": [
+    "src/backend/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "src/frontend"
+  ]
 }

@@ -1,4 +1,9 @@
-import express from 'express';
+/**
+ * Точка входа в приложение L_Shop
+ * Express сервер с авторизацией на основе сессий
+ */
+
+import express, { Express } from 'express';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import authRoutes from './routes/auth.routes';
@@ -6,30 +11,20 @@ import { errorHandler } from './middleware/error.middleware';
 import { ensureDataFiles } from './utils/file.utils';
 import { config } from './config/constants';
 
-const app = express();
+const app: Express = express();
 
-/**
- * Настройка CORS
- * Разрешает запросы только с URL фронтенда с поддержкой credentials (cookies)
- */
-app.use(cors({
-  origin: config.frontendUrl,
-  credentials: true,
-}));
+// CORS с поддержкой credentials для передачи httpOnly cookies
+app.use(
+  cors({
+    origin: config.frontendUrl,
+    credentials: true,
+  }),
+);
 
-/**
- * Парсинг JSON-тела запроса
- */
 app.use(express.json());
-
-/**
- * Парсинг cookies
- */
 app.use(cookieParser());
 
-/**
- * Эндпоинт для проверки работоспособности сервера
- */
+// Health check для проверки работоспособности сервера
 app.get('/health', (_req, res) => {
   res.json({
     status: 'ok',
@@ -38,20 +33,17 @@ app.get('/health', (_req, res) => {
   });
 });
 
-/**
- * API маршруты
- */
+// API маршруты
 app.use('/api/auth', authRoutes);
-// Здесь позже подключатся остальные модули
 
-/**
- * Middleware обработки ошибок (должен быть последним)
- */
+// TODO: Подключить маршруты продуктов (Никита П.)
+// TODO: Подключить маршруты корзины (Тимофей)
+// TODO: Подключить маршруты заказов (Никита Т.)
+
+// Обработчик ошибок должен быть последним middleware
 app.use(errorHandler);
 
-/**
- * Общий обработчик 404 для несуществующих маршрутов
- */
+// Обработчик 404 для несуществующих маршрутов
 app.use((_req, res) => {
   res.status(404).json({
     message: 'Not Found',
@@ -60,38 +52,35 @@ app.use((_req, res) => {
 });
 
 /**
- * Инициализация и запуск сервера
+ * Инициализирует файлы данных и запускает HTTP сервер
  */
 async function startServer(): Promise<void> {
   try {
-    // Инициализация файлов с данными
     await ensureDataFiles();
     // eslint-disable-next-line no-console
-    console.log('Файлы данных инициализированы');
+    console.log('[Server] Файлы данных инициализированы');
 
-    // Запуск сервера
     const server = app.listen(config.port, () => {
       // eslint-disable-next-line no-console
-      console.log(`Сервер запущен на http://localhost:${config.port}`);
+      console.log(`[Server] Сервер запущен на http://localhost:${config.port}`);
       // eslint-disable-next-line no-console
-      console.log(`Окружение: ${config.nodeEnv}`);
-      // eslint-disable-next-line no-console
-      console.log(`URL фронтенда: ${config.frontendUrl}`);
+      console.log(`[Server] Окружение: ${config.nodeEnv}`);
     });
 
-    // Плавное завершение работы (graceful shutdown)
-    const gracefulShutdown = (signal: string) => {
+    // Graceful shutdown позволяет завершить текущие запросы перед остановкой
+    const gracefulShutdown = (signal: string): void => {
       // eslint-disable-next-line no-console
-      console.log(`\nПолучен сигнал ${signal}. Плавное завершение работы...`);
+      console.log(`\n[Server] Получен сигнал ${signal}. Завершение работы...`);
+
       server.close(() => {
         // eslint-disable-next-line no-console
-        console.log('HTTP-сервер закрыт.');
+        console.log('[Server] HTTP-сервер закрыт');
         process.exit(0);
       });
 
-      // Принудительное завершение через 10 секунд
+      // Принудительное завершение через 10 секунд, если сервер не успел завершить запросы
       setTimeout(() => {
-        console.error('Forced shutdown after timeout');
+        console.error('[Server] Принудительное завершение после таймаута');
         process.exit(1);
       }, 10000);
     };
@@ -99,7 +88,7 @@ async function startServer(): Promise<void> {
     process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
     process.on('SIGINT', () => gracefulShutdown('SIGINT'));
   } catch (error) {
-    console.error('Failed to start server:', error);
+    console.error('[Server] Ошибка запуска:', error);
     process.exit(1);
   }
 }

@@ -1,3 +1,6 @@
+/**
+ * Конфигурация ESLint для проекта L_Shop
+ */
 module.exports = {
   parser: '@typescript-eslint/parser',
   extends: [
@@ -23,5 +26,12 @@ module.exports = {
         'no-console': 'off',
       },
     },
+    {
+      files: ['**/scripts/**/*.ts'],
+      rules: {
+        'no-console': 'off',
+      },
+    },
   ],
+  ignorePatterns: ['**/__tests__/**', '**/scripts/**'],
 };

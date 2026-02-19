@@ -1,13 +1,15 @@
+/**
+ * Скрипт для заполнения базы тестовыми данными
+ * Запуск: npm run seed
+ */
+
 import { UserService } from '../services/user.service';
 import { config } from '../config/constants';
 
 const userService = new UserService();
 
-/**
- * Creating test users
- */
 async function seedUsers(): Promise<void> {
-  console.log('Seeding users...');
+  console.log('[Seed] Создание тестовых пользователей...');
 
   const testUsers = [
     {
@@ -31,29 +33,26 @@ async function seedUsers(): Promise<void> {
       const existing = await userService.findByEmailOrLogin(userData.email, userData.login);
       if (!existing) {
         await userService.createUser(userData);
-        console.log(`Created user: ${userData.login}`);
+        console.log(`[Seed] Создан пользователь: ${userData.login}`);
       } else {
-        console.log(`User already exists: ${userData.login}`);
+        console.log(`[Seed] Пользователь уже существует: ${userData.login}`);
       }
     } catch (error) {
-      console.error(`Failed to create user ${userData.login}:`, error);
+      console.error(`[Seed] Ошибка создания пользователя ${userData.login}:`, error);
     }
   }
 }
 
-/**
- * Main seed function
- */
 async function seed(): Promise<void> {
-  console.log('Starting seed process...');
-  console.log(`Environment: ${config.nodeEnv}`);
+  console.log('[Seed] Начало заполнения данными...');
+  console.log(`[Seed] Окружение: ${config.nodeEnv}`);
 
   await seedUsers();
 
-  console.log('Seed completed!');
+  console.log('[Seed] Заполнение завершено!');
 }
 
 seed().catch((error) => {
-  console.error('Seed failed:', error);
+  console.error('[Seed] Ошибка:', error);
   process.exit(1);
 });
