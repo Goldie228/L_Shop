@@ -1,19 +1,19 @@
-# Prompt for Timofey (Variant 21) - Cart Module
+# Промпт для Тимофея (Вариант 21) - Модуль корзины
 
-## Introduction
+## Введение
 
-You are developing the cart module for the L_Shop online store. The project already contains basic infrastructure and authentication. Your task is to implement the backend and frontend for working with the cart.
+Ты разрабатываешь модуль корзины для интернет-магазина L_Shop. Проект уже содержит базовую инфраструктуру и аутентификацию. Твоя задача — реализовать backend и frontend для работы с корзиной.
 
-## Variant 21 - Features
+## Вариант 21 - Особенности
 
-For your variant, add discount support:
-- Add `discountPercent?: number` (0-100) field to the Product model
-- Consider the discount when calculating the cost in the cart
-- Display the old price crossed out and the new price with discount
+Для твоего варианта добавь поддержку скидок:
+- Добавь поле `discountPercent?: number` (0-100) в модель Product
+- Учитывай скидку при расчёте стоимости в корзине
+- Отображай старую цену зачёркнутой и новую цену со скидкой
 
 ## Backend
 
-### Files to create:
+### Файлы для создания:
 
 1. `src/backend/controllers/cart.controller.ts`
 2. `src/backend/services/cart.service.ts`
@@ -23,11 +23,11 @@ For your variant, add discount support:
 
 #### GET /api/cart
 
-Get the current user's cart.
+Получить корзину текущего пользователя.
 
-**Requires:** Authorization
+**Требует:** Авторизацию
 
-**Response:**
+**Ответ:**
 ```json
 {
   "userId": "uuid",
@@ -48,11 +48,11 @@ Get the current user's cart.
 
 #### POST /api/cart/items
 
-Add a product to the cart.
+Добавить продукт в корзину.
 
-**Requires:** Authorization
+**Требует:** Авторизацию
 
-**Request body:**
+**Тело запроса:**
 ```json
 {
   "productId": "uuid",
@@ -60,16 +60,16 @@ Add a product to the cart.
 }
 ```
 
-**Logic:**
-- Check product existence
-- Check stock availability (`inStock`)
-- If product is already in cart - increase quantity
+**Логика:**
+- Проверить существование продукта
+- Проверить наличие на складе (`inStock`)
+- Если продукт уже в корзине — увеличить количество
 
 #### PUT /api/cart/items/:productId
 
-Change product quantity.
+Изменить количество продукта.
 
-**Request body:**
+**Тело запроса:**
 ```json
 {
   "quantity": 3
@@ -78,9 +78,9 @@ Change product quantity.
 
 #### DELETE /api/cart/items/:productId
 
-Remove product from cart.
+Удалить продукт из корзины.
 
-### Service implementation:
+### Реализация сервиса:
 
 ```typescript
 // cart.service.ts
@@ -101,7 +101,7 @@ export class CartService {
       cart = { userId, items: [], updatedAt: new Date().toISOString() };
     }
     
-    // Enrich with product data
+    // Обогащаем данными продукта
     const items = cart.items.map(item => {
       const product = products.find(p => p.id === item.productId);
       const price = product?.price || 0;
@@ -123,22 +123,22 @@ export class CartService {
   }
   
   async addItem(userId: string, productId: string, quantity: number) {
-    // Implement add logic
+    // Реализуй логику добавления
   }
   
   async updateItem(userId: string, productId: string, quantity: number) {
-    // Implement update logic
+    // Реализуй логику обновления
   }
   
   async removeItem(userId: string, productId: string) {
-    // Implement remove logic
+    // Реализуй логику удаления
   }
 }
 ```
 
-### Connecting routes:
+### Подключение маршрутов:
 
-Add to `src/backend/app.ts`:
+Добавь в `src/backend/app.ts`:
 ```typescript
 import cartRoutes from './routes/cart.routes';
 // ...
@@ -147,7 +147,7 @@ app.use('/api/cart', cartRoutes);
 
 ## Frontend
 
-### File structure:
+### Структура файлов:
 
 ```
 src/frontend/
@@ -160,33 +160,33 @@ src/frontend/
     cartApi.ts
 ```
 
-### Components:
+### Компоненты:
 
 #### Cart
 
-List of products in the cart with:
-- Name (with `data-title="basket"` attribute)
-- Price per unit (with `data-price="basket"` attribute)
-- Quantity with +/- buttons
-- Total cost per item
-- Cart total sum
-- "Checkout" button
+Список продуктов в корзине с:
+- Названием (с атрибутом `data-title="basket"`)
+- Ценой за единицу (с атрибутом `data-price="basket"`)
+- Количеством с кнопками +/-
+- Общей стоимостью за позицию
+- Общей суммой корзины
+- Кнопкой "Оформить заказ"
 
 #### CartItem
 
-Product card in the cart with discount display (variant 21).
+Карточка продукта в корзине с отображением скидки (вариант 21).
 
-### Data-attributes:
+### Data-атрибуты:
 
-In the cart:
-- `data-title="basket"` - on the element with product name
-- `data-price="basket"` - on the element with product price
+В корзине:
+- `data-title="basket"` - на элементе с названием продукта
+- `data-price="basket"` - на элементе с ценой продукта
 
-## Testing
+## Тестирование
 
-### Unit tests for CartService
+### Unit-тесты для CartService
 
-Create `src/backend/services/__tests__/cart.service.test.ts`:
+Создай `src/backend/services/__tests__/cart.service.test.ts`:
 
 ```typescript
 import { CartService } from '../cart.service';
@@ -210,7 +210,7 @@ describe('CartService', () => {
       price: 1000,
       category: 'electronics',
       inStock: true,
-      discountPercent: 10, // Variant 21
+      discountPercent: 10, // Вариант 21
     },
     {
       id: 'product-2',
@@ -238,7 +238,7 @@ describe('CartService', () => {
   });
 
   describe('getCart', () => {
-    it('should return cart with enriched items', async () => {
+    it('должен вернуть корзину с обогащёнными элементами', async () => {
       mockReadJsonFile
         .mockResolvedValueOnce(mockCarts)
         .mockResolvedValueOnce(mockProducts);
@@ -250,19 +250,19 @@ describe('CartService', () => {
       expect(result.items[0].name).toBe('iPhone 15');
     });
 
-    it('should calculate discount correctly (variant 21)', async () => {
+    it('должен корректно рассчитывать скидку (вариант 21)', async () => {
       mockReadJsonFile
         .mockResolvedValueOnce(mockCarts)
         .mockResolvedValueOnce(mockProducts);
 
       const result = await cartService.getCart('user-1');
 
-      // 2 items * 1000 price * 0.9 (10% discount) = 1800
+      // 2 товара * 1000 цена * 0.9 (10% скидка) = 1800
       expect(result.items[0].total).toBe(1800);
       expect(result.items[0].discountPercent).toBe(10);
     });
 
-    it('should return empty cart for new user', async () => {
+    it('должен вернуть пустую корзину для нового пользователя', async () => {
       mockReadJsonFile
         .mockResolvedValueOnce([])
         .mockResolvedValueOnce(mockProducts);
@@ -275,7 +275,7 @@ describe('CartService', () => {
   });
 
   describe('addItem', () => {
-    it('should add new item to cart', async () => {
+    it('должен добавить новый товар в корзину', async () => {
       mockReadJsonFile
         .mockResolvedValueOnce(mockCarts)
         .mockResolvedValueOnce(mockProducts);
@@ -286,7 +286,7 @@ describe('CartService', () => {
       expect(mockWriteJsonFile).toHaveBeenCalled();
     });
 
-    it('should increase quantity if item exists', async () => {
+    it('должен увеличить количество, если товар уже есть', async () => {
       mockReadJsonFile
         .mockResolvedValueOnce(mockCarts)
         .mockResolvedValueOnce(mockProducts);
@@ -294,7 +294,7 @@ describe('CartService', () => {
 
       await cartService.addItem('user-1', 'product-1', 1);
 
-      // Should increase from 2 to 3
+      // Должен увеличить с 2 до 3
       const savedCart = mockWriteJsonFile.mock.calls[0][1] as Cart[];
       const item = savedCart[0].items.find(i => i.productId === 'product-1');
       expect(item?.quantity).toBe(3);
@@ -302,7 +302,7 @@ describe('CartService', () => {
   });
 
   describe('updateItem', () => {
-    it('should update item quantity', async () => {
+    it('должен обновить количество товара', async () => {
       mockReadJsonFile.mockResolvedValueOnce(mockCarts);
       mockWriteJsonFile.mockResolvedValue();
 
@@ -315,7 +315,7 @@ describe('CartService', () => {
   });
 
   describe('removeItem', () => {
-    it('should remove item from cart', async () => {
+    it('должен удалить товар из корзины', async () => {
       mockReadJsonFile.mockResolvedValueOnce(mockCarts);
       mockWriteJsonFile.mockResolvedValue();
 
@@ -328,30 +328,30 @@ describe('CartService', () => {
 });
 ```
 
-### Run tests
+### Запуск тестов
 
 ```bash
-npm test                    # Run all tests
-npm run test:watch          # Watch mode
-npm run test:coverage       # With coverage report
+npm test                    # Запустить все тесты
+npm run test:watch          # Режим наблюдения
+npm run test:coverage       # С отчётом покрытия
 ```
 
 ## Git
 
-1. Create branch: `git checkout -b feature/cart-timofey`
-2. Make commits in English
-3. Create PR to `main`
+1. Создай ветку: `git checkout -b feature/cart-timofey`
+2. Делай коммиты на английском
+3. Создай PR в `main`
 
-## Final checklist
+## Финальный чек-лист
 
 - [ ] Backend: controller, service, routes
 - [ ] API: GET /api/cart
 - [ ] API: POST /api/cart/items
 - [ ] API: PUT /api/cart/items/:productId
 - [ ] API: DELETE /api/cart/items/:productId
-- [ ] Frontend: Cart page
-- [ ] Frontend: Cart, CartItem components
-- [ ] Data-attributes: data-title="basket", data-price="basket"
-- [ ] Variant 21: discounts, discountPercent
-- [ ] Tests: unit tests for CartService
-- [ ] Git: branch, commits, PR
+- [ ] Frontend: Страница корзины
+- [ ] Frontend: Компоненты Cart, CartItem
+- [ ] Data-атрибуты: data-title="basket", data-price="basket"
+- [ ] Вариант 21: скидки, discountPercent
+- [ ] Тесты: unit-тесты для CartService
+- [ ] Git: ветка, коммиты, PR

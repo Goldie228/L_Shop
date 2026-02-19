@@ -1,23 +1,23 @@
-# Prompt for Nikita P. (Variant 17) - Product Module
+# Промпт для Никиты П. (Вариант 17) - Модуль продуктов
 
-## Introduction
+## Введение
 
-You are developing the product module for the L_Shop online store. The project already contains basic infrastructure created by the team lead (Gleb). Your task is to implement the backend and frontend for working with products.
+Ты разрабатываешь модуль продуктов для интернет-магазина L_Shop. Проект уже содержит базовую инфраструктуру, созданную тимлидом (Глебом). Твоя задача — реализовать backend и frontend для работы с продуктами.
 
-## Variant 17 - Features
+## Вариант 17 - Особенности
 
-For your variant, add additional fields to the Product model:
+Для твоего варианта добавь дополнительные поля в модель Product:
 ```typescript
 interface Product {
-  // ... base fields
-  rating?: number;        // average rating (1-5)
-  reviewsCount?: number;  // number of reviews
+  // ... базовые поля
+  rating?: number;        // средний рейтинг (1-5)
+  reviewsCount?: number;  // количество отзывов
 }
 ```
 
 ## Backend
 
-### Files to create:
+### Файлы для создания:
 
 1. `src/backend/controllers/product.controller.ts`
 2. `src/backend/services/product.service.ts`
@@ -27,19 +27,19 @@ interface Product {
 
 #### GET /api/products
 
-List of products with query-parameters support:
-- `search` (string) - search by `name` and `description` fields (case-insensitive)
-- `sort` (string) - values: `price_asc`, `price_desc`
-- `category` (string) - filter by category
-- `inStock` (boolean) - `true` or `false`
-- `minRating` (number) - minimum rating (for variant 17)
+Список продуктов с поддержкой query-параметров:
+- `search` (string) - поиск по полям `name` и `description` (без учёта регистра)
+- `sort` (string) - значения: `price_asc`, `price_desc`
+- `category` (string) - фильтр по категории
+- `inStock` (boolean) - `true` или `false`
+- `minRating` (number) - минимальный рейтинг (для варианта 17)
 
-**Request example:**
+**Пример запроса:**
 ```
 GET /api/products?search=phone&sort=price_asc&category=electronics&inStock=true&minRating=4
 ```
 
-**Response:**
+**Ответ:**
 ```json
 [
   {
@@ -58,12 +58,12 @@ GET /api/products?search=phone&sort=price_asc&category=electronics&inStock=true&
 
 #### GET /api/products/:id
 
-Get a single product by ID.
+Получить один продукт по ID.
 
-**Response 200:** Product object
-**Response 404:** `{ "message": "Product not found" }`
+**Ответ 200:** Объект продукта
+**Ответ 404:** `{ "message": "Product not found" }`
 
-### Service implementation:
+### Реализация сервиса:
 
 ```typescript
 // product.service.ts
@@ -82,7 +82,7 @@ export class ProductService {
   }): Promise<Product[]> {
     let products = await readJsonFile<Product>(PRODUCTS_FILE);
     
-    // Search
+    // Поиск
     if (filters.search) {
       const term = filters.search.toLowerCase();
       products = products.filter(p => 
@@ -91,23 +91,23 @@ export class ProductService {
       );
     }
     
-    // Category filter
+    // Фильтр по категории
     if (filters.category) {
       products = products.filter(p => p.category === filters.category);
     }
     
-    // In stock filter
+    // Фильтр по наличию
     if (filters.inStock !== undefined) {
       products = products.filter(p => p.inStock === (filters.inStock === 'true'));
     }
     
-    // Rating filter (variant 17)
+    // Фильтр по рейтингу (вариант 17)
     if (filters.minRating) {
       const min = Number(filters.minRating);
       products = products.filter(p => (p.rating || 0) >= min);
     }
     
-    // Sorting
+    // Сортировка
     if (filters.sort === 'price_asc') {
       products.sort((a, b) => a.price - b.price);
     } else if (filters.sort === 'price_desc') {
@@ -124,9 +124,9 @@ export class ProductService {
 }
 ```
 
-### Connecting routes:
+### Подключение маршрутов:
 
-Add to `src/backend/app.ts`:
+Добавь в `src/backend/app.ts`:
 ```typescript
 import productRoutes from './routes/product.routes';
 // ...
@@ -135,7 +135,7 @@ app.use('/api/products', productRoutes);
 
 ## Frontend
 
-### File structure:
+### Структура файлов:
 
 ```
 src/frontend/
@@ -151,44 +151,44 @@ src/frontend/
     product.ts
 ```
 
-### Components:
+### Компоненты:
 
 #### ProductCard
 
-Product card with:
-- Image (or placeholder)
-- Name (with `data-title` attribute)
-- Price (with `data-price` attribute)
-- Rating and number of reviews (variant 17)
-- "Add to cart" button (for authorized users)
+Карточка продукта с:
+- Изображением (или заглушкой)
+- Названием (с атрибутом `data-title`)
+- Ценой (с атрибутом `data-price`)
+- Рейтингом и количеством отзывов (вариант 17)
+- Кнопкой "Добавить в корзину" (для авторизованных пользователей)
 
 #### Filters
 
-Filter block with:
-- Search field (input)
-- Sorting select
-- Category select
-- "In stock only" checkbox
-- Minimum rating input (variant 17)
+Блок фильтров с:
+- Полем поиска (input)
+- Select для сортировки
+- Select для категории
+- Чекбоксом "Только в наличии"
+- Полем ввода минимального рейтинга (вариант 17)
 
-### Data-attributes:
+### Data-атрибуты:
 
-On the main page:
-- `data-title` - on the element with product name
-- `data-price` - on the element with product price
+На главной странице:
+- `data-title` - на элементе с названием продукта
+- `data-price` - на элементе с ценой продукта
 
 ## Git
 
-1. Create branch: `git checkout -b feature/products-nikita`
-2. Make commits in English: `feat: add product filtering`
-3. Create PR to `main`
-4. Request review from colleagues
+1. Создай ветку: `git checkout -b feature/products-nikita`
+2. Делай коммиты на английском: `feat: add product filtering`
+3. Создай PR в `main`
+4. Запроси review у коллег
 
-## Testing
+## Тестирование
 
-### Unit tests for ProductService
+### Unit-тесты для ProductService
 
-Create `src/backend/services/__tests__/product.service.test.ts`:
+Создай `src/backend/services/__tests__/product.service.test.ts`:
 
 ```typescript
 import { ProductService } from '../product.service';
@@ -231,7 +231,7 @@ describe('ProductService', () => {
   });
 
   describe('getProducts', () => {
-    it('should return all products when no filters', async () => {
+    it('должен вернуть все продукты без фильтров', async () => {
       mockReadJsonFile.mockResolvedValue(mockProducts);
 
       const result = await productService.getProducts({});
@@ -239,7 +239,7 @@ describe('ProductService', () => {
       expect(result).toHaveLength(2);
     });
 
-    it('should filter by search term', async () => {
+    it('должен фильтровать по поисковому запросу', async () => {
       mockReadJsonFile.mockResolvedValue(mockProducts);
 
       const result = await productService.getProducts({ search: 'iphone' });
@@ -248,7 +248,7 @@ describe('ProductService', () => {
       expect(result[0].name).toBe('iPhone 15');
     });
 
-    it('should filter by category', async () => {
+    it('должен фильтровать по категории', async () => {
       mockReadJsonFile.mockResolvedValue(mockProducts);
 
       const result = await productService.getProducts({ category: 'electronics' });
@@ -256,7 +256,7 @@ describe('ProductService', () => {
       expect(result).toHaveLength(2);
     });
 
-    it('should filter by inStock', async () => {
+    it('должен фильтровать по наличию', async () => {
       mockReadJsonFile.mockResolvedValue(mockProducts);
 
       const result = await productService.getProducts({ inStock: 'true' });
@@ -265,7 +265,7 @@ describe('ProductService', () => {
       expect(result[0].inStock).toBe(true);
     });
 
-    it('should filter by minRating (variant 17)', async () => {
+    it('должен фильтровать по минимальному рейтингу (вариант 17)', async () => {
       mockReadJsonFile.mockResolvedValue(mockProducts);
 
       const result = await productService.getProducts({ minRating: '4.2' });
@@ -274,7 +274,7 @@ describe('ProductService', () => {
       expect(result[0].rating).toBe(4.5);
     });
 
-    it('should sort by price ascending', async () => {
+    it('должен сортировать по возрастанию цены', async () => {
       mockReadJsonFile.mockResolvedValue(mockProducts);
 
       const result = await productService.getProducts({ sort: 'price_asc' });
@@ -283,7 +283,7 @@ describe('ProductService', () => {
       expect(result[1].price).toBe(999);
     });
 
-    it('should sort by price descending', async () => {
+    it('должен сортировать по убыванию цены', async () => {
       mockReadJsonFile.mockResolvedValue(mockProducts);
 
       const result = await productService.getProducts({ sort: 'price_desc' });
@@ -294,7 +294,7 @@ describe('ProductService', () => {
   });
 
   describe('getProductById', () => {
-    it('should return product by id', async () => {
+    it('должен вернуть продукт по id', async () => {
       mockReadJsonFile.mockResolvedValue(mockProducts);
 
       const result = await productService.getProductById('1');
@@ -303,7 +303,7 @@ describe('ProductService', () => {
       expect(result?.name).toBe('iPhone 15');
     });
 
-    it('should return null for non-existent id', async () => {
+    it('должен вернуть null для несуществующего id', async () => {
       mockReadJsonFile.mockResolvedValue(mockProducts);
 
       const result = await productService.getProductById('999');
@@ -314,22 +314,22 @@ describe('ProductService', () => {
 });
 ```
 
-### Run tests
+### Запуск тестов
 
 ```bash
-npm test                    # Run all tests
-npm run test:watch          # Watch mode
-npm run test:coverage       # With coverage report
+npm test                    # Запустить все тесты
+npm run test:watch          # Режим наблюдения
+npm run test:coverage       # С отчётом покрытия
 ```
 
-## Final checklist
+## Финальный чек-лист
 
 - [ ] Backend: controller, service, routes
-- [ ] API: GET /api/products with filters
+- [ ] API: GET /api/products с фильтрами
 - [ ] API: GET /api/products/:id
-- [ ] Frontend: Main page
-- [ ] Frontend: ProductCard, Filters components
-- [ ] Data-attributes: data-title, data-price
-- [ ] Variant 17: rating, reviewsCount, minRating filter
-- [ ] Tests: unit tests for ProductService
-- [ ] Git: branch, commits, PR
+- [ ] Frontend: Главная страница
+- [ ] Frontend: Компоненты ProductCard, Filters
+- [ ] Data-атрибуты: data-title, data-price
+- [ ] Вариант 17: rating, reviewsCount, фильтр minRating
+- [ ] Тесты: unit-тесты для ProductService
+- [ ] Git: ветка, коммиты, PR

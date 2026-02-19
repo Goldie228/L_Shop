@@ -1,29 +1,29 @@
-# Prompt for Nikita T. (Variant 24) - Order/Delivery Module
+# Промпт для Никиты Т. (Вариант 24) - Модуль заказов/доставки
 
-## Introduction
+## Введение
 
-You are developing the order and delivery module for the L_Shop online store. The project already contains basic infrastructure, authentication, and (by the time of your work) product and cart modules. Your task is to implement the backend and frontend for order checkout.
+Ты разрабатываешь модуль заказов и доставки для интернет-магазина L_Shop. Проект уже содержит базовую инфраструктуру, аутентификацию и (к моменту твоей работы) модули продуктов и корзины. Твоя задача — реализовать backend и frontend для оформления заказов.
 
-## Variant 24 - Features
+## Вариант 24 - Особенности
 
-For your variant, add:
-- Delivery type selection: `deliveryType: 'courier' | 'pickup'`
-- Order comment: `comment?: string`
+Для твоего варианта добавь:
+- Выбор типа доставки: `deliveryType: 'courier' | 'pickup'`
+- Комментарий к заказу: `comment?: string`
 
 ## Backend
 
-### Model update:
+### Обновление модели:
 
-Add to `src/backend/models/order.model.ts`:
+Добавь в `src/backend/models/order.model.ts`:
 ```typescript
 interface Order {
-  // ... base fields
+  // ... базовые поля
   deliveryType?: 'courier' | 'pickup';
   comment?: string;
 }
 ```
 
-### Files to create:
+### Файлы для создания:
 
 1. `src/backend/controllers/order.controller.ts`
 2. `src/backend/services/order.service.ts`
@@ -33,11 +33,11 @@ interface Order {
 
 #### POST /api/orders
 
-Create an order.
+Создать заказ.
 
-**Requires:** Authorization
+**Требует:** Авторизацию
 
-**Request body:**
+**Тело запроса:**
 ```json
 {
   "deliveryAddress": "ul. Pushkina, d. 10, kv. 5",
@@ -49,15 +49,15 @@ Create an order.
 }
 ```
 
-**Logic:**
-1. Get the current user's cart
-2. If cart is empty - error 400
-3. Create an order with a copy of products from the cart
-4. Set status to `pending`
-5. Clear the user's cart
-6. Return the created order
+**Логика:**
+1. Получить корзину текущего пользователя
+2. Если корзина пуста — ошибка 400
+3. Создать заказ с копией продуктов из корзины
+4. Установить статус `pending`
+5. Очистить корзину пользователя
+6. Вернуть созданный заказ
 
-**Response 201:**
+**Ответ 201:**
 ```json
 {
   "id": "uuid",
@@ -76,11 +76,11 @@ Create an order.
 
 #### GET /api/orders
 
-List of current user's orders.
+Список заказов текущего пользователя.
 
-**Requires:** Authorization
+**Требует:** Авторизацию
 
-**Response:**
+**Ответ:**
 ```json
 [
   {
@@ -92,7 +92,7 @@ List of current user's orders.
 ]
 ```
 
-### Service implementation:
+### Реализация сервиса:
 
 ```typescript
 // order.service.ts
@@ -116,7 +116,7 @@ export class OrderService {
       comment?: string;
     }
   ) {
-    // 1. Get cart
+    // 1. Получить корзину
     const carts = await readJsonFile<Cart>(CARTS_FILE);
     const cart = carts.find(c => c.userId === userId);
     
@@ -124,7 +124,7 @@ export class OrderService {
       throw new Error('Cart is empty');
     }
     
-    // 2. Create order
+    // 2. Создать заказ
     const orders = await readJsonFile<Order>(ORDERS_FILE);
     const newOrder: Order = {
       id: generateId(),
@@ -138,7 +138,7 @@ export class OrderService {
     orders.push(newOrder);
     await writeJsonFile(ORDERS_FILE, orders);
     
-    // 3. Clear cart
+    // 3. Очистить корзину
     const updatedCarts = carts.map(c => 
       c.userId === userId ? { ...c, items: [] } : c
     );
@@ -156,9 +156,9 @@ export class OrderService {
 }
 ```
 
-### Connecting routes:
+### Подключение маршрутов:
 
-Add to `src/backend/app.ts`:
+Добавь в `src/backend/app.ts`:
 ```typescript
 import orderRoutes from './routes/order.routes';
 // ...
@@ -167,7 +167,7 @@ app.use('/api/orders', orderRoutes);
 
 ## Frontend
 
-### File structure:
+### Структура файлов:
 
 ```
 src/frontend/
@@ -181,43 +181,43 @@ src/frontend/
     orderApi.ts
 ```
 
-### Components:
+### Компоненты:
 
 #### DeliveryForm
 
-Delivery checkout form with fields:
-- Delivery address (textarea)
-- Phone (input)
+Форма оформления доставки с полями:
+- Адрес доставки (textarea)
+- Телефон (input)
 - Email (input)
-- Payment method (radio: cash, card, online)
-- Delivery type (radio: courier, pickup) - variant 24
-- Comment (textarea) - variant 24
-- "Checkout" button
+- Способ оплаты (radio: cash, card, online)
+- Тип доставки (radio: courier, pickup) - вариант 24
+- Комментарий (textarea) - вариант 24
+- Кнопка "Оформить заказ"
 
-**Attribute:** `data-delivery` on the `<form>` element
+**Атрибут:** `data-delivery` на элементе `<form>`
 
 #### OrdersPage
 
-List of user's orders (optional).
+Список заказов пользователя (опционально).
 
-### Data-attributes:
+### Data-атрибуты:
 
-On the delivery form:
-- `data-delivery` - on the form element
+На форме доставки:
+- `data-delivery` - на элементе формы
 
 ## Git
 
-1. Create branch: `git checkout -b feature/orders-nikita-t`
-2. Make commits in English
-3. Create PR to `main`
+1. Создай ветку: `git checkout -b feature/orders-nikita-t`
+2. Делай коммиты на английском
+3. Создай PR в `main`
 
-## Final checklist
+## Финальный чек-лист
 
 - [ ] Backend: controller, service, routes
 - [ ] API: POST /api/orders
 - [ ] API: GET /api/orders
-- [ ] Frontend: Delivery page
-- [ ] Frontend: DeliveryForm component
-- [ ] Data-attributes: data-delivery
-- [ ] Variant 24: deliveryType, comment
-- [ ] Git: branch, commits, PR
+- [ ] Frontend: Страница доставки
+- [ ] Frontend: Компонент DeliveryForm
+- [ ] Data-атрибуты: data-delivery
+- [ ] Вариант 24: deliveryType, comment
+- [ ] Git: ветка, коммиты, PR
