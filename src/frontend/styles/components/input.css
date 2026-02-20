@@ -26,7 +26,7 @@
 
 .form-label--required::after {
   content: ' *';
-  color: var(--color-error-500);
+  color: var(--color-error);
 }
 
 /* ====== Base Input ====== */
@@ -38,12 +38,10 @@
   font-size: var(--font-size-base);
   line-height: var(--line-height-normal);
   color: var(--color-text-primary);
-  background-color: var(--color-surface-primary);
-  border: 1px solid var(--color-border-primary);
+  background-color: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  transition: 
-    border-color var(--transition-input),
-    box-shadow var(--transition-input),
+  transition: border-color var(--transition-input), box-shadow var(--transition-input),
     background-color var(--transition-input);
 }
 
@@ -53,17 +51,17 @@
 }
 
 .input:hover:not(:disabled):not(:focus) {
-  border-color: var(--color-border-secondary);
+  border-color: var(--color-border-hover);
 }
 
 .input:focus {
   outline: none;
-  border-color: var(--color-primary-500);
+  border-color: var(--color-focus);
   box-shadow: var(--shadow-focus);
 }
 
 .input:disabled {
-  background-color: var(--color-surface-tertiary);
+  background-color: var(--color-bg-tertiary);
   color: var(--color-text-muted);
   cursor: not-allowed;
 }
@@ -72,25 +70,25 @@
 
 /* Error State */
 .input--error {
-  border-color: var(--color-error-500);
+  border-color: var(--color-error);
 }
 
 .input--error:hover:not(:disabled):not(:focus) {
-  border-color: var(--color-error-600);
+  border-color: var(--color-error-hover);
 }
 
 .input--error:focus {
-  border-color: var(--color-error-500);
+  border-color: var(--color-error);
   box-shadow: var(--shadow-focus-error);
 }
 
 /* Success State */
 .input--success {
-  border-color: var(--color-success-500);
+  border-color: var(--color-success);
 }
 
 .input--success:focus {
-  border-color: var(--color-success-500);
+  border-color: var(--color-success);
   box-shadow: var(--shadow-focus-success);
 }
 
@@ -181,12 +179,10 @@
   appearance: none;
   width: 18px;
   height: 18px;
-  border: 2px solid var(--color-border-primary);
-  background-color: var(--color-surface-primary);
+  border: 2px solid var(--color-border);
+  background-color: var(--color-bg-primary);
   cursor: pointer;
-  transition: 
-    background-color var(--transition-fast),
-    border-color var(--transition-fast),
+  transition: background-color var(--transition-fast), border-color var(--transition-fast),
     box-shadow var(--transition-fast);
   flex-shrink: 0;
 }
@@ -201,20 +197,20 @@
 
 .checkbox__input:hover,
 .radio__input:hover {
-  border-color: var(--color-primary-500);
+  border-color: var(--color-focus);
 }
 
 .checkbox__input:focus,
 .radio__input:focus {
   outline: none;
-  border-color: var(--color-primary-500);
+  border-color: var(--color-focus);
   box-shadow: var(--shadow-focus);
 }
 
 .checkbox__input:checked,
 .radio__input:checked {
-  background-color: var(--color-primary-600);
-  border-color: var(--color-primary-600);
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
 }
 
 .checkbox__input:checked::after {
@@ -239,8 +235,8 @@
 
 .checkbox__input:disabled,
 .radio__input:disabled {
-  background-color: var(--color-surface-tertiary);
-  border-color: var(--color-border-primary);
+  background-color: var(--color-bg-tertiary);
+  border-color: var(--color-border);
   cursor: not-allowed;
 }
 
@@ -258,11 +254,11 @@
 }
 
 .form-helper--error {
-  color: var(--color-error-500);
+  color: var(--color-error);
 }
 
 .form-helper--success {
-  color: var(--color-success-500);
+  color: var(--color-success);
 }
 
 /* ====== Input with Button ====== */
@@ -323,6 +319,7 @@
   outline: none;
   box-shadow: var(--shadow-focus);
   border-radius: var(--radius-sm);
+  background-color: var(--state-focus-bg-dark);
 }
 
 /* ====== Responsive ====== */
@@ -330,11 +327,11 @@
   .input {
     font-size: 16px; /* Prevent zoom on iOS */
   }
-  
+
   .input-group {
     flex-direction: column;
   }
-  
+
   .input-group .input,
   .input-group .btn {
     border-radius: var(--radius-md);
@@ -342,13 +339,13 @@
     margin-right: 0;
     margin-top: -1px;
   }
-  
+
   .input-group .input:first-child {
     border-radius: var(--radius-md);
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
   }
-  
+
   .input-group .btn:last-child {
     border-radius: var(--radius-md);
     border-top-left-radius: 0;

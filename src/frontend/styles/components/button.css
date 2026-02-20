@@ -21,15 +21,12 @@
   border: 1px solid transparent;
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: 
-    background-color var(--transition-button),
-    border-color var(--transition-button),
-    color var(--transition-button),
-    box-shadow var(--transition-button),
+  transition: background-color var(--transition-button), border-color var(--transition-button),
+    color var(--transition-button), box-shadow var(--transition-button),
     transform var(--duration-fast) var(--ease-out);
   white-space: nowrap;
   user-select: none;
-  box-shadow: var(--shadow-button);
+  box-shadow: var(--shadow-2);
 }
 
 .btn:hover:not(:disabled) {
@@ -55,15 +52,15 @@
 
 /* Primary Button */
 .btn--primary {
-  background-color: var(--color-primary-600);
+  background-color: var(--color-primary);
   color: var(--color-text-inverse);
-  border-color: var(--color-primary-600);
+  border-color: var(--color-primary);
 }
 
 .btn--primary:hover:not(:disabled) {
-  background-color: var(--color-primary-700);
-  border-color: var(--color-primary-700);
-  box-shadow: var(--shadow-button-hover);
+  background-color: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+  box-shadow: var(--shadow-primary);
 }
 
 .btn--primary:active:not(:disabled) {
@@ -73,19 +70,19 @@
 
 /* Secondary Button */
 .btn--secondary {
-  background-color: var(--color-surface-primary);
+  background-color: var(--color-bg-secondary);
   color: var(--color-text-primary);
-  border-color: var(--color-border-primary);
+  border-color: var(--color-border);
 }
 
 .btn--secondary:hover:not(:disabled) {
-  background-color: var(--color-surface-secondary);
-  border-color: var(--color-border-secondary);
+  background-color: var(--color-bg-tertiary);
+  border-color: var(--color-border-hover);
   box-shadow: var(--shadow-2);
 }
 
 .btn--secondary:active:not(:disabled) {
-  background-color: var(--color-surface-tertiary);
+  background-color: var(--color-bg-primary);
 }
 
 /* Ghost Button */
@@ -97,26 +94,26 @@
 }
 
 .btn--ghost:hover:not(:disabled) {
-  background-color: var(--color-surface-secondary);
+  background-color: var(--state-hover-bg-dark);
   color: var(--color-text-primary);
   box-shadow: none;
 }
 
 .btn--ghost:active:not(:disabled) {
-  background-color: var(--color-surface-tertiary);
+  background-color: var(--state-active-bg-dark);
 }
 
 /* Danger Button */
 .btn--danger {
-  background-color: var(--color-error-600);
+  background-color: var(--color-error);
   color: var(--color-text-inverse);
-  border-color: var(--color-error-600);
+  border-color: var(--color-error);
 }
 
 .btn--danger:hover:not(:disabled) {
-  background-color: var(--color-error-700);
-  border-color: var(--color-error-700);
-  box-shadow: var(--shadow-button-hover);
+  background-color: var(--color-error-hover);
+  border-color: var(--color-error-hover);
+  box-shadow: var(--shadow-error);
 }
 
 .btn--danger:active:not(:disabled) {
@@ -126,15 +123,15 @@
 
 /* Success Button */
 .btn--success {
-  background-color: var(--color-success-600);
+  background-color: var(--color-success);
   color: var(--color-text-inverse);
-  border-color: var(--color-success-600);
+  border-color: var(--color-success);
 }
 
 .btn--success:hover:not(:disabled) {
-  background-color: var(--color-success-700);
-  border-color: var(--color-success-700);
-  box-shadow: var(--shadow-button-hover);
+  background-color: var(--color-success-hover);
+  border-color: var(--color-success-hover);
+  box-shadow: var(--shadow-success);
 }
 
 .btn--success:active:not(:disabled) {
@@ -145,16 +142,20 @@
 /* Link Button */
 .btn--link {
   background-color: transparent;
-  color: var(--color-primary-600);
+  color: var(--color-primary);
   border-color: transparent;
   padding: 0;
   box-shadow: none;
 }
 
 .btn--link:hover:not(:disabled) {
-  color: var(--color-primary-700);
+  color: var(--color-primary-hover);
   text-decoration: underline;
   transform: none;
+}
+
+.btn--link:focus-visible {
+  box-shadow: var(--shadow-focus);
 }
 
 /* ====== Button Sizes ====== */
@@ -252,16 +253,16 @@
   .btn {
     min-height: 44px; /* Touch target size */
   }
-  
+
   .btn--sm {
     min-height: 36px;
   }
-  
+
   .btn-group--full-mobile {
     width: 100%;
     flex-direction: column;
   }
-  
+
   .btn-group--full-mobile .btn {
     width: 100%;
   }
