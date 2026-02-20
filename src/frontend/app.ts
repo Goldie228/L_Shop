@@ -6,7 +6,7 @@
 import { store } from './store/store.js';
 import { router, APP_ROUTES } from './router/router.js';
 import { AuthService } from './services/auth.service.js';
-import { Header } from './components/layout/Header.js';
+import { Layout } from './components/layout/Layout.js';
 import { AuthModal } from './components/auth/AuthModal.js';
 import { MainPage } from './pages/MainPage.js';
 import { Route } from './router/router.js';
@@ -16,8 +16,8 @@ import { Route } from './router/router.js';
  * Manages app initialization and lifecycle
  */
 class App {
-  /** Header component */
-  private header: Header | null = null;
+  /** Layout component */
+  private layout: Layout | null = null;
   
   /** Auth modal component */
   private authModal: AuthModal | null = null;
@@ -27,9 +27,6 @@ class App {
   
   /** App container element */
   private appContainer: HTMLElement | null = null;
-  
-  /** Main content element */
-  private mainContent: HTMLElement | null = null;
 
   /**
    * Initialize application
@@ -106,22 +103,9 @@ class App {
   private renderLayout(): void {
     if (!this.appContainer) return;
     
-    // Create header
-    this.header = new Header({
-      onLoginClick: () => this.openAuthModal()
-    });
-    this.header.mount(this.appContainer);
-    
-    // Create main content container
-    this.mainContent = document.createElement('main');
-    this.mainContent.className = 'main-content';
-    this.appContainer.appendChild(this.mainContent);
-    
-    // Create auth modal (hidden initially)
-    this.authModal = new AuthModal({
-      onAuth: () => this.handleAuthSuccess()
-    });
-    this.authModal.mount(this.appContainer);
+    // Create layout with Header, Main content area, and Footer
+    this.layout = new Layout();
+    this.layout.mount(this.appContainer);
   }
 
   /**
@@ -129,7 +113,10 @@ class App {
    * @param route - Current route
    */
   private handleRouteChange(route: Route): void {
-    if (!this.mainContent) return;
+    if (!this.layout) return;
+    
+    const mainContent = this.layout.getMainContent();
+    if (!mainContent) return;
     
     // Clear current page
     if (this.currentPage) {
@@ -143,7 +130,7 @@ class App {
         this.currentPage = new MainPage({
           onAuthClick: () => this.openAuthModal()
         });
-        this.currentPage.mount(this.mainContent);
+        this.currentPage.mount(mainContent);
         break;
         
       case 'NotFoundPage':
@@ -159,11 +146,14 @@ class App {
    * Render 404 page
    */
   private renderNotFoundPage(): void {
-    if (!this.mainContent) return;
+    if (!this.layout) return;
     
-    this.mainContent.innerHTML = `
+    const mainContent = this.layout.getMainContent();
+    if (!mainContent) return;
+    
+    mainContent.innerHTML = `
       <div class="page not-found-page">
-        <div class="container text-center">
+        <div class="layout__content text-center">
           <h1 class="not-found__title">404</h1>
           <p class="not-found__text">Страница не найдена</p>
           <a href="/" class="btn btn--primary">На главную</a>
@@ -200,7 +190,7 @@ class App {
     
     this.appContainer.innerHTML = `
       <div class="app-error">
-        <div class="container text-center">
+        <div class="layout__content text-center">
           <h1>Ошибка</h1>
           <p>${message}</p>
           <button class="btn btn--primary" onclick="location.reload()">

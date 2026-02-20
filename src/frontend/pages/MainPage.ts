@@ -42,7 +42,8 @@ export class MainPage extends Component<MainPageProps> {
   public render(): HTMLElement {
     const state = store.getState();
 
-    // Создаём страницу с анимацией появления
+    // Создаём контейнер страницы (без layout обёртки)
+    // Layout будет управлять общей структурой
     const page = this.createElement('div', {
       className: 'page main-page animate-fade-in',
     });
@@ -71,8 +72,9 @@ export class MainPage extends Component<MainPageProps> {
     });
     hero.setAttribute('data-testid', 'hero-section');
 
+    // Используем контейнер из layout
     const container = this.createElement('div', {
-      className: 'container',
+      className: 'layout__content',
     });
 
     // Hero content
@@ -157,8 +159,9 @@ export class MainPage extends Component<MainPageProps> {
     });
     section.setAttribute('data-testid', 'features-section');
 
+    // Используем контейнер из layout
     const container = this.createElement('div', {
-      className: 'container',
+      className: 'layout__content',
     });
 
     // Section title с утилитарным классом типографики
