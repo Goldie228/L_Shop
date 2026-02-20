@@ -6,6 +6,31 @@
 import { User } from './user.js';
 
 /**
+ * Product model
+ * @see src/backend/models/product.model.ts - бэкенд модель
+ */
+export interface Product {
+  /** Уникальный идентификатор товара */
+  id: string;
+  /** Название товара */
+  name: string;
+  /** Описание товара */
+  description: string;
+  /** Цена в копейках/центах */
+  price: number;
+  /** Категория товара */
+  category: string;
+  /** В наличии ли товар */
+  inStock: boolean;
+  /** URL изображения товара (опционально) */
+  imageUrl?: string;
+  /** Рейтинг товара (0-5, опционально) */
+  rating?: number;
+  /** Количество отзывов (опционально) */
+  reviewCount?: number;
+}
+
+/**
  * Base API response structure
  */
 export interface ApiResponse<T = unknown> {
@@ -66,7 +91,7 @@ export interface LogoutResponse {
 /**
  * API error types
  */
-export type ApiErrorType = 
+export type ApiErrorType =
   | 'validation'
   | 'unauthorized'
   | 'forbidden'
@@ -90,14 +115,14 @@ export class ApiError extends Error {
     message: string,
     statusCode: number,
     type: ApiErrorType,
-    errors: ValidationError[] = []
+    errors: ValidationError[] = [],
   ) {
     super(message);
     this.name = 'ApiError';
     this.statusCode = statusCode;
     this.type = type;
     this.errors = errors;
-    
+
     // Maintain proper stack trace
     Object.setPrototypeOf(this, ApiError.prototype);
   }
@@ -110,18 +135,18 @@ export class ApiError extends Error {
   public static async fromResponse(response: Response): Promise<ApiError> {
     let message = 'An error occurred';
     let errors: ValidationError[] = [];
-    
+
     try {
-      const body = await response.json() as ApiResponse;
+      const body = (await response.json()) as ApiResponse;
       message = body.error || message;
       errors = body.errors || [];
     } catch {
       // Response body is not JSON
       message = response.statusText || message;
     }
-    
+
     const type = ApiError.getTypeFromStatus(response.status);
-    
+
     return new ApiError(message, response.status, type, errors);
   }
 
@@ -191,7 +216,7 @@ export const AUTH_ENDPOINTS = {
   /** Logout endpoint */
   LOGOUT: '/api/auth/logout',
   /** Get current user endpoint */
-  ME: '/api/auth/me'
+  ME: '/api/auth/me',
 } as const;
 
 /**
@@ -206,5 +231,5 @@ export const HTTP_STATUS = {
   FORBIDDEN: 403,
   NOT_FOUND: 404,
   CONFLICT: 409,
-  INTERNAL_SERVER_ERROR: 500
+  INTERNAL_SERVER_ERROR: 500,
 } as const;
