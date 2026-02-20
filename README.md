@@ -122,6 +122,72 @@ npm run lint
 npm run format
 ```
 
+## Тестирование
+
+Проект использует два уровня тестирования:
+
+### Unit тесты (Jest)
+
+Unit тесты проверяют отдельные модули backend: сервисы, утилиты, контроллеры.
+
+```bash
+# Запуск всех unit тестов
+npm test
+
+# Запуск в режиме наблюдения
+npm run test:watch
+
+# Запуск с отчётом покрытия
+npm run test:coverage
+
+# Подробный вывод
+npm run test:verbose
+```
+
+**Структура unit тестов:**
+- `src/backend/services/__tests__/` - тесты сервисов
+- `src/backend/utils/__tests__/` - тесты утилит
+
+### E2E тесты (Cypress)
+
+E2E тесты проверяют критические пользовательские сценарии: авторизацию, просмотр товаров.
+
+```bash
+# Запуск E2E тестов в headless режиме
+npm run test:e2e
+
+# Открытие Cypress Test Runner (интерактивный режим)
+npm run test:e2e:open
+```
+
+**Структура E2E тестов:**
+- `cypress/e2e/auth.cy.ts` - smoke tests для авторизации
+- `cypress/e2e/products.cy.ts` - smoke tests для просмотра товаров
+
+### Запуск всех тестов
+
+```bash
+# Последовательный запуск unit + e2e тестов
+npm run test:all
+```
+
+### Требования для E2E тестов
+
+Перед запуском E2E тестов убедитесь, что:
+1. Backend сервер запущен на `http://localhost:3001`
+2. Frontend сервер запущен на `http://localhost:3000`
+
+```bash
+# В одном терминале
+npm run dev:backend
+
+# В другом терминале
+npm run dev:frontend
+
+# В третьем терминале
+npm run test:e2e
+```
+
 ## API Endpoints
 
 ### Авторизация
@@ -132,10 +198,10 @@ npm run format
 | POST | /api/auth/logout | Выход из системы |
 | GET | /api/auth/me | Текущий пользователь |
 
-### Продукты (будет добавлено)
+### Продукты
 | Метод | Endpoint | Описание |
 |-------|----------|----------|
-| GET | /api/products | Список товаров с фильтрацией |
+| GET | /api/products | Список товаров |
 | GET | /api/products/:id | Детали товара |
 
 ### Корзина (будет добавлено)

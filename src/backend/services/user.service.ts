@@ -62,7 +62,10 @@ export class UserService {
     return newUser;
   }
 
-  async updateUser(id: string, data: Partial<Omit<User, 'id' | 'createdAt'>>): Promise<User | null> {
+  async updateUser(
+    id: string,
+    data: Partial<Omit<User, 'id' | 'createdAt'>>,
+  ): Promise<User | null> {
     const users = await this.getAllUsers();
     const index = users.findIndex((u) => u.id === id);
 

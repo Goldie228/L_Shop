@@ -114,10 +114,7 @@ describe('SessionService', () => {
       const removedCount = await sessionService.cleanExpired();
 
       expect(removedCount).toBe(1);
-      expect(mockWriteJsonFile).toHaveBeenCalledWith(
-        'sessions.json',
-        [mockSessions[0]],
-      );
+      expect(mockWriteJsonFile).toHaveBeenCalledWith('sessions.json', [mockSessions[0]]);
     });
   });
 

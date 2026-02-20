@@ -4,10 +4,7 @@
 
 import { Router } from 'express';
 import {
-  register,
-  login,
-  logout,
-  getCurrentUser,
+  register, login, logout, getCurrentUser,
 } from '../controllers/auth.controller';
 import { authMiddleware } from '../middleware/auth.middleware';
 
