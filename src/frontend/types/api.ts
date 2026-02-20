@@ -1,70 +1,70 @@
 /**
- * API Types - L_Shop Frontend
- * TypeScript interfaces for API requests and responses
+ * Типы API - L_Shop Frontend
+ * TypeScript интерфейсы для запросов и ответов API
  */
 
 import { User } from './user.js';
 
 /**
- * Base API response structure
+ * Базовая структура ответа API
  */
 export interface ApiResponse<T = unknown> {
-  /** Whether the request was successful */
+  /** Успешен ли запрос */
   success: boolean;
-  /** Response data (if successful) */
+  /** Данные ответа (при успехе) */
   data?: T;
-  /** Error message (if failed) */
+  /** Сообщение об ошибке (при неудаче) */
   error?: string;
-  /** Error details (validation errors) */
+  /** Детали ошибок (ошибки валидации) */
   errors?: ValidationError[];
 }
 
 /**
- * Validation error from API
+ * Ошибка валидации от API
  */
 export interface ValidationError {
-  /** Field that has error */
+  /** Поле с ошибкой */
   field: string;
-  /** Error message */
+  /** Сообщение об ошибке */
   message: string;
 }
 
 /**
- * Login response data
+ * Данные ответа при входе
  */
 export interface LoginResponse {
-  /** Authenticated user */
+  /** Аутентифицированный пользователь */
   user: User;
-  /** Session token (if using token-based auth) */
+  /** Токен сессии (при использовании токен-аутентификации) */
   token?: string;
 }
 
 /**
- * Register response data
+ * Данные ответа при регистрации
  */
 export interface RegisterResponse {
-  /** Created user */
+  /** Созданный пользователь */
   user: User;
 }
 
 /**
- * Current user response data
+ * Данные ответа с текущим пользователем
  */
 export interface MeResponse {
-  /** Current authenticated user */
+  /** Текущий аутентифицированный пользователь */
   user: User;
 }
 
 /**
- * Logout response data
+ * Данные ответа при выходе
  */
 export interface LogoutResponse {
-  /** Success message */
+  /** Сообщение об успехе */
   message: string;
 }
 
 /**
- * API error types
+ * Типы ошибок API
  */
 export type ApiErrorType =
   | 'validation'
@@ -76,14 +76,14 @@ export type ApiErrorType =
   | 'network';
 
 /**
- * Custom API error class
+ * Пользовательский класс ошибок API
  */
 export class ApiError extends Error {
-  /** HTTP status code */
+  /** HTTP статус код */
   public readonly statusCode: number;
-  /** Error type */
+  /** Тип ошибки */
   public readonly type: ApiErrorType;
-  /** Validation errors (if any) */
+  /** Ошибки валидации (если есть) */
   public readonly errors: ValidationError[];
 
   constructor(
@@ -98,17 +98,17 @@ export class ApiError extends Error {
     this.type = type;
     this.errors = errors;
 
-    // Maintain proper stack trace
+    // Сохранить правильный стек вызовов
     Object.setPrototypeOf(this, ApiError.prototype);
   }
 
   /**
-   * Create ApiError from HTTP response
-   * @param response - Fetch Response object
-   * @returns ApiError instance
+   * Создать ApiError из HTTP ответа
+   * @param response - Объект Fetch Response
+   * @returns Экземпляр ApiError
    */
   public static async fromResponse(response: Response): Promise<ApiError> {
-    let message = 'An error occurred';
+    let message = 'Произошла ошибка';
     let errors: ValidationError[] = [];
 
     try {
@@ -116,7 +116,7 @@ export class ApiError extends Error {
       message = body.error || message;
       errors = body.errors || [];
     } catch {
-      // Response body is not JSON
+      // Тело ответа не в формате JSON
       message = response.statusText || message;
     }
 
@@ -126,9 +126,9 @@ export class ApiError extends Error {
   }
 
   /**
-   * Determine error type from HTTP status
-   * @param status - HTTP status code
-   * @returns Error type
+   * Определить тип ошибки по HTTP статусу
+   * @param status - HTTP статус код
+   * @returns Тип ошибки
    */
   private static getTypeFromStatus(status: number): ApiErrorType {
     if (status === 400) return 'validation';
@@ -142,10 +142,10 @@ export class ApiError extends Error {
 }
 
 /**
- * Network error (when fetch fails)
+ * Сетевая ошибка (когда fetch завершился неудачей)
  */
 export class NetworkError extends Error {
-  constructor(message: string = 'Network error. Please check your connection.') {
+  constructor(message: string = 'Ошибка сети. Проверьте подключение к интернету.') {
     super(message);
     this.name = 'NetworkError';
     Object.setPrototypeOf(this, NetworkError.prototype);
@@ -153,49 +153,49 @@ export class NetworkError extends Error {
 }
 
 /**
- * Request configuration
+ * Конфигурация запроса
  */
 export interface RequestConfig {
-  /** HTTP method */
+  /** HTTP метод */
   method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
-  /** Request headers */
+  /** Заголовки запроса */
   headers?: Record<string, string>;
-  /** Request body */
+  /** Тело запроса */
   body?: unknown;
-  /** Query parameters */
+  /** Параметры запроса (query) */
   params?: Record<string, string>;
-  /** Abort signal for cancellation */
+  /** Сигнал отмены запроса */
   signal?: AbortSignal;
 }
 
 /**
- * API client configuration
+ * Конфигурация API клиента
  */
 export interface ApiClientConfig {
-  /** Base URL for API requests */
+  /** Базовый URL для запросов API */
   baseUrl: string;
-  /** Default headers */
+  /** Заголовки по умолчанию */
   defaultHeaders?: Record<string, string>;
-  /** Request timeout in milliseconds */
+  /** Таймаут запроса в миллисекундах */
   timeout?: number;
 }
 
 /**
- * Auth API endpoints
+ * Эндпоинты API аутентификации
  */
 export const AUTH_ENDPOINTS = {
-  /** Login endpoint */
+  /** Эндпоинт входа */
   LOGIN: '/api/auth/login',
-  /** Register endpoint */
+  /** Эндпоинт регистрации */
   REGISTER: '/api/auth/register',
-  /** Logout endpoint */
+  /** Эндпоинт выхода */
   LOGOUT: '/api/auth/logout',
-  /** Get current user endpoint */
+  /** Эндпоинт получения текущего пользователя */
   ME: '/api/auth/me',
 } as const;
 
 /**
- * HTTP status codes
+ * HTTP статус коды
  */
 export const HTTP_STATUS = {
   OK: 200,

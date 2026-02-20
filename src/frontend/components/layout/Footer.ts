@@ -1,6 +1,6 @@
 /**
- * Footer Component - L_Shop Frontend
- * Многосекционный футер с колонками, newsletter и социальными сетями
+ * Компонент Footer - L_Shop Frontend
+ * Многосекционный футер с колонками, рассылкой и социальными сетями
  *
  * @see src/frontend/styles/components/footer.css - стили футера
  * @see docs/DESIGN_SYSTEM.md - документация дизайн-системы
@@ -9,14 +9,14 @@
 import { Component, ComponentProps } from '../base/Component.js';
 
 /**
- * Props для Footer компонента
+ * Пропсы для компонента Footer
  */
 export interface FooterProps extends ComponentProps {
-  /** URL логотипа для клика */
+  /** URL логотипа для перехода */
   logoUrl?: string;
   /** Текст копирайта */
   copyrightText?: string;
-  /** Callback при подписке на newsletter */
+  /** Callback при подписке на рассылку */
   onNewsletterSubmit?: (email: string) => void;
 }
 
@@ -64,8 +64,8 @@ const LOGO_SVG = `
 `;
 
 /**
- * Footer component class
- * Многосекционный футер с адаптивным layout
+ * Класс компонента Footer
+ * Многосекционный футер с адаптивной раскладкой
  *
  * @example
  * ```typescript
@@ -79,13 +79,13 @@ const LOGO_SVG = `
  */
 export class Footer extends Component<FooterProps> {
   /**
-   * Newsletter форма и её состояние
+   * Форма рассылки и её состояние
    */
   private newsletterForm: HTMLFormElement | null = null;
   private emailInput: HTMLInputElement | null = null;
 
   /**
-   * Get default props
+   * Получить пропсы по умолчанию
    */
   protected getDefaultProps(): FooterProps {
     return {
@@ -96,8 +96,8 @@ export class Footer extends Component<FooterProps> {
   }
 
   /**
-   * Render footer
-   * @returns Footer element
+   * Отрендерить футер
+   * @returns Элемент футера
    */
   public render(): HTMLElement {
     const footer = this.createElement('footer', {
@@ -123,13 +123,13 @@ export class Footer extends Component<FooterProps> {
     const column3 = this.createCompanyColumn();
     container.appendChild(column3);
 
-    // Колонка 4: Newsletter форма
+    // Колонка 4: Форма рассылки
     const column4 = this.createNewsletterColumn();
     container.appendChild(column4);
 
     footer.appendChild(container);
 
-    // Legal links в отдельной строке
+    // Правовые ссылки в отдельной строке
     const legalBar = this.createLegalBar();
     footer.appendChild(legalBar);
 
@@ -479,16 +479,16 @@ export class Footer extends Component<FooterProps> {
     }, [this.props.copyrightText ?? '© 2024 L_Shop. Все права защищены.']);
     container.appendChild(copyright);
 
-    // Legal links
+    // Правовые ссылки
     const legalLinks = this.createElement('nav', {
       className: 'footer__legal-links',
       'aria-label': 'Правовая информация',
     });
 
     const legalItems = [
-      { name: 'Privacy Policy', href: '/privacy' },
-      { name: 'Terms of Service', href: '/terms' },
-      { name: 'Cookie Policy', href: '/cookies' },
+      { name: 'Политика конфиденциальности', href: '/privacy' },
+      { name: 'Условия использования', href: '/terms' },
+      { name: 'Политика cookie', href: '/cookies' },
     ];
 
     legalItems.forEach((item, index) => {

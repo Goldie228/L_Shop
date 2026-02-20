@@ -1,12 +1,12 @@
 /**
- * Modal Component Styles - L_Shop
- * Modal dialogs with backdrop, animations, responsive design
- * 
+ * Стили компонента модального окна - L_Shop
+ * Модальные диалоги с фоном, анимациями, адаптивным дизайном
+ *
  * @see src/frontend/styles/design-tokens.css - источник токенов
  * @see docs/DESIGN_SYSTEM.md - документация дизайн-системы
  */
 
-/* ====== Modal Backdrop ====== */
+/* ====== Фон модального окна ====== */
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -25,7 +25,7 @@
   visibility: visible;
 }
 
-/* ====== Modal Container ====== */
+/* ====== Контейнер модального окна ====== */
 .modal {
   position: fixed;
   top: 50%;
@@ -156,7 +156,7 @@
 
 /* ====== Modal Variants ====== */
 
-/* Auth Modal */
+/* Модальное окно аутентификации */
 .modal--auth {
   max-width: 420px;
 }
@@ -170,7 +170,7 @@
   padding: 0 var(--spacing-6) var(--spacing-6);
 }
 
-/* Confirmation Modal */
+/* Модальное окно подтверждения */
 .modal--confirm {
   max-width: 400px;
   text-align: center;
@@ -251,7 +251,7 @@ body.modal-open {
     width: 100%;
   }
 
-  /* Auth Modal Mobile */
+  /* Модальное окно аутентификации (мобильное) */
   .modal--auth {
     max-width: 100%;
     justify-content: flex-start;

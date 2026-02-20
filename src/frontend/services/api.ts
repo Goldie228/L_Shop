@@ -1,6 +1,6 @@
 /**
- * API Client - L_Shop Frontend
- * Base HTTP client for API requests
+ * API Клиент - L_Shop Frontend
+ * Базовый HTTP клиент для API запросов
  */
 
 import {
@@ -12,7 +12,7 @@ import {
 } from '../types/api.js';
 
 /**
- * Default API client configuration
+ * Конфигурация API клиента по умолчанию
  */
 const DEFAULT_CONFIG: ApiClientConfig = {
   baseUrl: '',
@@ -24,87 +24,87 @@ const DEFAULT_CONFIG: ApiClientConfig = {
 };
 
 /**
- * API Client class for making HTTP requests
+ * Класс API клиента для выполнения HTTP запросов
  */
 export class ApiClient {
   private readonly config: ApiClientConfig;
 
-  /**
-   * Create API client instance
-   * @param config - Client configuration
-   */
-  constructor(config: Partial<ApiClientConfig> = {}) {
+   /**
+    * Создать экземпляр API клиента
+    * @param config - Конфигурация клиента
+    */
+   constructor(config: Partial<ApiClientConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
   }
 
+   /**
+    * Выполнить HTTP запрос
+    * @param endpoint - API эндпоинт (относительно базового URL)
+    * @param config - Конфигурация запроса
+    * @returns Данные ответа
+    * @throws ApiError при HTTP ошибках, NetworkError при ошибках соединения
+    */
+   public async request<T = unknown>(
+     endpoint: string,
+     config: RequestConfig = { method: 'GET' }
+   ): Promise<T> {
+     const url = this.buildUrl(endpoint, config.params);
+     const headers = this.buildHeaders(config.headers);
+     
+     const fetchOptions: RequestInit = {
+       method: config.method,
+       headers,
+       credentials: 'include', // Включать куки для сессии
+       signal: config.signal
+     };
+
+     // Добавить тело для не-GET запросов
+     if (config.body && config.method !== 'GET') {
+       fetchOptions.body = JSON.stringify(config.body);
+     }
+
+     try {
+       const response = await this.fetchWithTimeout(url, fetchOptions);
+       
+       // Обработать успешные ответы
+       if (response.ok) {
+         // Обработать пустые ответы (204 No Content)
+         if (response.status === 204) {
+           return {} as T;
+         }
+         
+         const data = await response.json() as ApiResponse<T>;
+         return data.data as T;
+       }
+       
+       // Обработать ответы с ошибками
+       throw await ApiError.fromResponse(response);
+     } catch (error) {
+       // Пробросить ApiError
+       if (error instanceof ApiError) {
+         throw error;
+       }
+       
+       // Обработать ошибки отмены
+       if (error instanceof Error && error.name === 'AbortError') {
+         throw new Error('Request was cancelled');
+       }
+       
+       // Обработать сетевые ошибки
+       if (error instanceof TypeError) {
+         throw new NetworkError();
+       }
+       
+       // Пробросить другие ошибки
+       throw error;
+     }
+   }
+
   /**
-   * Make HTTP request
-   * @param endpoint - API endpoint (relative to base URL)
-   * @param config - Request configuration
-   * @returns Response data
-   * @throws ApiError on HTTP errors, NetworkError on connection failures
-   */
-  public async request<T = unknown>(
-    endpoint: string,
-    config: RequestConfig = { method: 'GET' }
-  ): Promise<T> {
-    const url = this.buildUrl(endpoint, config.params);
-    const headers = this.buildHeaders(config.headers);
-    
-    const fetchOptions: RequestInit = {
-      method: config.method,
-      headers,
-      credentials: 'include', // Include cookies for session
-      signal: config.signal
-    };
-
-    // Add body for non-GET requests
-    if (config.body && config.method !== 'GET') {
-      fetchOptions.body = JSON.stringify(config.body);
-    }
-
-    try {
-      const response = await this.fetchWithTimeout(url, fetchOptions);
-      
-      // Handle successful responses
-      if (response.ok) {
-        // Handle empty responses (204 No Content)
-        if (response.status === 204) {
-          return {} as T;
-        }
-        
-        const data = await response.json() as ApiResponse<T>;
-        return data.data as T;
-      }
-      
-      // Handle error responses
-      throw await ApiError.fromResponse(response);
-    } catch (error) {
-      // Re-throw ApiError
-      if (error instanceof ApiError) {
-        throw error;
-      }
-      
-      // Handle abort errors
-      if (error instanceof Error && error.name === 'AbortError') {
-        throw new Error('Request was cancelled');
-      }
-      
-      // Handle network errors
-      if (error instanceof TypeError) {
-        throw new NetworkError();
-      }
-      
-      // Re-throw other errors
-      throw error;
-    }
-  }
-
-  /**
-   * GET request
-   * @param endpoint - API endpoint
-   * @param params - Query parameters
-   * @returns Response data
+   * GET запрос
+   * @param endpoint - API эндпоинт
+   * @param params - Query параметры
+   * @returns Данные ответа
    */
   public async get<T = unknown>(
     endpoint: string,
@@ -114,10 +114,10 @@ export class ApiClient {
   }
 
   /**
-   * POST request
-   * @param endpoint - API endpoint
-   * @param body - Request body
-   * @returns Response data
+   * POST запрос
+   * @param endpoint - API эндпоинт
+   * @param body - Тело запроса
+   * @returns Данные ответа
    */
   public async post<T = unknown>(
     endpoint: string,
@@ -127,10 +127,10 @@ export class ApiClient {
   }
 
   /**
-   * PUT request
-   * @param endpoint - API endpoint
-   * @param body - Request body
-   * @returns Response data
+   * PUT запрос
+   * @param endpoint - API эндпоинт
+   * @param body - Тело запроса
+   * @returns Данные ответа
    */
   public async put<T = unknown>(
     endpoint: string,
@@ -140,10 +140,10 @@ export class ApiClient {
   }
 
   /**
-   * PATCH request
-   * @param endpoint - API endpoint
-   * @param body - Request body
-   * @returns Response data
+   * PATCH запрос
+   * @param endpoint - API эндпоинт
+   * @param body - Тело запроса
+   * @returns Данные ответа
    */
   public async patch<T = unknown>(
     endpoint: string,
@@ -153,19 +153,19 @@ export class ApiClient {
   }
 
   /**
-   * DELETE request
-   * @param endpoint - API endpoint
-   * @returns Response data
+   * DELETE запрос
+   * @param endpoint - API эндпоинт
+   * @returns Данные ответа
    */
   public async delete<T = unknown>(endpoint: string): Promise<T> {
     return this.request<T>(endpoint, { method: 'DELETE' });
   }
 
   /**
-   * Build full URL with query parameters
-   * @param endpoint - API endpoint
-   * @param params - Query parameters
-   * @returns Full URL
+   * Построить полный URL с query параметрами
+   * @param endpoint - API эндпоинт
+   * @param params - Query параметры
+   * @returns Полный URL
    */
   private buildUrl(endpoint: string, params?: Record<string, string>): string {
     const url = this.config.baseUrl + endpoint;
@@ -179,20 +179,20 @@ export class ApiClient {
   }
 
   /**
-   * Build headers object
-   * @param customHeaders - Custom headers to merge
-   * @returns Headers object
+   * Построить объект заголовков
+   * @param customHeaders - Кастомные заголовки для объединения
+   * @returns Объект Headers
    */
   private buildHeaders(customHeaders?: Record<string, string>): Headers {
     const headers = new Headers();
     
-    // Add default headers
+    // Добавить заголовки по умолчанию
     const defaultHeaders = this.config.defaultHeaders || {};
     for (const [key, value] of Object.entries(defaultHeaders)) {
       headers.set(key, value);
     }
     
-    // Add custom headers
+    // Добавить кастомные заголовки
     if (customHeaders) {
       for (const [key, value] of Object.entries(customHeaders)) {
         headers.set(key, value);
@@ -203,9 +203,9 @@ export class ApiClient {
   }
 
   /**
-   * Fetch with timeout
-   * @param url - Request URL
-   * @param options - Fetch options
+   * Fetch с таймаутом
+   * @param url - URL запроса
+   * @param options - Опции fetch
    * @returns Response
    */
   private async fetchWithTimeout(
@@ -214,14 +214,14 @@ export class ApiClient {
   ): Promise<Response> {
     const timeout = this.config.timeout || 10000;
     
-    // Create abort controller for timeout
+    // Создать AbortController для таймаута
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
     
-    // Merge signals if provided
+    // Объединить сигналы если предоставлены
     let signal = controller.signal;
     if (options.signal) {
-      // Create a new controller that aborts on either signal
+      // Создать новый контроллер, который отменяется при любом сигнале
       const externalController = new AbortController();
       
       options.signal.addEventListener('abort', () => {
@@ -252,7 +252,7 @@ export class ApiClient {
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 /**
- * Default API client instance
+ * Экземпляр API клиента по умолчанию
  */
 export const api = new ApiClient({
   baseUrl: API_BASE_URL

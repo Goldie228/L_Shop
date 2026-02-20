@@ -1,6 +1,6 @@
 /**
- * Auth Service - L_Shop Frontend
- * Service for authentication operations
+ * Сервис аутентификации - L_Shop Frontend
+ * Сервис для операций аутентификации
  */
 
 import { api } from './api.js';
@@ -12,7 +12,7 @@ import {
 } from '../types/user.js';
 
 /**
- * Login response from API
+ * Ответ API при входе
  */
 interface LoginApiResponse {
   user: User;
@@ -20,7 +20,7 @@ interface LoginApiResponse {
 }
 
 /**
- * Register response from API
+ * Ответ API при регистрации
  */
 interface RegisterApiResponse {
   user: User;
@@ -28,28 +28,28 @@ interface RegisterApiResponse {
 }
 
 /**
- * Logout response from API
+ * Ответ API при выходе
  */
 interface LogoutApiResponse {
   message: string;
 }
 
 /**
- * Me response from API
+ * Ответ API при получении текущего пользователя
  */
 interface MeApiResponse {
   user: User;
 }
 
 /**
- * Auth service for handling authentication operations
+ * Сервис аутентификации для обработки операций
  */
 export class AuthService {
   /**
-   * Login user
-   * @param credentials - Login credentials
-   * @returns Authenticated user
-   * @throws ApiError on failure
+   * Войти в систему
+   * @param credentials - Учетные данные для входа
+   * @returns Аутентифицированный пользователь
+   * @throws ApiError при ошибке
    */
   public static async login(credentials: LoginUserData): Promise<User> {
     const response = await api.post<LoginApiResponse>(AUTH_ENDPOINTS.LOGIN, {
@@ -61,10 +61,10 @@ export class AuthService {
   }
 
   /**
-   * Register new user
-   * @param userData - Registration data
-   * @returns Created user
-   * @throws ApiError on failure
+   * Зарегистрировать нового пользователя
+   * @param userData - Данные для регистрации
+   * @returns Созданный пользователь
+   * @throws ApiError при ошибке
    */
   public static async register(userData: RegisterUserData): Promise<User> {
     const response = await api.post<RegisterApiResponse>(
@@ -83,23 +83,23 @@ export class AuthService {
   }
 
   /**
-   * Logout current user
-   * @throws ApiError on failure
+   * Выйти из системы
+   * @throws ApiError при ошибке
    */
   public static async logout(): Promise<void> {
     await api.post<LogoutApiResponse>(AUTH_ENDPOINTS.LOGOUT);
   }
 
   /**
-   * Get current authenticated user
-   * @returns Current user or null if not authenticated
+   * Получить текущего аутентифицированного пользователя
+   * @returns Текущий пользователь или null если не аутентифицирован
    */
   public static async getCurrentUser(): Promise<User | null> {
     try {
       const response = await api.get<MeApiResponse>(AUTH_ENDPOINTS.ME);
       return response.user;
     } catch (error) {
-      // Return null for unauthorized errors
+      // Возвращать null при ошибках авторизации
       if (error instanceof Error && 'statusCode' in error) {
         const apiError = error as { statusCode: number };
         if (apiError.statusCode === 401) {
@@ -111,8 +111,8 @@ export class AuthService {
   }
 
   /**
-   * Check if user is authenticated
-   * @returns True if user has active session
+   * Проверить, аутентифицирован ли пользователь
+   * @returns True если у пользователя активная сессия
    */
   public static async isAuthenticated(): Promise<boolean> {
     try {
@@ -125,25 +125,25 @@ export class AuthService {
 }
 
 /**
- * Auth event types
+ * Типы событий аутентификации
  */
 export type AuthEventType = 'login' | 'logout' | 'register' | 'session_expired';
 
 /**
- * Auth event listener
+ * Слушатель событий аутентификации
  */
 export type AuthEventListener = (event: AuthEventType, user?: User) => void;
 
 /**
- * Auth event emitter for notifying components about auth changes
+ * Эмиттер событий аутентификации для уведомления компонентов об изменениях
  */
 export class AuthEventEmitter {
   private static listeners: Set<AuthEventListener> = new Set();
 
   /**
-   * Subscribe to auth events
-   * @param listener - Event listener function
-   * @returns Unsubscribe function
+   * Подписаться на события аутентификации
+   * @param listener - Функция слушателя событий
+   * @returns Функция отписки
    */
   public static subscribe(listener: AuthEventListener): () => void {
     this.listeners.add(listener);
@@ -154,16 +154,16 @@ export class AuthEventEmitter {
   }
 
   /**
-   * Emit auth event
-   * @param event - Event type
-   * @param user - User data (optional)
+   * Отправить событие аутентификации
+   * @param event - Тип события
+   * @param user - Данные пользователя (опционально)
    */
   public static emit(event: AuthEventType, user?: User): void {
     this.listeners.forEach(listener => {
       try {
         listener(event, user);
       } catch (error) {
-        console.error('Auth event listener error:', error);
+        console.error('Ошибка слушателя события аутентификации:', error);
       }
     });
   }

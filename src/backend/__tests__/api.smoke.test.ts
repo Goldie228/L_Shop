@@ -19,8 +19,8 @@ function createTestApp(): Express {
   app.use(express.json());
   app.use(cookieParser());
 
-  // Health check
-  app.get('/health', (_req, res) => {
+   // Проверка работоспособности
+   app.get('/health', (_req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
   });
 
@@ -30,14 +30,14 @@ function createTestApp(): Express {
   return app;
 }
 
-describe('API Smoke Tests', () => {
+describe('Смоук-тесты API', () => {
   let app: Express;
 
   beforeAll(() => {
     app = createTestApp();
   });
 
-  describe('Health Check', () => {
+  describe('Проверка работоспособности', () => {
     it('должен вернуть статус OK на /health', async () => {
       const response = await request(app).get('/health');
 
@@ -47,7 +47,7 @@ describe('API Smoke Tests', () => {
     });
   });
 
-  describe('Auth API', () => {
+  describe('API аутентификации', () => {
     it('должен вернуть ошибку при регистрации с пустыми данными', async () => {
       const response = await request(app).post('/api/auth/register').send({});
 

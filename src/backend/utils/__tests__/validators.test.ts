@@ -1,7 +1,7 @@
 import { isValidEmail, isValidPhone } from '../validators';
 
-describe('Валидаторы', () => {
-  describe('isValidEmail', () => {
+describe('Тесты валидаторов', () => {
+  describe('Валидация email', () => {
     it('должен возвращать true для валидного email', () => {
       expect(isValidEmail('test@example.com')).toBe(true);
       expect(isValidEmail('user.name@domain.org')).toBe(true);
@@ -14,7 +14,7 @@ describe('Валидаторы', () => {
     });
   });
 
-  describe('isValidPhone', () => {
+  describe('Валидация телефона', () => {
     it('должен возвращать true для валидного телефона', () => {
       expect(isValidPhone('+375291234567')).toBe(true);
       expect(isValidPhone('1234567890')).toBe(true);

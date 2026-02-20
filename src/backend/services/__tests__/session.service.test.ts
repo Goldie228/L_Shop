@@ -11,7 +11,7 @@ jest.mock('../../utils/file.utils');
 const mockReadJsonFile = readJsonFile as jest.MockedFunction<typeof readJsonFile>;
 const mockWriteJsonFile = writeJsonFile as jest.MockedFunction<typeof writeJsonFile>;
 
-describe('SessionService', () => {
+describe('Тесты SessionService', () => {
   let sessionService: SessionService;
 
   beforeEach(() => {
@@ -19,7 +19,7 @@ describe('SessionService', () => {
     jest.clearAllMocks();
   });
 
-  describe('createSession', () => {
+  describe('Создание сессии', () => {
     it('должен создавать новую сессию и возвращать токен', async () => {
       mockReadJsonFile.mockResolvedValue([]);
       mockWriteJsonFile.mockResolvedValue();
@@ -39,7 +39,7 @@ describe('SessionService', () => {
     });
   });
 
-  describe('getUserIdByToken', () => {
+  describe('Получение userId по токену', () => {
     it('должен возвращать userId для валидного токена', async () => {
       const mockSessions: Session[] = [
         {
@@ -79,7 +79,7 @@ describe('SessionService', () => {
     });
   });
 
-  describe('deleteSession', () => {
+  describe('Удаление сессии', () => {
     it('должен удалять сессию по токену', async () => {
       const mockSessions: Session[] = [
         { token: 'token-1', userId: 'user-1', expiresAt: new Date().toISOString() },
@@ -94,7 +94,7 @@ describe('SessionService', () => {
     });
   });
 
-  describe('cleanExpired', () => {
+  describe('Очистка истекших сессий', () => {
     it('должен удалять истёкшие сессии', async () => {
       const mockSessions: Session[] = [
         {
@@ -118,7 +118,7 @@ describe('SessionService', () => {
     });
   });
 
-  describe('extendSession', () => {
+  describe('Продление сессии', () => {
     it('должен продлевать сессию', async () => {
       const mockSessions: Session[] = [
         {

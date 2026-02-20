@@ -1,12 +1,12 @@
 /**
- * Input Component Styles - L_Shop
- * Text inputs, textareas, select with validation states
- * 
+ * Стили компонента поля ввода - L_Shop
+ * Текстовые поля, textarea, select с состояниями валидации
+ *
  * @see src/frontend/styles/design-tokens.css - источник токенов
  * @see docs/DESIGN_SYSTEM.md - документация дизайн-системы
  */
 
-/* ====== Form Group ====== */
+/* ====== Группа формы ====== */
 .form-group {
   margin-bottom: var(--spacing-4);
 }
@@ -15,7 +15,7 @@
   margin-bottom: 0;
 }
 
-/* ====== Label ====== */
+/* ====== Метка ====== */
 .form-label {
   display: block;
   margin-bottom: var(--spacing-1);
@@ -29,7 +29,7 @@
   color: var(--color-error);
 }
 
-/* ====== Base Input ====== */
+/* ====== Базовое поле ввода ====== */
 .input {
   display: block;
   width: 100%;
@@ -68,7 +68,7 @@
 
 /* ====== Input States ====== */
 
-/* Error State */
+/* Состояние ошибки */
 .input--error {
   border-color: var(--color-error);
 }
@@ -82,7 +82,7 @@
   box-shadow: var(--shadow-focus-error);
 }
 
-/* Success State */
+/* Состояние успеха */
 .input--success {
   border-color: var(--color-success);
 }
@@ -94,14 +94,14 @@
 
 /* ====== Input Sizes ====== */
 
-/* Small */
+/* Маленькое */
 .input--sm {
   padding: var(--spacing-1) var(--spacing-2);
   font-size: var(--font-size-sm);
   border-radius: var(--radius-sm);
 }
 
-/* Large */
+/* Большое */
 .input--lg {
   padding: var(--spacing-4) var(--spacing-6);
   font-size: var(--font-size-lg);
@@ -325,7 +325,7 @@
 /* ====== Responsive ====== */
 @media (max-width: 480px) {
   .input {
-    font-size: 16px; /* Prevent zoom on iOS */
+    font-size: 16px; /* Предотвратить зум на iOS */
   }
 
   .input-group {

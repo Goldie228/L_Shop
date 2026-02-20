@@ -1,6 +1,6 @@
 /**
- * Header Component - L_Shop Frontend
- * Site header with navigation, user section, and scroll effects
+ * Компонент Header - L_Shop Frontend
+ * Шапка сайта с навигацией, секцией пользователя и эффектами прокрутки
  *
  * @see src/frontend/styles/components/header.css - стили хедера
  * @see docs/DESIGN_SYSTEM.md - документация дизайн-системы
@@ -14,12 +14,12 @@ import { AuthService } from '../../services/auth.service.js';
 import { router } from '../../router/router.js';
 
 /**
- * Header props
+ * Пропсы для компонента Header
  */
 export interface HeaderProps extends ComponentProps {
-  /** Callback when login button clicked */
+  /** Callback при нажатии кнопки входа */
   onLoginClick?: () => void;
-  /** Threshold for scrolled state in pixels */
+  /** Порог состояния прокрутки в пикселях */
   scrollThreshold?: number;
 }
 
@@ -70,26 +70,26 @@ const LOGO_ICON_SVG = `
  * ```
  */
 export class Header extends Component<HeaderProps> {
-  /** User section element */
+  /** Элемент секции пользователя */
   private userSection: HTMLElement | null = null;
 
-  /** Mobile menu element */
+  /** Элемент мобильного меню */
   private mobileMenu: HTMLElement | null = null;
 
-  /** Store unsubscribe function */
+  /** Функция отписки от store */
   private unsubscribe: (() => void) | null = null;
 
-  /** Scroll handler reference */
+  /** Ссылка на обработчик прокрутки */
   private scrollHandler: (() => void) | null = null;
 
-  /** User dropdown element */
+  /** Элемент выпадающего меню пользователя */
   private userDropdown: HTMLElement | null = null;
 
-  /** Is dropdown open */
+  /** Открыто ли выпадающее меню */
   private isDropdownOpen: boolean = false;
 
   /**
-   * Get default props
+   * Получить пропсы по умолчанию
    */
   protected getDefaultProps(): HeaderProps {
     return {
@@ -99,8 +99,8 @@ export class Header extends Component<HeaderProps> {
   }
 
   /**
-   * Render header
-   * @returns Header element
+   * Отрендерить хедер
+   * @returns Элемент хедера
    */
   public render(): HTMLElement {
     const header = this.createElement('header', {
@@ -144,8 +144,8 @@ export class Header extends Component<HeaderProps> {
   }
 
   /**
-   * Create logo element
-   * @returns Logo element
+   * Создать элемент логотипа
+   * @returns Элемент логотипа
    */
   private createLogo(): HTMLAnchorElement {
     const logo = this.createElement(
@@ -167,8 +167,8 @@ export class Header extends Component<HeaderProps> {
   }
 
   /**
-   * Create navigation element
-   * @returns Navigation element
+   * Создать элемент навигации
+   * @returns Элемент навигации
    */
   private createNavigation(): HTMLElement {
     const nav = this.createElement('nav', {
@@ -210,8 +210,8 @@ export class Header extends Component<HeaderProps> {
   }
 
   /**
-   * Create search input element
-   * @returns Search element
+   * Создать элемент поиска
+   * @returns Элемент поиска
    */
   private createSearch(): HTMLElement {
     const search = this.createElement('div', {
@@ -227,8 +227,8 @@ export class Header extends Component<HeaderProps> {
       'data-testid': 'search-input',
     });
 
-    // Обработка Enter для поиска
-    this.addEventListener(input, 'keydown', (e) => {
+     // Обработка нажатия Enter для поиска
+     this.addEventListener(input, 'keydown', (e) => {
       if (e instanceof KeyboardEvent && e.key === 'Enter') {
         e.preventDefault();
         const query = input.value.trim();
@@ -248,8 +248,8 @@ export class Header extends Component<HeaderProps> {
   }
 
   /**
-   * Handle search query
-   * @param query - Search query
+   * Обработать поисковый запрос
+   * @param query - Поисковый запрос
    */
   private handleSearch(query: string): void {
     // TODO: Реализовать поиск через router.navigate или API вызов
@@ -258,11 +258,11 @@ export class Header extends Component<HeaderProps> {
   }
 
   /**
-   * Create navigation link
-   * @param text - Link text
-   * @param href - Link href
-   * @param isActive - Whether link is active
-   * @returns Link element
+   * Создать элемент навигационной ссылки
+   * @param text - Текст ссылки
+   * @param href - URL ссылки
+   * @param isActive - Активна ли ссылка
+   * @returns Элемент ссылки
    */
   private createNavLink(text: string, href: string, isActive: boolean = false): HTMLAnchorElement {
     const link = this.createElement(
@@ -284,8 +284,8 @@ export class Header extends Component<HeaderProps> {
   }
 
   /**
-   * Create user section
-   * @returns User section element
+   * Создать секцию пользователя
+   * @returns Элемент секции пользователя
    */
   private createUserSection(): HTMLElement {
     const state = store.getState();
@@ -314,9 +314,9 @@ export class Header extends Component<HeaderProps> {
   }
 
   /**
-   * Create user dropdown with avatar and menu
-   * @param user - User object
-   * @returns Dropdown element
+   * Создать выпадающее меню пользователя с аватаром и меню
+   * @param user - Объект пользователя
+   * @returns Элемент выпадающего меню
    */
   private createUserDropdown(user: User): HTMLElement {
     const info = getUserDisplayInfo(user);
@@ -392,8 +392,8 @@ export class Header extends Component<HeaderProps> {
 
     dropdown.appendChild(this.userDropdown);
 
-    // Close dropdown on outside click
-    document.addEventListener('click', (e) => {
+     // Закрыть выпадающее меню при клике вне его
+     document.addEventListener('click', (e) => {
       if (this.isDropdownOpen && !dropdown.contains(e.target as Node)) {
         this.closeDropdown();
       }
@@ -403,7 +403,7 @@ export class Header extends Component<HeaderProps> {
   }
 
   /**
-   * Toggle user dropdown
+   * Переключить выпадающее меню пользователя
    */
   private toggleDropdown(): void {
     if (this.isDropdownOpen) {
@@ -414,7 +414,7 @@ export class Header extends Component<HeaderProps> {
   }
 
   /**
-   * Open user dropdown
+   * Открыть выпадающее меню пользователя
    */
   private openDropdown(): void {
     if (!this.userDropdown || !this.element) return;
@@ -430,7 +430,7 @@ export class Header extends Component<HeaderProps> {
   }
 
   /**
-   * Close user dropdown
+   * Закрыть выпадающее меню пользователя
    */
   private closeDropdown(): void {
     if (!this.userDropdown || !this.element) return;
@@ -446,8 +446,8 @@ export class Header extends Component<HeaderProps> {
   }
 
   /**
-   * Create mobile menu toggle button
-   * @returns Toggle button
+   * Создать кнопку переключения мобильного меню
+   * @returns Кнопка переключения
    */
   private createMenuToggle(): HTMLButtonElement {
     const toggle = this.createElement('button', {
@@ -467,8 +467,8 @@ export class Header extends Component<HeaderProps> {
   }
 
   /**
-   * Create mobile menu
-   * @returns Mobile menu element
+   * Создать мобильное меню
+   * @returns Элемент мобильного меню
    */
   private createMobileMenu(): HTMLElement {
     const menu = this.createElement('div', {
@@ -478,8 +478,8 @@ export class Header extends Component<HeaderProps> {
       'data-testid': 'mobile-menu',
     });
 
-    // Navigation links
-    const navList = this.createElement('ul', {
+     // Ссылки навигации
+     const navList = this.createElement('ul', {
       className: 'header__mobile-nav-list',
     });
 

@@ -10,13 +10,13 @@ import { Component, ComponentProps } from '../components/base/Component.js';
 import { Button } from '../components/ui/Button.js';
 import { store } from '../store/store.js';
 
-/**
- * Main page props
- */
-export interface MainPageProps extends ComponentProps {
-  /** Callback when login/register clicked */
-  onAuthClick?: () => void;
-}
+ /**
+  * Пропсы главной страницы
+  */
+ export interface MainPageProps extends ComponentProps {
+   /** Callback при клике на вход/регистрацию */
+   onAuthClick?: () => void;
+ }
 
 /**
  * Коллекция для карточки коллекции

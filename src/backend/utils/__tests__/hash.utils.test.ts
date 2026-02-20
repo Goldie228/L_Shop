@@ -4,8 +4,8 @@
 
 import { hashPassword, comparePassword } from '../hash.utils';
 
-describe('hash.utils', () => {
-  describe('hashPassword', () => {
+describe('Тесты утилит хеширования', () => {
+  describe('Хеширование пароля', () => {
     it('должен возвращать хеш пароля', async () => {
       const password = 'testPassword123';
       const hash = await hashPassword(password);
@@ -24,7 +24,7 @@ describe('hash.utils', () => {
     });
   });
 
-  describe('comparePassword', () => {
+  describe('Сравнение паролей', () => {
     it('должен возвращать true для правильного пароля', async () => {
       const password = 'testPassword123';
       const hash = await hashPassword(password);

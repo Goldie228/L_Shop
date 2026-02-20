@@ -1,12 +1,12 @@
 /**
- * Button Component Styles - L_Shop
- * Primary, secondary, ghost buttons with variants
- * 
+ * Стили компонента кнопки - L_Shop
+ * Первичные, вторичные, призрачные кнопки с вариантами
+ *
  * @see src/frontend/styles/design-tokens.css - источник токенов
  * @see docs/DESIGN_SYSTEM.md - документация дизайн-системы
  */
 
-/* ====== Base Button ====== */
+/* ====== Базовая кнопка ====== */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -50,7 +50,7 @@
 
 /* ====== Button Variants ====== */
 
-/* Primary Button */
+/* Основная кнопка */
 .btn--primary {
   background-color: var(--color-primary);
   color: var(--color-text-inverse);
@@ -68,7 +68,7 @@
   border-color: var(--color-primary-800);
 }
 
-/* Secondary Button */
+/* Вторичная кнопка */
 .btn--secondary {
   background-color: var(--color-bg-secondary);
   color: var(--color-text-primary);
@@ -85,7 +85,7 @@
   background-color: var(--color-bg-primary);
 }
 
-/* Ghost Button */
+/* Кнопка-призрак */
 .btn--ghost {
   background-color: transparent;
   color: var(--color-text-secondary);
@@ -103,7 +103,7 @@
   background-color: var(--state-active-bg-dark);
 }
 
-/* Danger Button */
+/* Кнопка опасности */
 .btn--danger {
   background-color: var(--color-error);
   color: var(--color-text-inverse);
@@ -121,7 +121,7 @@
   border-color: var(--color-error-800);
 }
 
-/* Success Button */
+/* Кнопка успеха */
 .btn--success {
   background-color: var(--color-success);
   color: var(--color-text-inverse);
@@ -139,7 +139,7 @@
   border-color: var(--color-success-800);
 }
 
-/* Link Button */
+/* Кнопка-ссылка */
 .btn--link {
   background-color: transparent;
   color: var(--color-primary);
@@ -160,20 +160,20 @@
 
 /* ====== Button Sizes ====== */
 
-/* Small */
+/* Маленькая */
 .btn--sm {
   padding: var(--spacing-1) var(--spacing-2);
   font-size: var(--font-size-xs);
   border-radius: var(--radius-sm);
 }
 
-/* Medium (default) */
+/* Средняя (по умолчанию) */
 .btn--md {
   padding: var(--spacing-2) var(--spacing-4);
   font-size: var(--font-size-sm);
 }
 
-/* Large */
+/* Большая */
 .btn--lg {
   padding: var(--spacing-4) var(--spacing-6);
   font-size: var(--font-size-base);
@@ -182,7 +182,7 @@
 
 /* ====== Button States ====== */
 
-/* Loading State */
+/* Состояние загрузки */
 .btn--loading {
   position: relative;
   color: transparent;
@@ -211,12 +211,12 @@
   border-top-color: transparent;
 }
 
-/* Full Width */
+/* Полная ширина */
 .btn--block {
   width: 100%;
 }
 
-/* Icon Only */
+/* Только иконка */
 .btn--icon {
   padding: var(--spacing-2);
   aspect-ratio: 1;
@@ -251,7 +251,7 @@
 /* ====== Responsive ====== */
 @media (max-width: 480px) {
   .btn {
-    min-height: 44px; /* Touch target size */
+    min-height: 44px; /* Размер области касания */
   }
 
   .btn--sm {

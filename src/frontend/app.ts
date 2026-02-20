@@ -1,6 +1,6 @@
 /**
- * App Entry Point - L_Shop Frontend
- * Main application initialization
+ * Точка входа приложения - Фронтенд L_Shop
+ * Инициализация основного приложения
  */
 
 import { store } from './store/store.js';
@@ -16,57 +16,57 @@ import { Route } from './router/router.js';
  * Manages app initialization and lifecycle
  */
 class App {
-  /** Layout component */
+  /** Компонент макета */
   private layout: Layout | null = null;
   
-  /** Auth modal component */
+  /** Модальное окно аутентификации */
   private authModal: AuthModal | null = null;
   
-  /** Current page component */
+  /** Текущий компонент страницы */
   private currentPage: MainPage | null = null;
   
-  /** App container element */
+  /** Элемент-контейнер приложения */
   private appContainer: HTMLElement | null = null;
 
   /**
-   * Initialize application
+   * Инициализировать приложение
    */
   public async init(): Promise<void> {
-    console.log('L_Shop Frontend: Initializing...');
+    console.log('L_Shop Frontend: Инициализация...');
     
-    // Get app container
+    // Получить контейнер приложения
     this.appContainer = document.getElementById('app');
     
     if (!this.appContainer) {
-      console.error('App container not found');
+      console.error('Контейнер приложения не найден');
       return;
     }
     
-    // Clear loading state
+    // Очистить состояние загрузки
     this.appContainer.innerHTML = '';
     
     try {
-      // Check authentication status
+      // Проверить статус аутентификации
       await this.checkAuth();
       
-      // Setup router
+      // Настроить роутер
       this.setupRouter();
       
-      // Render app layout
+      // Отрендерить макет приложения
       this.renderLayout();
       
-      // Initialize router
+      // Инициализировать роутер
       router.init();
       
-      console.log('L_Shop Frontend: Initialized successfully');
+      console.log('L_Shop Frontend: Инициализировано успешно');
     } catch (error) {
-      console.error('L_Shop Frontend: Initialization error', error);
+      console.error('L_Shop Frontend: Ошибка инициализации', error);
       this.showError('Ошибка инициализации приложения');
     }
   }
 
   /**
-   * Check current authentication status
+   * Проверить текущий статус аутентификации
    */
   private async checkAuth(): Promise<void> {
     store.setLoading(true);
@@ -79,38 +79,38 @@ class App {
         store.setUser(null);
       }
     } catch (error) {
-      console.error('Auth check error:', error);
+      console.error('Ошибка проверки аутентификации:', error);
       store.setUser(null);
     }
   }
 
   /**
-   * Setup router with routes
+   * Настроить роутер с маршрутами
    */
   private setupRouter(): void {
-    // Register routes
+    // Зарегистрировать маршруты
     router.registerRoutes(APP_ROUTES);
     
-    // Subscribe to route changes
+    // Подписаться на изменения маршрутов
     router.subscribe((route: Route) => {
       this.handleRouteChange(route);
     });
   }
 
   /**
-   * Render app layout
+   * Отрендерить макет приложения
    */
   private renderLayout(): void {
     if (!this.appContainer) return;
     
-    // Create layout with Header, Main content area, and Footer
+    // Создать макет с Header, основной областью контента и Footer
     this.layout = new Layout();
     this.layout.mount(this.appContainer);
   }
 
   /**
-   * Handle route change
-   * @param route - Current route
+   * Обработать изменение маршрута
+   * @param route - Текущий маршрут
    */
   private handleRouteChange(route: Route): void {
     if (!this.layout) return;
@@ -118,13 +118,13 @@ class App {
     const mainContent = this.layout.getMainContent();
     if (!mainContent) return;
     
-    // Clear current page
+    // Очистить текущую страницу
     if (this.currentPage) {
       this.currentPage.unmount();
       this.currentPage = null;
     }
     
-    // Render new page based on route
+    // Отрендерить новую страницу на основе маршрута
     switch (route.component) {
       case 'MainPage':
         this.currentPage = new MainPage({
@@ -143,7 +143,7 @@ class App {
   }
 
   /**
-   * Render 404 page
+   * Отрендерить страницу 404
    */
   private renderNotFoundPage(): void {
     if (!this.layout) return;
@@ -163,27 +163,27 @@ class App {
   }
 
   /**
-   * Open auth modal
+   * Открыть модальное окно аутентификации
    */
   private openAuthModal(): void {
     if (this.authModal) {
       this.authModal.open('login');
     }
   }
-
+  
   /**
-   * Handle successful authentication
+   * Обработать успешную аутентификацию
    */
   private handleAuthSuccess(): void {
-    // Refresh page to update user state
+    // Обновить страницу для обновления состояния пользователя
     if (this.currentPage) {
       this.currentPage.update();
     }
   }
-
+  
   /**
-   * Show error message
-   * @param message - Error message
+   * Показать сообщение об ошибке
+   * @param message - Сообщение об ошибке
    */
   private showError(message: string): void {
     if (!this.appContainer) return;
@@ -202,13 +202,13 @@ class App {
   }
 }
 
-// Initialize app when DOM is ready
+// Инициализировать приложение при готовности DOM
 document.addEventListener('DOMContentLoaded', () => {
   const app = new App();
   app.init();
 });
 
-// Add global styles for loading and error states
+// Добавить глобальные стили для состояний загрузки и ошибок
 const style = document.createElement('style');
 style.textContent = `
   .app-loading {

@@ -1,14 +1,14 @@
 /**
- * Utility Classes - L_Shop
+ * Утилитарные классы - L_Shop
  * Вспомогательные классы для быстрой стилизации
- * 
+ *
  * @see src/frontend/styles/design-tokens.css - источник токенов
  * @see docs/DESIGN_SYSTEM.md - документация дизайн-системы
  */
 
-/* ====== Typography Utilities ====== */
+/* ====== Утилиты типографики ====== */
 
-/* Hero text - самый крупный заголовок */
+/* Герой (hero) - самый крупный заголовок */
 .text-hero {
   font-size: var(--font-size-5xl);
   font-weight: var(--font-weight-bold);
@@ -16,7 +16,7 @@
   letter-spacing: var(--letter-spacing-tight);
 }
 
-/* Display text - крупный заголовок */
+/* Экран (display) - крупный заголовок */
 .text-display {
   font-size: var(--font-size-4xl);
   font-weight: var(--font-weight-bold);
@@ -24,7 +24,7 @@
   letter-spacing: var(--letter-spacing-tight);
 }
 
-/* Heading 1 */
+/* Заголовок 1 */
 .text-h1 {
   font-size: var(--font-size-3xl);
   font-weight: var(--font-weight-bold);
@@ -32,49 +32,49 @@
   letter-spacing: var(--letter-spacing-tight);
 }
 
-/* Heading 2 */
+/* Заголовок 2 */
 .text-h2 {
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-semibold);
   line-height: var(--line-height-tight);
 }
 
-/* Heading 3 */
+/* Заголовок 3 */
 .text-h3 {
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-semibold);
   line-height: var(--line-height-snug);
 }
 
-/* Heading 4 */
+/* Заголовок 4 */
 .text-h4 {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-medium);
   line-height: var(--line-height-snug);
 }
 
-/* Body Large */
+/* Крупный текст */
 .text-body-lg {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-normal);
   line-height: var(--line-height-relaxed);
 }
 
-/* Body - основной текст */
+/* Тело (body) - основной текст */
 .text-body {
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-normal);
   line-height: var(--line-height-normal);
 }
 
-/* Body Small */
+/* Малый текст */
 .text-body-sm {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-normal);
   line-height: var(--line-height-normal);
 }
 
-/* Caption */
+/* Подпись */
 .text-caption {
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-normal);
@@ -82,7 +82,7 @@
   color: var(--color-text-muted);
 }
 
-/* Font weights */
+/* Насыщенность шрифта */
 .font-light { font-weight: var(--font-weight-light); }
 .font-normal { font-weight: var(--font-weight-normal); }
 .font-medium { font-weight: var(--font-weight-medium); }
@@ -90,12 +90,12 @@
 .font-bold { font-weight: var(--font-weight-bold); }
 .font-extrabold { font-weight: var(--font-weight-extrabold); }
 
-/* Text alignment */
+/* Выравнивание текста */
 .text-left { text-align: left; }
 .text-center { text-align: center; }
 .text-right { text-align: right; }
 
-/* Text colors */
+/* Цвета текста */
 .text-primary { color: var(--color-text-primary); }
 .text-secondary { color: var(--color-text-secondary); }
 .text-muted { color: var(--color-text-muted); }
@@ -105,9 +105,9 @@
 .text-error { color: var(--color-error-600); }
 .text-warning { color: var(--color-warning-600); }
 
-/* ====== Spacing Utilities ====== */
+/* ====== Утилиты отступов ====== */
 
-/* Margin */
+/* Внешние отступы (margin) */
 .m-0 { margin: 0; }
 .m-1 { margin: var(--spacing-1); }
 .m-2 { margin: var(--spacing-2); }
@@ -121,7 +121,7 @@
 .m-16 { margin: var(--spacing-16); }
 .m-auto { margin: auto; }
 
-/* Margin X (horizontal) */
+/* Горизонтальные отступы (margin-x) */
 .mx-0 { margin-left: 0; margin-right: 0; }
 .mx-1 { margin-left: var(--spacing-1); margin-right: var(--spacing-1); }
 .mx-2 { margin-left: var(--spacing-2); margin-right: var(--spacing-2); }
@@ -131,7 +131,7 @@
 .mx-8 { margin-left: var(--spacing-8); margin-right: var(--spacing-8); }
 .mx-auto { margin-left: auto; margin-right: auto; }
 
-/* Margin Y (vertical) */
+/* Вертикальные отступы (margin-y) */
 .my-0 { margin-top: 0; margin-bottom: 0; }
 .my-1 { margin-top: var(--spacing-1); margin-bottom: var(--spacing-1); }
 .my-2 { margin-top: var(--spacing-2); margin-bottom: var(--spacing-2); }
@@ -140,7 +140,7 @@
 .my-6 { margin-top: var(--spacing-6); margin-bottom: var(--spacing-6); }
 .my-8 { margin-top: var(--spacing-8); margin-bottom: var(--spacing-8); }
 
-/* Margin Top */
+/* Верхний отступ (margin-top) */
 .mt-0 { margin-top: 0; }
 .mt-1 { margin-top: var(--spacing-1); }
 .mt-2 { margin-top: var(--spacing-2); }
@@ -151,7 +151,7 @@
 .mt-10 { margin-top: var(--spacing-10); }
 .mt-12 { margin-top: var(--spacing-12); }
 
-/* Margin Bottom */
+/* Нижний отступ (margin-bottom) */
 .mb-0 { margin-bottom: 0; }
 .mb-1 { margin-bottom: var(--spacing-1); }
 .mb-2 { margin-bottom: var(--spacing-2); }
@@ -162,7 +162,7 @@
 .mb-10 { margin-bottom: var(--spacing-10); }
 .mb-12 { margin-bottom: var(--spacing-12); }
 
-/* Padding */
+/* Внутренние отступы (padding) */
 .p-0 { padding: 0; }
 .p-1 { padding: var(--spacing-1); }
 .p-2 { padding: var(--spacing-2); }
@@ -174,7 +174,7 @@
 .p-10 { padding: var(--spacing-10); }
 .p-12 { padding: var(--spacing-12); }
 
-/* Padding X (horizontal) */
+/* Горизонтальные внутренние отступы (padding-x) */
 .px-0 { padding-left: 0; padding-right: 0; }
 .px-1 { padding-left: var(--spacing-1); padding-right: var(--spacing-1); }
 .px-2 { padding-left: var(--spacing-2); padding-right: var(--spacing-2); }
@@ -183,7 +183,7 @@
 .px-6 { padding-left: var(--spacing-6); padding-right: var(--spacing-6); }
 .px-8 { padding-left: var(--spacing-8); padding-right: var(--spacing-8); }
 
-/* Padding Y (vertical) */
+/* Вертикальные внутренние отступы (padding-y) */
 .py-0 { padding-top: 0; padding-bottom: 0; }
 .py-1 { padding-top: var(--spacing-1); padding-bottom: var(--spacing-1); }
 .py-2 { padding-top: var(--spacing-2); padding-bottom: var(--spacing-2); }
@@ -192,7 +192,7 @@
 .py-6 { padding-top: var(--spacing-6); padding-bottom: var(--spacing-6); }
 .py-8 { padding-top: var(--spacing-8); padding-bottom: var(--spacing-8); }
 
-/* Gap */
+/* Отступы между элементами (gap) */
 .gap-0 { gap: 0; }
 .gap-1 { gap: var(--spacing-1); }
 .gap-2 { gap: var(--spacing-2); }
@@ -214,42 +214,42 @@
 
 /* ====== Animation Utilities ====== */
 
-/* Fade In */
+/* Появление (fade in) */
 .animate-fade-in {
   animation: fadeIn var(--duration-normal) var(--ease-out);
 }
 
-/* Slide Up */
+/* Подъём (slide up) */
 .animate-slide-up {
   animation: slideUp var(--duration-normal) var(--ease-out);
 }
 
-/* Scale In */
+/* Масштабирование (scale in) */
 .animate-scale-in {
   animation: scaleIn var(--duration-normal) var(--ease-out);
 }
 
-/* Shake - для ошибок */
+/* Тряска (shake) - для ошибок */
 .animate-shake {
   animation: shake var(--duration-fast) var(--ease-out);
 }
 
-/* Pulse */
+/* Пульсация (pulse) */
 .animate-pulse {
   animation: pulse var(--duration-slow) var(--ease-in-out) infinite;
 }
 
-/* Spin - для спиннеров */
+/* Вращение (spin) - для спиннеров */
 .animate-spin {
   animation: spin 1s linear infinite;
 }
 
-/* Bounce */
+/* Прыжок (bounce) */
 .animate-bounce {
   animation: bounce var(--duration-slow) var(--ease-out) infinite;
 }
 
-/* Animation keyframes */
+/* Ключевые кадры анимаций */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -320,7 +320,7 @@
 .inline-flex { display: inline-flex; }
 .grid { display: grid; }
 
-/* Flex utilities */
+/* Утилиты flex */
 .flex-row { flex-direction: row; }
 .flex-col { flex-direction: column; }
 .flex-wrap { flex-wrap: wrap; }

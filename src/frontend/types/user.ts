@@ -1,91 +1,91 @@
 /**
- * User Types - L_Shop Frontend
- * TypeScript interfaces for user-related data
+ * Типы пользователей - L_Shop Frontend
+ * TypeScript интерфейсы для данных, связанных с пользователями
  */
 
 /**
- * User role enumeration
+ * Перечисление ролей пользователя
  */
 export type UserRole = 'user' | 'admin';
 
 /**
- * User object returned from API
+ * Объект пользователя, возвращаемый из API
  */
 export interface User {
-  /** Unique user identifier */
+  /** Уникальный идентификатор пользователя */
   id: string;
-  /** User's display name */
+  /** Отображаемое имя пользователя */
   name: string;
-  /** User's login username */
+  /** Логин пользователя */
   login: string;
-  /** User's email address */
+  /** Адрес электронной почты */
   email: string;
-  /** User's phone number in format +1234567890 */
+  /** Номер телефона в формате +1234567890 */
   phone: string;
-  /** User's role */
+  /** Роль пользователя */
   role: UserRole;
-  /** Account creation timestamp */
+  /** Время создания аккаунта */
   createdAt: string;
-  /** Last update timestamp */
+  /** Время последнего обновления */
   updatedAt: string;
 }
 
 /**
- * User data for registration
+ * Данные пользователя для регистрации
  */
 export interface RegisterUserData {
-  /** User's display name */
+  /** Отображаемое имя пользователя */
   name: string;
-  /** User's login username */
+  /** Логин пользователя */
   login: string;
-  /** User's email address */
+  /** Адрес электронной почты */
   email: string;
-  /** User's phone number in format +1234567890 */
+  /** Номер телефона в формате +1234567890 */
   phone: string;
-  /** User's password (min 6 characters) */
+  /** Пароль пользователя (мин. 6 символов) */
   password: string;
-  /** Password confirmation (must match password) */
+  /** Подтверждение пароля (должно совпадать с password) */
   confirmPassword: string;
 }
 
 /**
- * User data for login
+ * Данные пользователя для входа
  */
 export interface LoginUserData {
-  /** Login or email */
+  /** Логин или email */
   loginOrEmail: string;
-  /** User's password */
+  /** Пароль пользователя */
   password: string;
 }
 
 /**
- * User state for frontend store
+ * Состояние пользователя для фронтенд-стора
  */
 export interface UserState {
-  /** Current user (null if not authenticated) */
+  /** Текущий пользователь (null если не аутентифицирован) */
   user: User | null;
-  /** Authentication status */
+  /** Статус аутентификации */
   isAuthenticated: boolean;
-  /** Loading state for auth operations */
+  /** Состояние загрузки для операций аутентификации */
   isLoading: boolean;
-  /** Error message from last auth operation */
+  /** Сообщение об ошибке от последней операции аутентификации */
   error: string | null;
 }
 
 /**
- * User display info for header
+ * Информация для отображения пользователя в хедере
  */
 export interface UserDisplayInfo {
-  /** User's initials for avatar */
+  /** Инициалы пользователя для аватара */
   initials: string;
-  /** User's display name (truncated if needed) */
+  /** Отображаемое имя пользователя (урезанное при необходимости) */
   displayName: string;
 }
 
 /**
- * Get user display info from user object
- * @param user - User object
- * @returns Display info for UI
+ * Получить информацию для отображения из объекта пользователя
+ * @param user - Объект пользователя
+ * @returns Информация для UI
  */
 export function getUserDisplayInfo(user: User): UserDisplayInfo {
   const nameParts = user.name.trim().split(/\s+/);
@@ -105,137 +105,137 @@ export function getUserDisplayInfo(user: User): UserDisplayInfo {
 }
 
 /**
- * Validation result for user input
+ * Результат валидации пользовательского ввода
  */
 export interface ValidationResult {
-  /** Whether the input is valid */
+  /** Валиден ли ввод */
   isValid: boolean;
-  /** Error message if invalid */
+  /** Сообщение об ошибке (если невалиден) */
   error: string | null;
 }
 
 /**
- * Validate email format
- * @param email - Email to validate
- * @returns Validation result
+ * Валидировать формат email
+ * @param email - Email для валидации
+ * @returns Результат валидации
  */
 export function validateEmail(email: string): ValidationResult {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   
   if (!email.trim()) {
-    return { isValid: false, error: 'Email is required' };
+    return { isValid: false, error: 'Email обязателен' };
   }
   
   if (!emailRegex.test(email)) {
-    return { isValid: false, error: 'Invalid email format' };
+    return { isValid: false, error: 'Неверный формат email' };
   }
   
   return { isValid: true, error: null };
 }
 
 /**
- * Validate login format
- * @param login - Login to validate
- * @returns Validation result
+ * Валидировать формат логина
+ * @param login - Логин для валидации
+ * @returns Результат валидации
  */
 export function validateLogin(login: string): ValidationResult {
   if (!login.trim()) {
-    return { isValid: false, error: 'Login is required' };
+    return { isValid: false, error: 'Логин обязателен' };
   }
   
   if (login.length < 3) {
-    return { isValid: false, error: 'Login must be at least 3 characters' };
+    return { isValid: false, error: 'Логин должен содержать минимум 3 символа' };
   }
   
   if (login.length > 30) {
-    return { isValid: false, error: 'Login must be less than 30 characters' };
+    return { isValid: false, error: 'Логин должен содержать максимум 30 символов' };
   }
   
   const loginRegex = /^[a-zA-Z0-9_]+$/;
   if (!loginRegex.test(login)) {
-    return { isValid: false, error: 'Login can only contain letters, numbers, and underscores' };
+    return { isValid: false, error: 'Логин может содержать только буквы, цифры и подчеркивания' };
   }
   
   return { isValid: true, error: null };
 }
 
 /**
- * Validate password strength
- * @param password - Password to validate
- * @returns Validation result
+ * Валидировать сложность пароля
+ * @param password - Пароль для валидации
+ * @returns Результат валидации
  */
 export function validatePassword(password: string): ValidationResult {
   if (!password) {
-    return { isValid: false, error: 'Password is required' };
+    return { isValid: false, error: 'Пароль обязателен' };
   }
   
   if (password.length < 6) {
-    return { isValid: false, error: 'Password must be at least 6 characters' };
+    return { isValid: false, error: 'Пароль должен содержать минимум 6 символов' };
   }
   
   if (password.length > 100) {
-    return { isValid: false, error: 'Password is too long' };
+    return { isValid: false, error: 'Пароль слишком длинный' };
   }
   
   return { isValid: true, error: null };
 }
 
 /**
- * Validate phone number format
- * @param phone - Phone to validate
- * @returns Validation result
+ * Валидировать формат номера телефона
+ * @param phone - Телефон для валидации
+ * @returns Результат валидации
  */
 export function validatePhone(phone: string): ValidationResult {
   const phoneRegex = /^\+\d{10,15}$/;
   
   if (!phone.trim()) {
-    return { isValid: false, error: 'Phone number is required' };
+    return { isValid: false, error: 'Номер телефона обязателен' };
   }
   
   if (!phoneRegex.test(phone)) {
-    return { isValid: false, error: 'Phone must be in format +1234567890' };
+    return { isValid: false, error: 'Телефон должен быть в формате +1234567890' };
   }
   
   return { isValid: true, error: null };
 }
 
 /**
- * Validate name
- * @param name - Name to validate
- * @returns Validation result
+ * Валидировать имя
+ * @param name - Имя для валидации
+ * @returns Результат валидации
  */
 export function validateName(name: string): ValidationResult {
   if (!name.trim()) {
-    return { isValid: false, error: 'Name is required' };
+    return { isValid: false, error: 'Имя обязательно' };
   }
   
   if (name.length < 2) {
-    return { isValid: false, error: 'Name must be at least 2 characters' };
+    return { isValid: false, error: 'Имя должно содержать минимум 2 символа' };
   }
   
   if (name.length > 50) {
-    return { isValid: false, error: 'Name must be less than 50 characters' };
+    return { isValid: false, error: 'Имя должно содержать максимум 50 символов' };
   }
   
   return { isValid: true, error: null };
 }
 
 /**
- * Validate password confirmation
- * @param password - Original password
- * @param confirmPassword - Confirmation password
- * @returns Validation result
+ * Валидировать подтверждение пароля
+ * @param password - Исходный пароль
+ * @param confirmPassword - Пароль подтверждения
+ * @returns Результат валидации
  */
 export function validatePasswordConfirmation(
   password: string, 
   confirmPassword: string
 ): ValidationResult {
   if (!confirmPassword) {
-    return { isValid: false, error: 'Password confirmation is required' };
+    return { isValid: false, error: 'Подтверждение пароля обязательно' };
   }
   
   if (password !== confirmPassword) {
-    return { isValid: false, error: 'Passwords do not match' };
+    return { isValid: false, error: 'Пароли не совпадают' };
   }
   
   return { isValid: true, error: null };

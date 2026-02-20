@@ -14,7 +14,7 @@ const mockReadJsonFile = readJsonFile as jest.MockedFunction<typeof readJsonFile
 const mockWriteJsonFile = writeJsonFile as jest.MockedFunction<typeof writeJsonFile>;
 const mockHashPassword = hashPassword as jest.MockedFunction<typeof hashPassword>;
 
-describe('UserService', () => {
+describe('Тесты UserService', () => {
   let userService: UserService;
 
   beforeEach(() => {
@@ -23,7 +23,7 @@ describe('UserService', () => {
     mockHashPassword.mockResolvedValue('hashed-password');
   });
 
-  describe('getAllUsers', () => {
+  describe('Получение всех пользователей', () => {
     it('должен возвращать всех пользователей', async () => {
       const mockUsers: User[] = [
         {
@@ -46,7 +46,7 @@ describe('UserService', () => {
     });
   });
 
-  describe('getUserById', () => {
+  describe('Получение пользователя по ID', () => {
     it('должен возвращать пользователя по ID', async () => {
       const mockUsers: User[] = [
         {
@@ -76,7 +76,7 @@ describe('UserService', () => {
     });
   });
 
-  describe('findByEmailOrLogin', () => {
+  describe('Поиск по email или логину', () => {
     it('должен находить пользователя по email', async () => {
       const mockUsers: User[] = [
         {
@@ -126,7 +126,7 @@ describe('UserService', () => {
     });
   });
 
-  describe('findByLoginOrEmail', () => {
+  describe('Поиск по логину или email', () => {
     it('должен находить пользователя по логину или email', async () => {
       const mockUsers: User[] = [
         {
@@ -150,7 +150,7 @@ describe('UserService', () => {
     });
   });
 
-  describe('createUser', () => {
+  describe('Создание пользователя', () => {
     it('должен создавать нового пользователя', async () => {
       mockReadJsonFile.mockResolvedValue([]);
       mockWriteJsonFile.mockResolvedValue();
@@ -175,7 +175,7 @@ describe('UserService', () => {
     });
   });
 
-  describe('updateUser', () => {
+  describe('Обновление пользователя', () => {
     it('должен обновлять пользователя', async () => {
       const mockUsers: User[] = [
         {

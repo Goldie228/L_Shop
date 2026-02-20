@@ -1,12 +1,12 @@
 /**
- * Form Component Styles - L_Shop
- * Auth forms, validation, error states
- * 
+ * Стили компонента формы - L_Shop
+ * Формы аутентификации, валидация, состояния ошибок
+ *
  * @see src/frontend/styles/design-tokens.css - источник токенов
  * @see docs/DESIGN_SYSTEM.md - документация дизайн-системы
  */
 
-/* ====== Auth Form Container ====== */
+/* ====== Контейнер формы аутентификации ====== */
 .auth-form {
   width: 100%;
 }
@@ -29,7 +29,7 @@
   color: var(--color-text-secondary);
 }
 
-/* ====== Form Tabs ====== */
+/* ====== Вкладки формы ====== */
 .auth-form__tabs {
   display: flex;
   gap: var(--spacing-1);
@@ -149,7 +149,7 @@
   opacity: 0.6;
 }
 
-/* Error State - с анимацией появления */
+/* Состояние ошибки - с анимацией появления */
 .form-field--error .form-field__input {
   border-color: var(--color-error-500);
   animation: shake var(--duration-fast) var(--ease-out);
@@ -160,7 +160,7 @@
   box-shadow: 0 0 0 3px var(--color-error-100);
 }
 
-/* Success State - с анимацией */
+/* Состояние успеха - с анимацией */
 .form-field--success .form-field__input {
   border-color: var(--color-success-500);
 }
@@ -478,7 +478,7 @@
   }
   
   .form-field__input {
-    font-size: 16px; /* Prevent zoom on iOS */
+    font-size: 16px; /* Предотвратить зум на iOS */
   }
 }
 

@@ -8,45 +8,45 @@
   
   <title>L_Shop - Интернет-магазин</title>
   
-  <!-- Favicon -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%232563eb' width='100' height='100' rx='20'/><text x='50' y='70' font-size='60' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>L</text></svg>">
-  
-  <!-- Google Fonts - Inter -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  
-  <!-- CSS Styles -->
-  <!-- Design Tokens (должен быть загружен первым) -->
-  <link rel="stylesheet" href="styles/design-tokens.css">
-  <!-- Variables (алиасы к токенам для обратной совместимости) -->
-  <link rel="stylesheet" href="styles/variables.css">
-  <!-- Main styles -->
-  <link rel="stylesheet" href="styles/main.css">
-  <!-- Utility classes -->
-  <link rel="stylesheet" href="styles/utilities.css">
-  <!-- Component styles -->
-  <link rel="stylesheet" href="styles/components/button.css">
-  <link rel="stylesheet" href="styles/components/input.css">
-  <link rel="stylesheet" href="styles/components/modal.css">
-  <link rel="stylesheet" href="styles/components/header.css">
-  <link rel="stylesheet" href="styles/components/footer.css">
-  <link rel="stylesheet" href="styles/components/layout.css">
-  <link rel="stylesheet" href="styles/components/forms.css">
-  <!-- Page styles -->
-  <link rel="stylesheet" href="styles/pages/main-page.css">
+   <!-- Фавикон -->
+   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%232563eb' width='100' height='100' rx='20'/><text x='50' y='70' font-size='60' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>L</text></svg>">
+   
+   <!-- Шрифты Google - Inter -->
+   <link rel="preconnect" href="https://fonts.googleapis.com">
+   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+   
+   <!-- Стили CSS -->
+   <!-- Токены дизайна (должны загружаться первыми) -->
+   <link rel="stylesheet" href="styles/design-tokens.css">
+   <!-- Переменные (алиасы к токенам для обратной совместимости) -->
+   <link rel="stylesheet" href="styles/variables.css">
+   <!-- Основные стили -->
+   <link rel="stylesheet" href="styles/main.css">
+   <!-- Утилитарные классы -->
+   <link rel="stylesheet" href="styles/utilities.css">
+   <!-- Стили компонентов -->
+   <link rel="stylesheet" href="styles/components/button.css">
+   <link rel="stylesheet" href="styles/components/input.css">
+   <link rel="stylesheet" href="styles/components/modal.css">
+   <link rel="stylesheet" href="styles/components/header.css">
+   <link rel="stylesheet" href="styles/components/footer.css">
+   <link rel="stylesheet" href="styles/components/layout.css">
+   <link rel="stylesheet" href="styles/components/forms.css">
+   <!-- Стили страниц -->
+   <link rel="stylesheet" href="styles/pages/main-page.css">
 </head>
 <body>
-  <!-- App root element -->
+  <!-- Корневой элемент приложения -->
   <div id="app">
-    <!-- Loading state before JS loads -->
+    <!-- Состояние загрузки до загрузки JS -->
     <div class="app-loading">
       <div class="spinner spinner--lg"></div>
       <p>Загрузка...</p>
     </div>
   </div>
   
-  <!-- NoScript fallback -->
+  <!-- Запасной вариант при отключенном JavaScript -->
   <noscript>
     <div class="noscript-warning">
       <h1>JavaScript отключен</h1>
@@ -54,7 +54,7 @@
     </div>
   </noscript>
   
-  <!-- TypeScript compiled to JavaScript -->
+  <!-- TypeScript скомпилирован в JavaScript -->
   <script src="dist/app.js" type="module"></script>
 </body>
 </html>

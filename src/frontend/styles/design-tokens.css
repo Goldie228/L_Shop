@@ -1,7 +1,7 @@
 /**
- * Design Tokens - L_Shop
+ * Дизайн-токены - L_Shop
  * Комплексная система дизайн-токенов для премиального UI
- * 
+ *
  * @see docs/DESIGN_SYSTEM.md - полная документация дизайн-системы
  * @version 1.0.0
  * @created 2026-02-19
@@ -190,7 +190,7 @@
   --line-height-relaxed: 1.625;
   --line-height-loose: 2;
 
-  /* ------ Letter-spacing ------ */
+  /* ------ Интервал букв ------ */
   --letter-spacing-tighter: -0.05em;
   --letter-spacing-tight: -0.025em;
   --letter-spacing-normal: 0;
@@ -255,7 +255,7 @@
   --shadow-error: 0 4px 14px rgba(239, 68, 68, 0.4);
   --shadow-success: 0 4px 14px rgba(34, 197, 94, 0.4);
 
-  /* ------ Focus ring ------ */
+  /* ------ Кольцо фокуса ------ */
   --shadow-focus: 0 0 0 3px rgba(59, 130, 246, 0.3);
   --shadow-focus-error: 0 0 0 3px rgba(239, 68, 68, 0.3);
   --shadow-focus-success: 0 0 0 3px rgba(34, 197, 94, 0.3);
@@ -285,7 +285,7 @@
    * МИКРО-ВЗАИМОДЕЙСТВИЯ
    * ============================================ */
 
-  /* ------ Timing функции ------ */
+  /* ------ Функции времени ------ */
   --ease-linear: linear;
   --ease-in: cubic-bezier(0.4, 0, 1, 1);
   --ease-out: cubic-bezier(0, 0, 0.2, 1);
@@ -358,10 +358,10 @@
     */
 
   /* ============================================
-   * DARK THEME TOKENS (готовы к переопределению)
+   * ТОКЕНЫ ТЁМНОЙ ТЕМЫ (готовы к переопределению)
    * ============================================ */
 
-  /* ------ Background Colors для Dark Theme ------ */
+  /* ------ Цвета фона для тёмной темы ------ */
   --color-bg-base: #0a0a0f;
   --color-bg-primary-dark: #0f0f14;
   --color-bg-secondary-dark: #16161d;
@@ -370,7 +370,7 @@
   --color-bg-overlay-dark: rgba(0, 0, 0, 0.6);
   --color-bg-scrim-dark: rgba(0, 0, 0, 0.8);
 
-  /* ------ Text Colors для Dark Theme (WCAG AA) ------ */
+  /* ------ Цвета текста для тёмной темы (WCAG AA) ------ */
   --color-text-primary-dark: #f4f4f5; /* 15.8:1 ✓ AAA */
   --color-text-secondary-dark: #a1a1aa; /* 8.2:1 ✓ AAA */
   --color-text-muted-dark: #71717a; /* 4.5:1 ✓ AA */
@@ -378,7 +378,7 @@
   --color-text-link-dark: #60a5fa;
   --color-text-link-hover-dark: #93c5fd;
 
-  /* ------ Accent Colors для Dark Theme ------ */
+  /* ------ Акцентные цвета для тёмной темы ------ */
   --color-accent-primary-dark: #3b82f6;
   --color-accent-hover-dark: #60a5fa;
   --color-accent-active-dark: #2563eb;
@@ -386,7 +386,7 @@
   --color-accent-subtle-dark: rgba(59, 130, 246, 0.08);
   --color-accent-focus-dark: rgba(59, 130, 246, 0.25);
 
-  /* ------ Semantic Colors для Dark Theme ------ */
+  /* ------ Семантические цвета для тёмной темы ------ */
   --color-success-primary-dark: #22c55e;
   --color-success-hover-dark: #4ade80;
   --color-success-active-dark: #16a34a;

@@ -1,6 +1,6 @@
 import { generateId } from '../id.utils';
 
-describe('generateId', () => {
+describe('Генерация ID', () => {
   it('должен генерировать уникальные UUID', () => {
     const id1 = generateId();
     const id2 = generateId();

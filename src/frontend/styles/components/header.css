@@ -1,12 +1,12 @@
 /**
- * Header Component Styles - L_Shop
- * Site header with navigation, responsive design
- * 
+ * Стили компонента шапки - L_Shop
+ * Шапка сайта с навигацией, адаптивный дизайн
+ *
  * @see src/frontend/styles/design-tokens.css - источник токенов
  * @see docs/DESIGN_SYSTEM.md - документация дизайн-системы
  */
 
-/* ====== Header Base ====== */
+/* ====== Базовая шапка ====== */
 .header {
   position: sticky;
   top: 0;
@@ -19,7 +19,7 @@
   transition: background-color var(--transition-normal), border-color var(--transition-normal);
 }
 
-/* Scrolled state with elevated background */
+/* Состояние прокрутки с поднятым фоном */
 .header--scrolled {
   background-color: var(--color-bg-elevated);
   border-bottom-color: var(--color-border-secondary);
@@ -36,7 +36,7 @@
   padding: 0 var(--spacing-4);
 }
 
-/* ====== Logo ====== */
+/* ====== Логотип ====== */
 .header__logo {
   display: flex;
   align-items: center;
@@ -394,7 +394,7 @@
     display: block;
   }
 
-  /* Show user section in mobile menu */
+  /* Показать секцию пользователя в мобильном меню */
   .header__mobile-menu .header__user {
     display: flex;
     flex-direction: column;
@@ -406,12 +406,12 @@
     width: 100%;
   }
 
-  /* Adjust header container for mobile */
+  /* Настроить контейнер шапки для мобильного */
   .header__container {
     padding: 0 var(--spacing-3);
   }
 
-  /* Hide search on mobile (already in mobile menu if needed) */
+  /* Спрятать поиск на мобильном (уже в мобильном меню если нужно) */
   .header__search {
     display: none;
   }
@@ -427,7 +427,7 @@
   }
 }
 
-/* Tablet breakpoint - adjust layout */
+/* Точка останова планшета - настроить макет */
 @media (min-width: 769px) and (max-width: 1024px) {
   .header__container {
     padding: 0 var(--spacing-4);
@@ -448,7 +448,7 @@
   }
 }
 
-/* Large screens */
+/* Большие экраны */
 @media (min-width: 1025px) {
   .header__container {
     padding: 0 var(--spacing-6);
@@ -512,14 +512,14 @@ body.menu-open {
   height: 100%;
 }
 
-/* Mobile search - compact version */
+/* Мобильный поиск - компактная версия */
 @media (max-width: 1024px) {
   .header__search {
     display: none;
   }
 }
 
-/* Tablet and below - hide search */
+/* Планшет и ниже - спрятать поиск */
 @media (max-width: 1024px) {
   .header__search {
     display: none;

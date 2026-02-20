@@ -1,9 +1,9 @@
 /**
- * Main CSS - L_Shop
- * Base styles, reset, typography, utilities
+ * Основной CSS - L_Shop
+ * Базовые стили, сброс, типографика, утилиты
  */
 
-/* ====== CSS Reset ====== */
+/* ====== Сброс CSS ====== */
 *,
 *::before,
 *::after {
@@ -12,7 +12,7 @@
   padding: 0;
 }
 
-/* ====== Document & Sections ====== */
+/* ====== Документ и секции ====== */
 html {
   font-size: 16px;
   scroll-behavior: smooth;
@@ -31,7 +31,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ====== Typography ====== */
+/* ====== Типографика ====== */
 h1, h2, h3, h4, h5, h6 {
   font-weight: var(--font-weight-semibold);
   line-height: var(--line-height-tight);
@@ -374,11 +374,11 @@ table {
   border: 1px solid var(--color-warning);
 }
 
-/* ====== Responsive Breakpoints ====== */
-/* Mobile: default (320px+) */
-/* Tablet: 768px+ */
-/* Desktop: 1024px+ */
-/* Large Desktop: 1280px+ */
+/* ====== Адаптивные точки останова ====== */
+/* Мобильные: по умолчанию (320px+) */
+/* Планшеты: 768px+ */
+/* Десктоп: 1024px+ */
+/* Большой десктоп: 1280px+ */
 
 @media (min-width: 768px) {
   .container {

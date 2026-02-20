@@ -1,12 +1,12 @@
 /**
- * Footer Component Styles - L_Shop
- * Многосекционный футер с адаптивным layout и dark theme
+ * Стили компонента футера - L_Shop
+ * Многосекционный футер с адаптивным макетом и тёмной темой
  *
  * @see src/frontend/styles/design-tokens.css - источник токенов
  * @see docs/DESIGN_SYSTEM.md - документация дизайн-системы
  */
 
-/* ====== Footer Base ====== */
+/* ====== Базовый футер ====== */
 .footer {
   background-color: var(--color-bg-secondary);
   border-top: 1px solid var(--color-border);
@@ -23,7 +23,7 @@
   padding: var(--spacing-16) var(--spacing-6);
 }
 
-/* ====== Columns ====== */
+/* ====== Колонки ====== */
 .footer__column {
   display: flex;
   flex-direction: column;
@@ -37,7 +37,7 @@
   margin: 0 0 var(--spacing-2) 0;
 }
 
-/* ====== Brand Column ====== */
+/* ====== Колонка бренда ====== */
 .footer__logo-link {
   display: inline-flex;
   align-items: center;
@@ -362,7 +362,7 @@
     gap: var(--spacing-2);
   }
 
-  /* Legal bar: stack on very small screens */
+  /* Юридическая панель: стекировать на очень маленьких экранах */
   .footer__legal-container {
     flex-direction: column;
     text-align: center;

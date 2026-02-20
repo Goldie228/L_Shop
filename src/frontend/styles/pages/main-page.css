@@ -1,13 +1,13 @@
 /**
- * Main Page Styles - L_Shop Frontend
- * Hero section, Collections, and Features
+ * Стили главной страницы - L_Shop Frontend
+ * Секция героя, Коллекции и Особенности
  *
  * @see src/frontend/styles/design-tokens.css - источник токенов
  * @see docs/DESIGN_SYSTEM.md - документация дизайн-системы
  */
 
 /* ============================================
- * HERO SECTION
+ * СЕКЦИЯ ГЕРОЯ
  * ============================================ */
 
 .hero {
@@ -17,7 +17,7 @@
   overflow: hidden;
 }
 
-/* Dark gradient background for hero */
+/* Тёмный градиентный фон для героя */
 .hero::before {
   content: '';
   position: absolute;
@@ -280,7 +280,7 @@
   animation: fadeInUp var(--duration-normal) var(--ease-out) forwards;
 }
 
-/* Staggered animation delays */
+/* Смещенные задержки анимации */
 .collection-card:nth-child(1) {
   animation-delay: 0.1s;
 }
