@@ -162,17 +162,17 @@
   --font-family-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
 
   /* ------ Шкала размеров (модульная шкала 1.25) ------ */
-  --font-size-2xs: 0.625rem;   /* 10px */
-  --font-size-xs: 0.75rem;     /* 12px */
-  --font-size-sm: 0.875rem;    /* 14px */
-  --font-size-base: 1rem;      /* 16px */
-  --font-size-lg: 1.125rem;    /* 18px */
-  --font-size-xl: 1.25rem;     /* 20px */
-  --font-size-2xl: 1.5rem;     /* 24px */
-  --font-size-3xl: 1.875rem;   /* 30px */
-  --font-size-4xl: 2.25rem;    /* 36px */
-  --font-size-5xl: 3rem;       /* 48px */
-  --font-size-6xl: 3.75rem;    /* 60px */
+  --font-size-2xs: 0.625rem; /* 10px */
+  --font-size-xs: 0.75rem; /* 12px */
+  --font-size-sm: 0.875rem; /* 14px */
+  --font-size-base: 1rem; /* 16px */
+  --font-size-lg: 1.125rem; /* 18px */
+  --font-size-xl: 1.25rem; /* 20px */
+  --font-size-2xl: 1.5rem; /* 24px */
+  --font-size-3xl: 1.875rem; /* 30px */
+  --font-size-4xl: 2.25rem; /* 36px */
+  --font-size-5xl: 3rem; /* 48px */
+  --font-size-6xl: 3.75rem; /* 60px */
 
   /* ------ Вес шрифтов ------ */
   --font-weight-light: 300;
@@ -207,28 +207,28 @@
 
   /* ------ Шкала отступов ------ */
   --spacing-0: 0;
-  --spacing-1: 0.25rem;    /* 4px - 0.5 unit */
-  --spacing-2: 0.5rem;     /* 8px - 1 unit */
-  --spacing-3: 0.75rem;    /* 12px - 1.5 units */
-  --spacing-4: 1rem;       /* 16px - 2 units */
-  --spacing-5: 1.25rem;    /* 20px - 2.5 units */
-  --spacing-6: 1.5rem;     /* 24px - 3 units */
-  --spacing-8: 2rem;       /* 32px - 4 units */
-  --spacing-10: 2.5rem;    /* 40px - 5 units */
-  --spacing-12: 3rem;      /* 48px - 6 units */
-  --spacing-16: 4rem;      /* 64px - 8 units */
-  --spacing-20: 5rem;      /* 80px - 10 units */
-  --spacing-24: 6rem;      /* 96px - 12 units */
-  --spacing-32: 8rem;      /* 128px - 16 units */
+  --spacing-1: 0.25rem; /* 4px - 0.5 unit */
+  --spacing-2: 0.5rem; /* 8px - 1 unit */
+  --spacing-3: 0.75rem; /* 12px - 1.5 units */
+  --spacing-4: 1rem; /* 16px - 2 units */
+  --spacing-5: 1.25rem; /* 20px - 2.5 units */
+  --spacing-6: 1.5rem; /* 24px - 3 units */
+  --spacing-8: 2rem; /* 32px - 4 units */
+  --spacing-10: 2.5rem; /* 40px - 5 units */
+  --spacing-12: 3rem; /* 48px - 6 units */
+  --spacing-16: 4rem; /* 64px - 8 units */
+  --spacing-20: 5rem; /* 80px - 10 units */
+  --spacing-24: 6rem; /* 96px - 12 units */
+  --spacing-32: 8rem; /* 128px - 16 units */
 
   /* ------ Семантические алиасы ------ */
-  --spacing-xs: var(--spacing-1);     /* 4px */
-  --spacing-sm: var(--spacing-2);     /* 8px */
-  --spacing-md: var(--spacing-4);     /* 16px */
-  --spacing-lg: var(--spacing-6);     /* 24px */
-  --spacing-xl: var(--spacing-8);     /* 32px */
-  --spacing-2xl: var(--spacing-12);   /* 48px */
-  --spacing-3xl: var(--spacing-16);   /* 64px */
+  --spacing-xs: var(--spacing-1); /* 4px */
+  --spacing-sm: var(--spacing-2); /* 8px */
+  --spacing-md: var(--spacing-4); /* 16px */
+  --spacing-lg: var(--spacing-6); /* 24px */
+  --spacing-xl: var(--spacing-8); /* 32px */
+  --spacing-2xl: var(--spacing-12); /* 48px */
+  --spacing-3xl: var(--spacing-16); /* 64px */
 
   /* ============================================
    * ТЕНИ И ГЛУБИНА (Elevation)
@@ -266,20 +266,20 @@
 
   /* ------ Шкала скруглений ------ */
   --radius-0: 0;
-  --radius-1: 0.25rem;     /* 4px */
-  --radius-2: 0.375rem;    /* 6px */
-  --radius-3: 0.5rem;      /* 8px */
-  --radius-4: 0.75rem;     /* 12px */
-  --radius-5: 1rem;        /* 16px */
-  --radius-6: 1.5rem;      /* 24px */
+  --radius-1: 0.25rem; /* 4px */
+  --radius-2: 0.375rem; /* 6px */
+  --radius-3: 0.5rem; /* 8px */
+  --radius-4: 0.75rem; /* 12px */
+  --radius-5: 1rem; /* 16px */
+  --radius-6: 1.5rem; /* 24px */
   --radius-full: 9999px;
 
   /* ------ Семантические алиасы ------ */
-  --radius-sm: var(--radius-1);    /* 4px - badges, tags */
-  --radius-md: var(--radius-3);    /* 8px - buttons, inputs */
-  --radius-lg: var(--radius-4);    /* 12px - cards */
-  --radius-xl: var(--radius-5);    /* 16px - modals */
-  --radius-2xl: var(--radius-6);   /* 24px - large cards */
+  --radius-sm: var(--radius-1); /* 4px - badges, tags */
+  --radius-md: var(--radius-3); /* 8px - buttons, inputs */
+  --radius-lg: var(--radius-4); /* 12px - cards */
+  --radius-xl: var(--radius-5); /* 16px - modals */
+  --radius-2xl: var(--radius-6); /* 24px - large cards */
 
   /* ============================================
    * МИКРО-ВЗАИМОДЕЙСТВИЯ
@@ -310,8 +310,8 @@
 
   /* ------ Готовые переходы ------ */
   --transition-colors: color var(--duration-fast) var(--ease-out),
-                       background-color var(--duration-fast) var(--ease-out),
-                       border-color var(--duration-fast) var(--ease-out);
+    background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
   --transition-opacity: opacity var(--duration-fast) var(--ease-out);
   --transition-shadow: box-shadow var(--duration-normal) var(--ease-out);
   --transition-transform: transform var(--duration-normal) var(--ease-out);
@@ -319,13 +319,13 @@
 
   /* ------ Специализированные переходы ------ */
   --transition-button: background-color var(--duration-fast) var(--ease-out),
-                       border-color var(--duration-fast) var(--ease-out),
-                       box-shadow var(--duration-fast) var(--ease-out);
+    border-color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
   --transition-input: border-color var(--duration-fast) var(--ease-out),
-                      box-shadow var(--duration-fast) var(--ease-out);
+    box-shadow var(--duration-fast) var(--ease-out);
   --transition-modal: opacity var(--duration-normal) var(--ease-out),
-                      transform var(--duration-normal) var(--ease-out),
-                      visibility var(--duration-normal) var(--ease-out);
+    transform var(--duration-normal) var(--ease-out),
+    visibility var(--duration-normal) var(--ease-out);
 
   /* ============================================
    * Z-INDEX
@@ -355,100 +355,292 @@
    * --breakpoint-lg: 1024px;
    * --breakpoint-xl: 1280px;
    * --breakpoint-2xl: 1536px;
-   */
+    */
+
+  /* ============================================
+   * DARK THEME TOKENS (готовы к переопределению)
+   * ============================================ */
+
+  /* ------ Background Colors для Dark Theme ------ */
+  --color-bg-base: #0a0a0f;
+  --color-bg-primary-dark: #0f0f14;
+  --color-bg-secondary-dark: #16161d;
+  --color-bg-tertiary-dark: #1c1c25;
+  --color-bg-elevated-dark: #23232e;
+  --color-bg-overlay-dark: rgba(0, 0, 0, 0.6);
+  --color-bg-scrim-dark: rgba(0, 0, 0, 0.8);
+
+  /* ------ Text Colors для Dark Theme (WCAG AA) ------ */
+  --color-text-primary-dark: #f4f4f5; /* 15.8:1 ✓ AAA */
+  --color-text-secondary-dark: #a1a1aa; /* 8.2:1 ✓ AAA */
+  --color-text-muted-dark: #71717a; /* 4.5:1 ✓ AA */
+  --color-text-disabled-dark: #52525b;
+  --color-text-link-dark: #60a5fa;
+  --color-text-link-hover-dark: #93c5fd;
+
+  /* ------ Accent Colors для Dark Theme ------ */
+  --color-accent-primary-dark: #3b82f6;
+  --color-accent-hover-dark: #60a5fa;
+  --color-accent-active-dark: #2563eb;
+  --color-accent-muted-dark: rgba(59, 130, 246, 0.15);
+  --color-accent-subtle-dark: rgba(59, 130, 246, 0.08);
+  --color-accent-focus-dark: rgba(59, 130, 246, 0.25);
+
+  /* ------ Semantic Colors для Dark Theme ------ */
+  --color-success-primary-dark: #22c55e;
+  --color-success-hover-dark: #4ade80;
+  --color-success-active-dark: #16a34a;
+  --color-success-muted-dark: rgba(34, 197, 94, 0.15);
+
+  --color-error-primary-dark: #ef4444;
+  --color-error-hover-dark: #f87171;
+  --color-error-active-dark: #dc2626;
+  --color-error-muted-dark: rgba(239, 68, 68, 0.15);
+
+  --color-warning-primary-dark: #f59e0b;
+  --color-warning-hover-dark: #fbbf24;
+  --color-warning-active-dark: #d97706;
+  --color-warning-muted-dark: rgba(245, 158, 11, 0.15);
+
+  --color-info-primary-dark: #0ea5e9;
+  --color-info-hover-dark: #38bdf8;
+  --color-info-active-dark: #0284c7;
+  --color-info-muted-dark: rgba(14, 165, 233, 0.15);
+
+  /* ------ Border Colors для Dark Theme ------ */
+  --color-border-primary-dark: #27272a;
+  --color-border-secondary-dark: #3f3f46;
+  --color-border-tertiary-dark: #52525b;
+  --color-border-focus-dark: #3b82f6;
+  --color-border-error-dark: #ef4444;
+
+  /* ------ Dark Shadows (Glow-эффекты) ------ */
+  --shadow-dark-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-dark-2: 0 2px 4px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-dark-3: 0 4px 8px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow-dark-4: 0 8px 16px rgba(0, 0, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.3);
+  --shadow-dark-5: 0 16px 32px rgba(0, 0, 0, 0.5), 0 8px 16px rgba(0, 0, 0, 0.4);
+
+  --shadow-glow-accent-dark: 0 0 20px rgba(59, 130, 246, 0.3), 0 0 40px rgba(59, 130, 246, 0.15);
+  --shadow-glow-accent-hover-dark: 0 0 25px rgba(59, 130, 246, 0.4),
+    0 0 50px rgba(59, 130, 246, 0.2);
+  --shadow-glow-success-dark: 0 0 20px rgba(34, 197, 94, 0.3);
+  --shadow-glow-error-dark: 0 0 20px rgba(239, 68, 68, 0.3);
+
+  --shadow-inset-dark: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow-inset-deep-dark: inset 0 4px 8px rgba(0, 0, 0, 0.4);
+
+  /* ------ Interactive States для Dark Theme ------ */
+  --state-hover-opacity-dark: 0.08;
+  --state-active-opacity-dark: 0.12;
+  --state-selected-opacity-dark: 0.16;
+  --state-disabled-opacity-dark: 0.38;
+  --state-focus-opacity-dark: 0.25;
+
+  --state-hover-bg-dark: rgba(255, 255, 255, 0.08);
+  --state-active-bg-dark: rgba(255, 255, 255, 0.12);
+  --state-selected-bg-dark: rgba(59, 130, 246, 0.16);
+  --state-focus-bg-dark: rgba(59, 130, 246, 0.08);
+
+  /* ------ Gradients для Dark Theme ------ */
+  --gradient-dark-radial: radial-gradient(
+    circle at 50% 0%,
+    rgba(59, 130, 246, 0.08) 0%,
+    transparent 50%
+  );
+  --gradient-dark-linear: linear-gradient(180deg, #0f0f14 0%, #0a0a0f 100%);
+  --gradient-card-dark: linear-gradient(180deg, #16161d 0%, #0f0f14 100%);
+  --gradient-elevated-dark: linear-gradient(180deg, #23232e 0%, #16161d 100%);
+  --gradient-accent-dark: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
 }
 
 /* ============================================
  * DARK MODE
  * ============================================ */
 
+/* ============================================
+ * DARK THEME - Автоматическое переключение системы
+ * ============================================ */
+
 @media (prefers-color-scheme: dark) {
   :root.auto-theme {
-    /* Primary */
-    --color-primary-50: #1e3a8a;
-    --color-primary-100: #1e40af;
-    --color-primary-200: #1d4ed8;
-    --color-primary-300: #2563eb;
-    --color-primary-400: #3b82f6;
-    --color-primary-500: #60a5fa;
-    --color-primary-600: #93c5fd;
-    --color-primary-700: #bfdbfe;
-    --color-primary-800: #dbeafe;
-    --color-primary-900: #eff6ff;
+    /* ------ Background Colors ------ */
+    --color-bg-primary: var(--color-bg-primary-dark);
+    --color-bg-secondary: var(--color-bg-secondary-dark);
+    --color-bg-tertiary: var(--color-bg-tertiary-dark);
+    --color-bg-elevated: var(--color-bg-elevated-dark);
+    --color-bg-overlay: var(--color-bg-overlay-dark);
+    --color-bg-scrim: var(--color-bg-scrim-dark);
 
-    /* Neutral */
-    --color-neutral-0: #0f172a;
-    --color-neutral-50: #1e293b;
-    --color-neutral-100: #334155;
-    --color-neutral-200: #475569;
-    --color-neutral-300: #64748b;
-    --color-neutral-400: #94a3b8;
-    --color-neutral-500: #cbd5e1;
-    --color-neutral-600: #e2e8f0;
-    --color-neutral-700: #f1f5f9;
-    --color-neutral-800: #f8fafc;
-    --color-neutral-900: #ffffff;
+    /* ------ Text Colors ------ */
+    --color-text-primary: var(--color-text-primary-dark);
+    --color-text-secondary: var(--color-text-secondary-dark);
+    --color-text-muted: var(--color-text-muted-dark);
+    --color-text-disabled: var(--color-text-disabled-dark);
+    --color-text-link: var(--color-text-link-dark);
+    --color-text-link-hover: var(--color-text-link-hover-dark);
 
-    /* Алиасы для текста */
-    --color-text-primary: var(--color-neutral-800);
-    --color-text-secondary: var(--color-neutral-400);
-    --color-text-muted: var(--color-neutral-300);
-    --color-text-inverse: var(--color-neutral-900);
+    /* ------ Accent Colors ------ */
+    --color-accent-primary: var(--color-accent-primary-dark);
+    --color-accent-hover: var(--color-accent-hover-dark);
+    --color-accent-active: var(--color-accent-active-dark);
+    --color-accent-muted: var(--color-accent-muted-dark);
+    --color-accent-subtle: var(--color-accent-subtle-dark);
+    --color-accent-focus: var(--color-accent-focus-dark);
 
-    /* Алиасы для фонов */
-    --color-bg-primary: var(--color-neutral-0);
-    --color-bg-secondary: var(--color-neutral-50);
-    --color-bg-tertiary: var(--color-neutral-100);
+    /* ------ Semantic Colors ------ */
+    --color-success: var(--color-success-primary-dark);
+    --color-success-hover: var(--color-success-hover-dark);
+    --color-success-active: var(--color-success-active-dark);
+    --color-success-muted: var(--color-success-muted-dark);
 
-    /* Алиасы для границ */
-    --color-border: var(--color-neutral-200);
-    --color-border-hover: var(--color-neutral-300);
+    --color-error: var(--color-error-primary-dark);
+    --color-error-hover: var(--color-error-hover-dark);
+    --color-error-active: var(--color-error-active-dark);
+    --color-error-muted: var(--color-error-muted-dark);
 
-    /* Градиенты */
-    --gradient-hero: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-    --gradient-card: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+    --color-warning: var(--color-warning-primary-dark);
+    --color-warning-hover: var(--color-warning-hover-dark);
+    --color-warning-active: var(--color-warning-active-dark);
+    --color-warning-muted: var(--color-warning-muted-dark);
+
+    --color-info: var(--color-info-primary-dark);
+    --color-info-hover: var(--color-info-hover-dark);
+    --color-info-active: var(--color-info-active-dark);
+    --color-info-muted: var(--color-info-muted-dark);
+
+    /* ------ Border Colors ------ */
+    --color-border: var(--color-border-primary-dark);
+    --color-border-hover: var(--color-border-secondary-dark);
+    --color-border-focus: var(--color-border-focus-dark);
+    --color-border-error: var(--color-border-error-dark);
+
+    /* ------ Shadows (Dark Theme) ------ */
+    --shadow-1: var(--shadow-dark-1);
+    --shadow-2: var(--shadow-dark-2);
+    --shadow-3: var(--shadow-dark-3);
+    --shadow-4: var(--shadow-dark-4);
+    --shadow-5: var(--shadow-dark-5);
+
+    --shadow-primary: var(--shadow-glow-accent-dark);
+    --shadow-primary-hover: var(--shadow-glow-accent-hover-dark);
+    --shadow-error: var(--shadow-glow-error-dark);
+    --shadow-success: var(--shadow-glow-success-dark);
+
+    --shadow-focus: var(--shadow-glow-accent-dark);
+    --shadow-focus-error: var(--shadow-glow-error-dark);
+    --shadow-focus-success: var(--shadow-glow-success-dark);
+
+    /* ------ Interactive States ------ */
+    --state-hover-opacity: var(--state-hover-opacity-dark);
+    --state-active-opacity: var(--state-active-opacity-dark);
+    --state-selected-opacity: var(--state-selected-opacity-dark);
+    --state-disabled-opacity: var(--state-disabled-opacity-dark);
+    --state-focus-opacity: var(--state-focus-opacity-dark);
+
+    --state-hover-bg: var(--state-hover-bg-dark);
+    --state-active-bg: var(--state-active-bg-dark);
+    --state-selected-bg: var(--state-selected-bg-dark);
+    --state-focus-bg: var(--state-focus-bg-dark);
+
+    /* ------ Gradients ------ */
+    --gradient-hero: var(--gradient-dark-radial);
+    --gradient-card: var(--gradient-card-dark);
+    --gradient-elevated: var(--gradient-elevated-dark);
+    --gradient-accent: var(--gradient-accent-dark);
   }
 }
 
-/* Ручное управление темой через класс */
+/* ============================================
+ * DARK THEME - Ручное управление через класс
+ * ============================================ */
+
+/* Ручное управление темой через класс .dark-theme */
 :root.dark-theme {
-  /* Primary */
-  --color-primary-50: #1e3a8a;
-  --color-primary-100: #1e40af;
-  --color-primary-200: #1d4ed8;
-  --color-primary-300: #2563eb;
-  --color-primary-400: #3b82f6;
-  --color-primary-500: #60a5fa;
-  --color-primary-600: #93c5fd;
-  --color-primary-700: #bfdbfe;
-  --color-primary-800: #dbeafe;
-  --color-primary-900: #eff6ff;
+  /* ------ Background Colors ------ */
+  --color-bg-primary: var(--color-bg-primary-dark);
+  --color-bg-secondary: var(--color-bg-secondary-dark);
+  --color-bg-tertiary: var(--color-bg-tertiary-dark);
+  --color-bg-elevated: var(--color-bg-elevated-dark);
+  --color-bg-overlay: var(--color-bg-overlay-dark);
+  --color-bg-scrim: var(--color-bg-scrim-dark);
 
-  /* Neutral */
-  --color-neutral-0: #0f172a;
-  --color-neutral-50: #1e293b;
-  --color-neutral-100: #334155;
-  --color-neutral-200: #475569;
-  --color-neutral-300: #64748b;
-  --color-neutral-400: #94a3b8;
-  --color-neutral-500: #cbd5e1;
-  --color-neutral-600: #e2e8f0;
-  --color-neutral-700: #f1f5f9;
-  --color-neutral-800: #f8fafc;
-  --color-neutral-900: #ffffff;
+  /* ------ Text Colors ------ */
+  --color-text-primary: var(--color-text-primary-dark);
+  --color-text-secondary: var(--color-text-secondary-dark);
+  --color-text-muted: var(--color-text-muted-dark);
+  --color-text-disabled: var(--color-text-disabled-dark);
+  --color-text-link: var(--color-text-link-dark);
+  --color-text-link-hover: var(--color-text-link-hover-dark);
 
-  /* Алиасы */
-  --color-text-primary: var(--color-neutral-800);
-  --color-text-secondary: var(--color-neutral-400);
-  --color-text-muted: var(--color-neutral-300);
-  --color-text-inverse: var(--color-neutral-900);
-  --color-bg-primary: var(--color-neutral-0);
-  --color-bg-secondary: var(--color-neutral-50);
-  --color-bg-tertiary: var(--color-neutral-100);
-  --color-border: var(--color-neutral-200);
-  --color-border-hover: var(--color-neutral-300);
-  --gradient-hero: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-  --gradient-card: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  /* ------ Accent Colors ------ */
+  --color-accent-primary: var(--color-accent-primary-dark);
+  --color-accent-hover: var(--color-accent-hover-dark);
+  --color-accent-active: var(--color-accent-active-dark);
+  --color-accent-muted: var(--color-accent-muted-dark);
+  --color-accent-subtle: var(--color-accent-subtle-dark);
+  --color-accent-focus: var(--color-accent-focus-dark);
+
+  /* ------ Semantic Colors ------ */
+  --color-success: var(--color-success-primary-dark);
+  --color-success-hover: var(--color-success-hover-dark);
+  --color-success-active: var(--color-success-active-dark);
+  --color-success-muted: var(--color-success-muted-dark);
+
+  --color-error: var(--color-error-primary-dark);
+  --color-error-hover: var(--color-error-hover-dark);
+  --color-error-active: var(--color-error-active-dark);
+  --color-error-muted: var(--color-error-muted-dark);
+
+  --color-warning: var(--color-warning-primary-dark);
+  --color-warning-hover: var(--color-warning-hover-dark);
+  --color-warning-active: var(--color-warning-active-dark);
+  --color-warning-muted: var(--color-warning-muted-dark);
+
+  --color-info: var(--color-info-primary-dark);
+  --color-info-hover: var(--color-info-hover-dark);
+  --color-info-active: var(--color-info-active-dark);
+  --color-info-muted: var(--color-info-muted-dark);
+
+  /* ------ Border Colors ------ */
+  --color-border: var(--color-border-primary-dark);
+  --color-border-hover: var(--color-border-secondary-dark);
+  --color-border-focus: var(--color-border-focus-dark);
+  --color-border-error: var(--color-border-error-dark);
+
+  /* ------ Shadows (Dark Theme) ------ */
+  --shadow-1: var(--shadow-dark-1);
+  --shadow-2: var(--shadow-dark-2);
+  --shadow-3: var(--shadow-dark-3);
+  --shadow-4: var(--shadow-dark-4);
+  --shadow-5: var(--shadow-dark-5);
+
+  --shadow-primary: var(--shadow-glow-accent-dark);
+  --shadow-primary-hover: var(--shadow-glow-accent-hover-dark);
+  --shadow-error: var(--shadow-glow-error-dark);
+  --shadow-success: var(--shadow-glow-success-dark);
+
+  --shadow-focus: var(--shadow-glow-accent-dark);
+  --shadow-focus-error: var(--shadow-glow-error-dark);
+  --shadow-focus-success: var(--shadow-glow-success-dark);
+
+  /* ------ Interactive States ------ */
+  --state-hover-opacity: var(--state-hover-opacity-dark);
+  --state-active-opacity: var(--state-active-opacity-dark);
+  --state-selected-opacity: var(--state-selected-opacity-dark);
+  --state-disabled-opacity: var(--state-disabled-opacity-dark);
+  --state-focus-opacity: var(--state-focus-opacity-dark);
+
+  --state-hover-bg: var(--state-hover-bg-dark);
+  --state-active-bg: var(--state-active-bg-dark);
+  --state-selected-bg: var(--state-selected-bg-dark);
+  --state-focus-bg: var(--state-focus-bg-dark);
+
+  /* ------ Gradients ------ */
+  --gradient-hero: var(--gradient-dark-radial);
+  --gradient-card: var(--gradient-card-dark);
+  --gradient-elevated: var(--gradient-elevated-dark);
+  --gradient-accent: var(--gradient-accent-dark);
 }
 
 /* ============================================
@@ -539,13 +731,21 @@
  * ============================================ */
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes fadeOut {
-  from { opacity: 1; }
-  to { opacity: 0; }
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 
 @keyframes slideInUp {
@@ -604,23 +804,40 @@
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-4px); }
-  75% { transform: translateX(4px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
 }
 
 @keyframes bounce {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
     animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
   }
