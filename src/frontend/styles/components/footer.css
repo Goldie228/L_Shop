@@ -1,0 +1,449 @@
+/**
+ * Footer Component Styles - L_Shop
+ * Многосекционный футер с адаптивным layout и dark theme
+ *
+ * @see src/frontend/styles/design-tokens.css - источник токенов
+ * @see docs/DESIGN_SYSTEM.md - документация дизайн-системы
+ */
+
+/* ====== Footer Base ====== */
+.footer {
+  background-color: var(--color-bg-secondary);
+  border-top: 1px solid var(--color-border);
+  width: 100%;
+}
+
+/* Контейнер с ограничением ширины */
+.footer__container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-8);
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding: var(--spacing-16) var(--spacing-6);
+}
+
+/* ====== Columns ====== */
+.footer__column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.footer__column-title {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-2) 0;
+}
+
+/* ====== Brand Column ====== */
+.footer__logo-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  text-decoration: none;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  transition: color var(--transition-fast);
+}
+
+.footer__logo-link:hover {
+  color: var(--color-primary);
+}
+
+.footer__logo {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-primary);
+  color: var(--color-text-inverse);
+  border-radius: var(--radius-md);
+  transition: background-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.footer__logo-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.footer__logo-link:hover .footer__logo {
+  background-color: var(--color-primary-hover);
+  transform: scale(1.05);
+}
+
+.footer__brand-name {
+  font-family: var(--font-family-primary);
+}
+
+.footer__description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  margin: 0;
+}
+
+/* ====== Social Links ====== */
+.footer__social {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  margin-top: var(--spacing-2);
+}
+
+.footer__social-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+.footer__social-links {
+  display: flex;
+  gap: var(--spacing-3);
+  flex-wrap: wrap;
+}
+
+.footer__social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background-color: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  color: var(--color-text-secondary);
+  transition: background-color var(--transition-fast), border-color var(--transition-fast),
+    color var(--transition-fast), transform var(--transition-fast);
+}
+
+.footer__social-link:hover {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-text-inverse);
+  transform: translateY(-2px);
+}
+
+.footer__social-link:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+.footer__social-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* ====== Links List ====== */
+.footer__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.footer__list-item {
+  margin: 0;
+}
+
+.footer__link {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  padding: var(--spacing-1) 0;
+  transition: color var(--transition-fast), transform var(--transition-fast);
+}
+
+.footer__link:hover {
+  color: var(--color-primary);
+  transform: translateX(4px);
+}
+
+.footer__link:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+  border-radius: var(--radius-sm);
+}
+
+/* ====== Newsletter Column ====== */
+.footer__newsletter-description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  margin: 0;
+}
+
+.footer__newsletter-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  margin-top: var(--spacing-2);
+}
+
+.footer__newsletter-input {
+  width: 100%;
+  padding: var(--spacing-3) var(--spacing-4);
+  background-color: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family-primary);
+  color: var(--color-text-primary);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.footer__newsletter-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.footer__newsletter-input:focus {
+  border-color: var(--color-primary);
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+.footer__newsletter-input--error {
+  border-color: var(--color-error);
+}
+
+.footer__newsletter-input--error:focus {
+  box-shadow: var(--shadow-focus-error);
+}
+
+.footer__newsletter-button {
+  padding: var(--spacing-3) var(--spacing-4);
+  background-color: var(--color-primary);
+  color: var(--color-text-inverse);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-family-primary);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), transform var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.footer__newsletter-button:hover {
+  background-color: var(--color-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-primary);
+}
+
+.footer__newsletter-button:active {
+  transform: translateY(0);
+}
+
+.footer__newsletter-button:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+.footer__newsletter-message {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  margin: 0;
+  min-height: 1.2em;
+  transition: color var(--transition-fast);
+}
+
+.footer__newsletter-message--success {
+  color: var(--color-success);
+}
+
+.footer__newsletter-message--error {
+  color: var(--color-error);
+}
+
+/* ====== Legal Bar ====== */
+.footer__legal-bar {
+  border-top: 1px solid var(--color-border);
+  background-color: var(--color-bg-tertiary);
+}
+
+.footer__legal-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding: var(--spacing-4) var(--spacing-6);
+  gap: var(--spacing-4);
+}
+
+.footer__copyright {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.footer__legal-links {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.footer__legal-link {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.footer__legal-link:hover {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+.footer__legal-link:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+  border-radius: var(--radius-sm);
+}
+
+.footer__legal-separator {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  user-select: none;
+}
+
+/* ====== Tablet (769px - 1024px): 2x2 grid ====== */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .footer__container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-6);
+    padding: var(--spacing-12) var(--spacing-4);
+  }
+}
+
+/* ====== Mobile (<768px): vertical stack ====== */
+@media (max-width: 768px) {
+  .footer__container {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-8);
+    padding: var(--spacing-10) var(--spacing-4);
+  }
+
+  .footer__column {
+    gap: var(--spacing-3);
+  }
+
+  .footer__column-title {
+    font-size: var(--font-size-base);
+  }
+
+  .footer__description {
+    font-size: var(--font-size-sm);
+  }
+
+  .footer__social-links {
+    gap: var(--spacing-2);
+  }
+
+  .footer__social-link {
+    width: 36px;
+    height: 36px;
+  }
+
+  .footer__social-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .footer__newsletter-form {
+    gap: var(--spacing-2);
+  }
+
+  /* Legal bar: stack on very small screens */
+  .footer__legal-container {
+    flex-direction: column;
+    text-align: center;
+    padding: var(--spacing-4);
+  }
+
+  .footer__legal-links {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--spacing-2);
+  }
+
+  .footer__legal-separator {
+    display: none;
+  }
+}
+
+/* ====== Large screens (>1280px) ====== */
+@media (min-width: 1280px) {
+  .footer__container {
+    padding: var(--spacing-16) var(--spacing-8);
+  }
+}
+
+/* ====== Dark Theme Support ====== */
+/* Токены автоматически переключаются через @media (prefers-color-scheme: dark) в design-tokens.css */
+/* Здесь только специфичные для Footer тонкие настройки */
+
+@media (prefers-color-scheme: dark) {
+  .footer {
+    /* Используем dark theme токены */
+    background-color: var(--color-bg-secondary-dark);
+    border-top-color: var(--color-border-primary-dark);
+  }
+
+  .footer__legal-bar {
+    background-color: var(--color-bg-tertiary-dark);
+    border-top-color: var(--color-border-primary-dark);
+  }
+
+  .footer__social-link {
+    background-color: var(--color-bg-primary-dark);
+    border-color: var(--color-border-primary-dark);
+  }
+
+  .footer__social-link:hover {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+  }
+
+  .footer__newsletter-input {
+    background-color: var(--color-bg-primary-dark);
+    border-color: var(--color-border-primary-dark);
+    color: var(--color-text-primary-dark);
+  }
+
+  .footer__newsletter-input::placeholder {
+    color: var(--color-text-muted-dark);
+  }
+}
+
+/* ====== Reduced Motion ====== */
+@media (prefers-reduced-motion: reduce) {
+  .footer__logo-link,
+  .footer__social-link,
+  .footer__link,
+  .footer__newsletter-button,
+  .footer__logo,
+  .footer__dropdown-chevron {
+    transition: none;
+  }
+}
+
+/* ====== High Contrast Mode ====== */
+@media (prefers-contrast: high) {
+  .footer__link,
+  .footer__legal-link {
+    text-decoration: underline;
+  }
+
+  .footer__newsletter-button {
+    border: 2px solid currentColor;
+  }
+}
