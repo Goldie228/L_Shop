@@ -4,13 +4,11 @@
  *
  * @see src/frontend/styles/pages/main-page.css - стили страницы
  * @see src/frontend/styles/utilities.css - утилитарные классы
- * @see src/frontend/types/api.ts - типы Product
  */
 
 import { Component, ComponentProps } from '../components/base/Component.js';
 import { Button } from '../components/ui/Button.js';
 import { store } from '../store/store.js';
-import { Product } from '../types/api.js';
 
 /**
  * Main page props
@@ -43,76 +41,6 @@ interface Collection {
 export class MainPage extends Component<MainPageProps> {
   /** Store unsubscribe function */
   private unsubscribe: (() => void) | null = null;
-
-  /** Мок-данные продуктов */
-  private readonly mockProducts: Product[] = [
-    {
-      id: '1',
-      name: 'Смартфон Pro Max',
-      description: 'Мощный смартфон с отличной камерой',
-      price: 89999,
-      category: 'Электроника',
-      inStock: true,
-      imageUrl: 'https://via.placeholder.com/300x300/1e293b/60a5fa?text=Phone',
-      rating: 4.8,
-      reviewCount: 124,
-    },
-    {
-      id: '2',
-      name: 'Беспроводные наушники',
-      description: 'Шумоподавление и чистый звук',
-      price: 24999,
-      category: 'Аксессуары',
-      inStock: true,
-      imageUrl: 'https://via.placeholder.com/300x300/1e293b/60a5fa?text=Headphones',
-      rating: 4.6,
-      reviewCount: 89,
-    },
-    {
-      id: '3',
-      name: 'Ноутбук ультрабук',
-      description: 'Лёгкий и мощный для работы и развлечений',
-      price: 129999,
-      category: 'Электроника',
-      inStock: true,
-      imageUrl: 'https://via.placeholder.com/300x300/1e293b/60a5fa?text=Laptop',
-      rating: 4.9,
-      reviewCount: 256,
-    },
-    {
-      id: '4',
-      name: 'Умные часы Series X',
-      description: 'Фитнес-трекер с пульсометром',
-      price: 34999,
-      category: 'Аксессуары',
-      inStock: true,
-      imageUrl: 'https://via.placeholder.com/300x300/1e293b/60a5fa?text=Watch',
-      rating: 4.5,
-      reviewCount: 78,
-    },
-    {
-      id: '5',
-      name: 'Планшет Pro 12',
-      description: 'Большой экран для творчества',
-      price: 79999,
-      category: 'Электроника',
-      inStock: false,
-      imageUrl: 'https://via.placeholder.com/300x300/1e293b/60a5fa?text=Tablet',
-      rating: 4.7,
-      reviewCount: 145,
-    },
-    {
-      id: '6',
-      name: 'Колонка Smart Speaker',
-      description: 'Голосовой помощник и музыка в одном',
-      price: 14999,
-      category: 'Аксессуары',
-      inStock: true,
-      imageUrl: 'https://via.placeholder.com/300x300/1e293b/60a5fa?text=Speaker',
-      rating: 4.4,
-      reviewCount: 203,
-    },
-  ];
 
   /**
    * Коллекции для секции Featured Collections
@@ -176,11 +104,7 @@ export class MainPage extends Component<MainPageProps> {
     const collections = this.createCollectionsSection();
     page.appendChild(collections);
 
-    // Curated Products section
-    const products = this.createProductsSection();
-    page.appendChild(products);
-
-    // Features section (оставляем для совместимости)
+    // Features section
     const features = this.createFeaturesSection();
     page.appendChild(features);
 
@@ -356,225 +280,7 @@ export class MainPage extends Component<MainPageProps> {
   }
 
   /**
-   * Create curated products section
-   * @returns Products element
-   */
-  private createProductsSection(): HTMLElement {
-    const section = this.createElement('section', {
-      className: 'products-section',
-    });
-    section.setAttribute('data-testid', 'products-section');
-
-    const container = this.createElement('div', {
-      className: 'layout__content',
-    });
-
-    // Section header
-    const header = this.createElement('div', {
-      className: 'products-section__header',
-    });
-
-    const title = this.createElement('h2', { className: 'products-section__title text-h2' }, [
-      'Хиты продаж',
-    ]);
-    header.appendChild(title);
-
-    const subtitle = this.createElement(
-      'p',
-      { className: 'products-section__subtitle text-body' },
-      ['Самые популярные товары среди наших покупателей'],
-    );
-    header.appendChild(subtitle);
-
-    container.appendChild(header);
-
-    // Products grid
-    const grid = this.createElement('div', {
-      className: 'products-section__grid',
-    });
-
-    // Render products with staggered animation
-    this.mockProducts.forEach((product, index) => {
-      const card = this.createProductCard(product, index);
-      grid.appendChild(card);
-    });
-
-    container.appendChild(grid);
-    section.appendChild(container);
-
-    return section;
-  }
-
-  /**
-   * Create product card
-   * @param product - Product data
-   * @param index - Card index for animation delay
-   * @returns Card element
-   */
-  private createProductCard(product: Product, index: number): HTMLElement {
-    const card = this.createElement('div', {
-      className: 'product-card card card--hover animate-slide-up',
-    });
-    card.setAttribute('data-testid', `product-card-${index}`);
-
-    // Image container
-    const imageContainer = this.createElement('div', {
-      className: 'product-card__image-container',
-    });
-
-    const image = this.createElement('img', {
-      className: 'product-card__image',
-      src: product.imageUrl || 'https://via.placeholder.com/300x300/16161d/64748b?text=No+Image',
-      alt: product.name,
-      loading: 'lazy',
-    });
-    imageContainer.appendChild(image);
-
-    // Stock badge
-    if (!product.inStock) {
-      const outOfStockBadge = this.createElement(
-        'span',
-        {
-          className: 'product-card__badge product-card__badge--out-of-stock',
-        },
-        ['Нет в наличии'],
-      );
-      imageContainer.appendChild(outOfStockBadge);
-    }
-
-    card.appendChild(imageContainer);
-
-    // Content
-    const content = this.createElement('div', {
-      className: 'product-card__content',
-    });
-
-    // Category
-    const category = this.createElement(
-      'span',
-      { className: 'product-card__category text-body-sm' },
-      [product.category],
-    );
-    content.appendChild(category);
-
-    // Name
-    const name = this.createElement('h3', { className: 'product-card__name text-h4' }, [
-      product.name,
-    ]);
-    content.appendChild(name);
-
-    // Description
-    const description = this.createElement(
-      'p',
-      { className: 'product-card__description text-body-sm' },
-      [product.description],
-    );
-    content.appendChild(description);
-
-    // Rating
-    if (product.rating !== undefined) {
-      const ratingContainer = this.createElement('div', {
-        className: 'product-card__rating',
-      });
-
-      const stars = this.createStars(product.rating);
-      ratingContainer.appendChild(stars);
-
-      if (product.reviewCount !== undefined) {
-        const reviewCount = this.createElement(
-          'span',
-          { className: 'product-card__review-count text-body-sm' },
-          [`(${product.reviewCount})`],
-        );
-        ratingContainer.appendChild(reviewCount);
-      }
-
-      content.appendChild(ratingContainer);
-    }
-
-    // Price and action
-    const actions = this.createElement('div', {
-      className: 'product-card__actions',
-    });
-
-    const price = this.createElement('span', { className: 'product-card__price text-h4' }, [
-      `${(product.price / 100).toFixed(2)} ₽`,
-    ]);
-    actions.appendChild(price);
-
-    const addToCartButton = new Button({
-      text: 'В корзину',
-      variant: 'primary',
-      size: 'sm',
-      disabled: !product.inStock,
-      onClick: () => {
-        console.log(`Add to cart: ${product.name}`);
-        // TODO: Добавить в корзину
-      },
-    });
-    actions.appendChild(addToCartButton.render());
-
-    content.appendChild(actions);
-    card.appendChild(content);
-
-    return card;
-  }
-
-  /**
-   * Create star rating display
-   * @param rating - Rating value (0-5)
-   * @returns Star container element
-   */
-  private createStars(rating: number): HTMLElement {
-    const container = this.createElement('span', {
-      className: 'product-card__stars',
-    });
-
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 >= 0.5;
-    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
-
-    // Full stars
-    for (let i = 0; i < fullStars; i++) {
-      const star = this.createElement(
-        'span',
-        {
-          className: 'star star--full',
-        },
-        ['★'],
-      );
-      container.appendChild(star);
-    }
-
-    // Half star
-    if (hasHalfStar) {
-      const halfStar = this.createElement(
-        'span',
-        {
-          className: 'star star--half',
-        },
-        ['★'],
-      );
-      container.appendChild(halfStar);
-    }
-
-    // Empty stars
-    for (let i = 0; i < emptyStars; i++) {
-      const emptyStar = this.createElement(
-        'span',
-        {
-          className: 'star star--empty',
-        },
-        ['★'],
-      );
-      container.appendChild(emptyStar);
-    }
-
-    return container;
-  }
-
-  /**
-   * Create features section (старая секция для совместимости)
+   * Create features section
    * @returns Features element
    */
   private createFeaturesSection(): HTMLElement {

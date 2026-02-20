@@ -6,31 +6,6 @@
 import { User } from './user.js';
 
 /**
- * Product model
- * @see src/backend/models/product.model.ts - бэкенд модель
- */
-export interface Product {
-  /** Уникальный идентификатор товара */
-  id: string;
-  /** Название товара */
-  name: string;
-  /** Описание товара */
-  description: string;
-  /** Цена в копейках/центах */
-  price: number;
-  /** Категория товара */
-  category: string;
-  /** В наличии ли товар */
-  inStock: boolean;
-  /** URL изображения товара (опционально) */
-  imageUrl?: string;
-  /** Рейтинг товара (0-5, опционально) */
-  rating?: number;
-  /** Количество отзывов (опционально) */
-  reviewCount?: number;
-}
-
-/**
  * Base API response structure
  */
 export interface ApiResponse<T = unknown> {

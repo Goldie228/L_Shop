@@ -20,9 +20,7 @@ const userService = new UserService();
  */
 export async function register(req: Request, res: Response): Promise<void> {
   try {
-    const {
-      name, email, login: userLogin, phone, password,
-    } = req.body;
+    const { name, email, login: userLogin, phone, password } = req.body;
 
     if (!name || !email || !userLogin || !phone || !password) {
       res.status(400).json({
