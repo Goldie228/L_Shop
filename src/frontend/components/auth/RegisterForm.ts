@@ -234,14 +234,10 @@ export class RegisterForm extends Component<RegisterFormProps> {
      this.inputs.set('phone', phoneInput);
      container.appendChild(phoneInput.render());
      
-     // Контейнер пароля (для toggle и индикатора силы)
-     const passwordContainer = this.createElement('div', {
-       className: 'form-field__password-container'
-     });
-
-    const passwordInput = new Input({
+     // Поле пароля (Input уже имеет встроенный toggle)
+     const passwordInput = new Input({
       name: 'password',
-      type: this.state.showPassword ? 'text' : 'password',
+      type: 'password',
       label: 'Пароль',
       placeholder: 'Минимум 6 символов',
       required: true,
@@ -257,26 +253,16 @@ export class RegisterForm extends Component<RegisterFormProps> {
       onBlur: (value) => this.handleInputBlur('password', value)
     });
     this.inputs.set('password', passwordInput);
-    passwordContainer.appendChild(passwordInput.render());
-
-    // Кнопка toggle password visibility
-    const passwordToggle = this.createPasswordToggle('password');
-    passwordContainer.appendChild(passwordToggle);
+    container.appendChild(passwordInput.render());
 
     // Индикатор силы пароля
     const strengthIndicator = this.createPasswordStrengthIndicator();
-    passwordContainer.appendChild(strengthIndicator);
+    container.appendChild(strengthIndicator);
 
-    container.appendChild(passwordContainer);
-
-    // Confirm password input container
-    const confirmPasswordContainer = this.createElement('div', {
-      className: 'form-field__password-container'
-    });
-
+    // Поле подтверждения пароля (Input уже имеет встроенный toggle)
     const confirmPasswordInput = new Input({
       name: 'confirmPassword',
-      type: this.state.showConfirmPassword ? 'text' : 'password',
+      type: 'password',
       label: 'Подтверждение пароля',
       placeholder: 'Повторите пароль',
       required: true,
@@ -288,13 +274,7 @@ export class RegisterForm extends Component<RegisterFormProps> {
       onBlur: (value) => this.handleInputBlur('confirmPassword', value)
     });
     this.inputs.set('confirmPassword', confirmPasswordInput);
-    confirmPasswordContainer.appendChild(confirmPasswordInput.render());
-
-    // Кнопка toggle confirm password visibility
-    const confirmPasswordToggle = this.createPasswordToggle('confirmPassword');
-    confirmPasswordContainer.appendChild(confirmPasswordToggle);
-
-    container.appendChild(confirmPasswordContainer);
+    container.appendChild(confirmPasswordInput.render());
     
     return container;
   }
@@ -320,41 +300,7 @@ export class RegisterForm extends Component<RegisterFormProps> {
      });
      container.appendChild(this.submitButton.render());
      
-     // Ссылка переключения на вход
-     if (this.props.onSwitchToLogin) {
-       const switchLink = this.createElement(
-         'div',
-         { className: 'auth-form__link' },
-         ['Уже есть аккаунт? ', this.createSwitchLink()]
-       );
-       container.appendChild(switchLink);
-     }
-     
      return container;
-   }
-
-   /**
-    * Создать ссылку переключения на вход
-    * @returns Элемент ссылки
-    */
-   private createSwitchLink(): HTMLAnchorElement {
-     const link = this.createElement(
-       'a',
-       {
-         href: '#login',
-         role: 'button'
-       },
-       ['Войти']
-     );
-     
-     this.addEventListener(link, 'click', (e) => {
-       e.preventDefault();
-       if (this.props.onSwitchToLogin) {
-         this.props.onSwitchToLogin();
-       }
-     });
-     
-     return link;
    }
 
    /**

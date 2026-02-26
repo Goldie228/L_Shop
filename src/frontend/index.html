@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" class="dark-theme">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -30,11 +30,10 @@
    <link rel="stylesheet" href="styles/components/input.css">
    <link rel="stylesheet" href="styles/components/modal.css">
    <link rel="stylesheet" href="styles/components/header.css">
-   <link rel="stylesheet" href="styles/components/footer.css">
    <link rel="stylesheet" href="styles/components/layout.css">
    <link rel="stylesheet" href="styles/components/forms.css">
    <!-- Стили страниц -->
-   <link rel="stylesheet" href="styles/pages/main-page.css">
+   <link rel="stylesheet" href="styles/pages/profile.css">
 </head>
 <body>
   <!-- Корневой элемент приложения -->
@@ -54,7 +53,7 @@
     </div>
   </noscript>
   
-  <!-- TypeScript скомпилирован в JavaScript -->
-  <script src="dist/app.js" type="module"></script>
+  <!-- TypeScript entry point для Vite в режиме разработки -->
+  <script type="module" src="/app.ts"></script>
 </body>
 </html>

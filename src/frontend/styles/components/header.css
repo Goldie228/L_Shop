@@ -74,7 +74,35 @@
 
 .header__logo:hover .header__logo-icon {
   background-color: var(--color-primary-hover);
-  transform: scale(1.05);
+  transform: scale(1.1) rotate(-3deg);
+}
+
+/* Анимация пульсации для логотипа */
+@keyframes logo-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.header__logo-icon {
+  position: relative;
+  overflow: hidden;
+}
+
+.header__logo-icon::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 50%);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.header__logo:hover .header__logo-icon::after {
+  opacity: 1;
 }
 
 /* ====== Navigation ====== */
@@ -524,4 +552,139 @@ body.menu-open {
   .header__search {
     display: none;
   }
+}
+
+/* ====== Dark Theme ====== */
+:root.dark-theme .header {
+  background-color: var(--color-bg-primary-dark);
+  border-bottom-color: var(--color-border-primary-dark);
+}
+
+:root.dark-theme .header--scrolled {
+  background-color: var(--color-bg-elevated-dark);
+  border-bottom-color: var(--color-border-secondary-dark);
+  box-shadow: var(--shadow-dark-3);
+}
+
+:root.dark-theme .header__logo {
+  color: var(--color-text-primary-dark);
+}
+
+:root.dark-theme .header__logo:hover {
+  color: var(--color-accent-hover-dark);
+}
+
+:root.dark-theme .header__logo-icon {
+  background-color: var(--color-accent-primary-dark);
+}
+
+:root.dark-theme .header__logo:hover .header__logo-icon {
+  background-color: var(--color-accent-hover-dark);
+}
+
+:root.dark-theme .header__nav-link {
+  color: var(--color-text-secondary-dark);
+}
+
+:root.dark-theme .header__nav-link:hover {
+  color: var(--color-text-primary-dark);
+  background-color: var(--color-bg-secondary-dark);
+}
+
+:root.dark-theme .header__nav-link--active {
+  color: var(--color-accent-primary-dark);
+  background-color: var(--color-accent-muted-dark);
+}
+
+:root.dark-theme .header__nav-link--active:hover {
+  background-color: var(--color-accent-subtle-dark);
+}
+
+:root.dark-theme .header__user-avatar {
+  background-color: var(--color-accent-muted-dark);
+  color: var(--color-accent-primary-dark);
+}
+
+:root.dark-theme .header__user-name {
+  color: var(--color-text-primary-dark);
+}
+
+:root.dark-theme .header__user-trigger {
+  border-color: var(--color-border-primary-dark);
+}
+
+:root.dark-theme .header__user-trigger:hover {
+  background-color: var(--color-bg-secondary-dark);
+  border-color: var(--color-border-secondary-dark);
+}
+
+:root.dark-theme .header__dropdown-chevron {
+  color: var(--color-text-secondary-dark);
+}
+
+:root.dark-theme .header__dropdown-menu {
+  background-color: var(--color-bg-elevated-dark);
+  border-color: var(--color-border-primary-dark);
+  box-shadow: var(--shadow-dark-4);
+}
+
+:root.dark-theme .header__dropdown-user-name {
+  color: var(--color-text-primary-dark);
+}
+
+:root.dark-theme .header__dropdown-user-email {
+  color: var(--color-text-secondary-dark);
+}
+
+:root.dark-theme .header__dropdown-divider {
+  background-color: var(--color-border-primary-dark);
+}
+
+:root.dark-theme .header__menu-toggle {
+  color: var(--color-text-primary-dark);
+}
+
+:root.dark-theme .header__menu-toggle:hover {
+  background-color: var(--color-bg-secondary-dark);
+  color: var(--color-accent-primary-dark);
+}
+
+:root.dark-theme .header__mobile-menu {
+  background-color: var(--color-bg-primary-dark);
+}
+
+:root.dark-theme .header__mobile-nav-link {
+  color: var(--color-text-primary-dark);
+}
+
+:root.dark-theme .header__mobile-nav-link:hover,
+:root.dark-theme .header__mobile-nav-link--active {
+  background-color: var(--color-bg-secondary-dark);
+}
+
+:root.dark-theme .header__mobile-nav-link--active {
+  color: var(--color-accent-primary-dark);
+}
+
+:root.dark-theme .header__mobile-user {
+  border-top-color: var(--color-border-primary-dark);
+}
+
+:root.dark-theme .header__search-input {
+  background-color: var(--color-bg-secondary-dark);
+  border-color: var(--color-border-primary-dark);
+  color: var(--color-text-primary-dark);
+}
+
+:root.dark-theme .header__search-input::placeholder {
+  color: var(--color-text-muted-dark);
+}
+
+:root.dark-theme .header__search-input:focus {
+  background-color: var(--color-bg-tertiary-dark);
+  border-color: var(--color-accent-primary-dark);
+}
+
+:root.dark-theme .header__search-icon-wrapper {
+  color: var(--color-text-muted-dark);
 }

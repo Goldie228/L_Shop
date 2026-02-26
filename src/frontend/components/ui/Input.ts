@@ -509,16 +509,7 @@ export class Input extends Component<InputProps> {
    */
   public setError(error: string): void {
     this.setProps({ inputState: 'error', error });
-    this.update();
-    
-    // Добавить класс анимации shake
-    if (this.element) {
-      this.element.classList.add('form-field--shake');
-      // Удалить класс после анимации
-      setTimeout(() => {
-        this.element?.classList.remove('form-field--shake');
-      }, 500);
-    }
+    this.rebuild();
   }
 
   /**
@@ -526,7 +517,7 @@ export class Input extends Component<InputProps> {
    */
   public clearError(): void {
     this.setProps({ inputState: 'default', error: undefined });
-    this.update();
+    this.rebuild();
   }
 
   /**
@@ -534,7 +525,7 @@ export class Input extends Component<InputProps> {
    */
   public setSuccess(): void {
     this.setProps({ inputState: 'success' });
-    this.update();
+    this.rebuild();
   }
 
   /**
@@ -542,7 +533,49 @@ export class Input extends Component<InputProps> {
    */
   public resetState(): void {
     this.setProps({ inputState: 'default', error: undefined });
-    this.update();
+    this.rebuild();
+  }
+
+  /**
+   * Перестроить компонент с сохранением состояния (без полной перерисовки)
+   */
+  private rebuild(): void {
+    // Просто обновляем классы контейнера без перерисовки
+    if (!this.element) return;
+    
+    const { inputState, error } = this.props;
+    
+    // Обновить классы
+    this.element.classList.remove('form-field--error', 'form-field--success');
+    if (inputState !== 'default') {
+      this.element.classList.add(`form-field--${inputState}`);
+    }
+    
+    // Обновить или добавить сообщение об ошибке
+    const existingError = this.element.querySelector('.form-field__error');
+    if (inputState === 'error' && error) {
+      if (!existingError) {
+        // Создать новый элемент ошибки
+        const errorElement = this.createErrorElement();
+        const inputWrapper = this.element.querySelector('.form-field__input-wrapper');
+        if (inputWrapper) {
+          inputWrapper.parentNode?.insertBefore(errorElement, inputWrapper.nextSibling);
+        }
+      } else {
+        // Обновить текст ошибки
+        const textSpan = existingError.querySelector('.form-field__error-text');
+        if (textSpan) {
+          textSpan.textContent = error;
+        }
+      }
+    } else if (existingError) {
+      existingError.remove();
+    }
+    
+    // Обновить aria-invalid
+    if (this.inputElement) {
+      this.inputElement.setAttribute('aria-invalid', inputState === 'error' ? 'true' : 'false');
+    }
   }
 
   /**

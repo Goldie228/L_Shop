@@ -1,9 +1,15 @@
 /**
  * Store - L_Shop Frontend
- * Простое управление состоянием с подписками
+ * Управление состоянием приложения с подписками и таймером сессии
  */
 
 import { User, UserState } from '../types/user.js';
+
+/**
+ * Длительность сессии в минутах
+ * Должна совпадать с SESSION_DURATION_MINUTES в backend/config/constants.ts
+ */
+const SESSION_DURATION_MINUTES = 10;
 
 /**
  * Интерфейс состояния приложения
@@ -45,23 +51,45 @@ const initialState: AppState = {
 export type StateListener<T = unknown> = (state: T) => void;
 
 /**
- * Класс Store для управления состоянием
+ * Класс Store для управления состоянием приложения
+ * Реализует паттерн Singleton
+ * 
+ * @example
+ * ```typescript
+ * // Получить состояние
+ * const state = store.getState();
+ * 
+ * // Установить пользователя
+ * store.setUser(user);
+ * 
+ * // Подписаться на изменения
+ * const unsubscribe = store.subscribe('user', (state) => {
+ *   console.log('User state changed:', state);
+ * });
+ * 
+ * // Таймер сессии
+ * store.startSessionTimer();
+ * store.resetSessionTimer(); // При активности пользователя
+ * ```
  */
 export class Store {
   /** Текущее состояние */
   private state: AppState;
-  
-  /** Слушатели состояния */
+
+  /** Слушатели состояния по ключам */
   private listeners: Map<keyof AppState, Set<StateListener>> = new Map();
-  
+
   /** Глобальные слушатели */
   private globalListeners: Set<StateListener<AppState>> = new Set();
-  
-  /** Единственный экземпляр */
+
+  /** Таймер сессии */
+  private sessionTimer: ReturnType<typeof setTimeout> | null = null;
+
+  /** Единственный экземпляр (Singleton) */
   private static instance: Store | null = null;
 
   /**
-   * Получить экземпляр store (синглтон)
+   * Получить экземпляр store (Singleton)
    * @returns Экземпляр store
    */
   public static getInstance(): Store {
@@ -73,15 +101,19 @@ export class Store {
 
   /**
    * Создать экземпляр store
-   * Приватный для паттерна синглтона
+   * Приватный конструктор для паттерна Singleton
    */
   private constructor() {
     this.state = { ...initialState };
   }
 
+  // =========================================
+  // Получение состояния
+  // =========================================
+
   /**
-   * Получить текущее состояние
-   * @returns Текущее состояние
+   * Получить текущее состояние приложения
+   * @returns Копия текущего состояния
    */
   public getState(): AppState {
     return { ...this.state };
@@ -102,20 +134,40 @@ export class Store {
   }
 
   /**
+   * Получить текущего пользователя
+   * @returns Объект пользователя или null
+   */
+  public getUser(): User | null {
+    return this.state.user.user;
+  }
+
+  /**
+   * Проверить, аутентифицирован ли пользователь
+   * @returns true если пользователь аутентифицирован
+   */
+  public isAuthenticated(): boolean {
+    return this.state.user.isAuthenticated;
+  }
+
+  // =========================================
+  // Изменение состояния
+  // =========================================
+
+  /**
    * Обновить состояние
    * @param partial - Частичное состояние для слияния
    */
   public setState(partial: Partial<AppState>): void {
     const prevState = { ...this.state };
     this.state = { ...this.state, ...partial };
-    
+
     // Уведомить конкретных слушателей
     for (const key of Object.keys(partial) as Array<keyof AppState>) {
       if (prevState[key] !== this.state[key]) {
         this.notifyListeners(key);
       }
     }
-    
+
     // Уведомить глобальных слушателей
     this.notifyGlobalListeners();
   }
@@ -132,6 +184,7 @@ export class Store {
 
   /**
    * Установить текущего пользователя
+   * При установке пользователя автоматически запускается таймер сессии
    * @param user - Объект пользователя или null
    */
   public setUser(user: User | null): void {
@@ -141,6 +194,13 @@ export class Store {
       isLoading: false,
       error: null
     });
+
+    // Управление таймером сессии
+    if (user) {
+      this.startSessionTimer();
+    } else {
+      this.clearSessionTimer();
+    }
   }
 
   /**
@@ -157,6 +217,20 @@ export class Store {
    */
   public setError(error: string | null): void {
     this.setUserState({ error, isLoading: false });
+  }
+
+  /**
+   * Выход пользователя из системы
+   * Очищает данные пользователя и останавливает таймер сессии
+   */
+  public logout(): void {
+    this.clearSessionTimer();
+    this.setUserState({
+      user: null,
+      isAuthenticated: false,
+      isLoading: false,
+      error: null
+    });
   }
 
   /**
@@ -186,8 +260,12 @@ export class Store {
     });
   }
 
+  // =========================================
+  // Подписка на изменения
+  // =========================================
+
   /**
-   * Подписаться на изменения состояния
+   * Подписаться на изменения конкретного ключа состояния
    * @param key - Ключ состояния для отслеживания
    * @param listener - Функция слушателя
    * @returns Функция отписки
@@ -199,10 +277,10 @@ export class Store {
     if (!this.listeners.has(key)) {
       this.listeners.set(key, new Set());
     }
-    
+
     const listeners = this.listeners.get(key)!;
     listeners.add(listener as StateListener);
-    
+
     // Вернуть функцию отписки
     return () => {
       listeners.delete(listener as StateListener);
@@ -216,11 +294,80 @@ export class Store {
    */
   public subscribeAll(listener: StateListener<AppState>): () => void {
     this.globalListeners.add(listener);
-    
+
     return () => {
       this.globalListeners.delete(listener);
     };
   }
+
+  // =========================================
+  // Таймер сессии
+  // =========================================
+
+  /**
+   * Запустить таймер сессии
+   * Автоматически вызывается при setUser с валидным пользователем
+   * По истечении времени пользователь будет разлогинен
+   */
+  public startSessionTimer(): void {
+    this.clearSessionTimer();
+
+    this.sessionTimer = setTimeout(() => {
+      this.handleSessionExpired();
+    }, SESSION_DURATION_MINUTES * 60 * 1000);
+
+    console.log(
+      `[Store] Таймер сессии запущен на ${SESSION_DURATION_MINUTES} минут`
+    );
+  }
+
+  /**
+   * Сбросить таймер сессии
+   * Вызывается при активности пользователя для продления сессии
+   */
+  public resetSessionTimer(): void {
+    if (this.state.user.isAuthenticated) {
+      this.startSessionTimer();
+    }
+  }
+
+  /**
+   * Очистить таймер сессии
+   * Вызывается при logout или установке null пользователя
+   */
+  public clearSessionTimer(): void {
+    if (this.sessionTimer) {
+      clearTimeout(this.sessionTimer);
+      this.sessionTimer = null;
+      console.log('[Store] Таймер сессии очищен');
+    }
+  }
+
+  /**
+   * Обработать истечение сессии
+   * Разлогинивает пользователя и показывает сообщение
+   */
+  private handleSessionExpired(): void {
+    console.log('[Store] Сессия истекла');
+
+    // Очистить таймер
+    this.sessionTimer = null;
+
+    // Разлогинить пользователя
+    this.setUserState({
+      user: null,
+      isAuthenticated: false,
+      isLoading: false,
+      error: 'Сессия истекла. Пожалуйста, войдите снова.'
+    });
+
+    // Можно добавить редирект на страницу входа или открытие модального окна
+    // Это будет реализовано в app.ts через подписку на изменения
+  }
+
+  // =========================================
+  // Приватные методы
+  // =========================================
 
   /**
    * Уведомить слушателей для конкретного ключа
@@ -234,7 +381,7 @@ export class Store {
         try {
           listener(slice);
         } catch (error) {
-          console.error(`Ошибка слушателя store для ${key}:`, error);
+          console.error(`[Store] Ошибка слушателя для ${key}:`, error);
         }
       });
     }
@@ -249,7 +396,7 @@ export class Store {
       try {
         listener(state);
       } catch (error) {
-        console.error('Ошибка глобального слушателя store:', error);
+        console.error('[Store] Ошибка глобального слушателя:', error);
       }
     });
   }
@@ -258,9 +405,10 @@ export class Store {
    * Сбросить состояние к начальному
    */
   public reset(): void {
+    this.clearSessionTimer();
     this.state = { ...initialState };
     this.notifyGlobalListeners();
-    
+
     for (const key of Object.keys(initialState) as Array<keyof AppState>) {
       this.notifyListeners(key);
     }
@@ -268,6 +416,6 @@ export class Store {
 }
 
 /**
- * Экземпляр store по умолчанию
+ * Экземпляр store (Singleton)
  */
 export const store = Store.getInstance();

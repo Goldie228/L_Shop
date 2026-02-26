@@ -111,7 +111,9 @@ export async function register(req: Request, res: Response): Promise<void> {
  */
 export async function login(req: Request, res: Response): Promise<void> {
   try {
+    console.log('[AuthController] Login request body:', JSON.stringify(req.body));
     const { login: userLogin, password } = req.body;
+    console.log('[AuthController] Extracted:', { userLogin, passwordLength: password?.length });
 
     if (!userLogin || !password) {
       res.status(400).json({

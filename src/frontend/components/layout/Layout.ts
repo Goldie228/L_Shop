@@ -20,6 +20,8 @@ export interface LayoutProps extends ComponentProps {
   beforeContent?: HTMLElement | string;
   /** Дополнительный контент после основного (например, CTA секция) */
   afterContent?: HTMLElement | string;
+  /** Callback при нажатии кнопки входа */
+  onLoginClick?: () => void;
 }
 
 /**
@@ -27,7 +29,6 @@ export interface LayoutProps extends ComponentProps {
  * Обеспечивает консистентную структуру всех страниц:
  * - Header (sticky, вверху)
  * - Main content area (с контейнером)
- * - Footer (внизу)
  *
  * @example
  * ```typescript
@@ -67,9 +68,13 @@ export class Layout extends Component<LayoutProps> {
       'data-testid': 'layout',
     });
 
-    // Header (sticky)
-    this.header = new Header();
-    layout.appendChild(this.header.render());
+    // Header (sticky) - mount to trigger onMount
+    this.header = new Header({
+      onLoginClick: this.props.onLoginClick,
+    });
+    const headerContainer = this.createElement('div', { className: 'layout__header-container' });
+    layout.appendChild(headerContainer);
+    this.header.mount(headerContainer);
 
     // Main content area
     const main = this.createElement('main', {
@@ -139,24 +144,16 @@ export class Layout extends Component<LayoutProps> {
   }
 
   /**
-   * Get footer component
-   * @returns Footer component
-   */
-  public getFooter(): Footer | null {
-    return this.footer;
-  }
-
-  /**
    * Called after component is mounted
    */
-  protected onMounted(): void {
+  protected onMount(): void {
     // Layout-specific initialization if needed
   }
 
   /**
    * Called after component is unmounted
    */
-  protected onUnmounted(): void {
+  protected onUnmount(): void {
     // Cleanup if needed
   }
 }

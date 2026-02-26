@@ -1,158 +1,111 @@
 /**
  * Router - L_Shop Frontend
- * Клиентский SPA роутер с History API
+ * Простой клиентский роутер на History API
  */
 
-import { store } from '../store/store.js';
-
 /**
- * Конфигурация маршрута
+ * Интерфейс маршрута
  */
 export interface Route {
   /** Путь маршрута */
   path: string;
-  /** Имя компонента страницы */
-  component: string;
+  /** Имя компонента страницы (для обратной совместимости) */
+  component?: string;
   /** Заголовок страницы */
   title?: string;
+  /** Обработчик маршрута */
+  handler?: () => void;
   /** Требуется ли аутентификация */
   requiresAuth?: boolean;
-  /** Путь перенаправления если требуется авторизация и пользователь не авторизован */
+  /** Путь перенаправления если требуется авторизация */
   authRedirect?: string;
-}
-
-/**
- * Результат сопоставления маршрута
- */
-export interface RouteMatch {
-  /** Сопоставленный маршрут */
-  route: Route;
-  /** Параметры маршрута */
-  params: Record<string, string>;
-}
-
-/**
- * Опции навигации роутера
- */
-export interface NavigationOptions {
-  /** Добавить в историю */
-  replace?: boolean;
-  /** Состояние для передачи */
-  state?: unknown;
 }
 
 /**
  * Слушатель изменения маршрута
  */
-export type RouteChangeListener = (route: Route, params: Record<string, string>) => void;
+export type RouteChangeListener = (route: Route) => void;
 
 /**
  * Класс Router для клиентской навигации
+ * Использует History API для навигации без перезагрузки страницы
+ * 
+ * @example
+ * ```typescript
+ * const router = new Router();
+ * 
+ * // Простой способ регистрации
+ * router.register('/', () => {
+ *   console.log('Главная страница');
+ * });
+ * 
+ * // Или через конфигурацию
+ * router.registerRoutes([
+ *   { path: '/', component: 'HomePage', handler: () => {} },
+ *   { path: '*', component: 'NotFoundPage', handler: () => {} }
+ * ]);
+ * 
+ * router.init();
+ * 
+ * // Программная навигация
+ * router.navigate('/');
+ * ```
  */
 export class Router {
-  /** Конфигурации маршрутов */
-  private routes: Map<string, Route> = new Map();
-  
-  /** Слушатели изменения маршрута */
-  private listeners: Set<RouteChangeListener> = new Set();
-  
+  /** Зарегистрированные маршруты */
+  private routes: Map<string, Route>;
+
   /** Текущий маршрут */
   private currentRoute: Route | null = null;
-  
-  /** Текущие параметры */
-  private currentParams: Record<string, string> = {};
-  
-  /** Маршрут 404 */
-  private notFoundRoute: Route | null = null;
-  
-  /** Единственный экземпляр */
-  private static instance: Router | null = null;
 
-  /**
-   * Получить экземпляр роутера (синглтон)
-   * @returns Экземпляр роутера
-   */
-  public static getInstance(): Router {
-    if (!Router.instance) {
-      Router.instance = new Router();
-    }
-    return Router.instance;
-  }
+  /** Слушатели изменения маршрута */
+  private listeners: Set<RouteChangeListener> = new Set();
+
+  /** Привязанный обработчик popstate */
+  private boundPopStateHandler: (event: PopStateEvent) => void;
 
   /**
    * Создать экземпляр роутера
-   * Приватный для паттерна синглтона
    */
-  private constructor() {
-    this.setupEventListeners();
+  constructor() {
+    this.routes = new Map();
+    this.boundPopStateHandler = this.handlePopState.bind(this);
   }
 
   /**
-   * Зарегистрировать маршруты
+   * Зарегистрировать маршрут (простой способ)
+   * @param path - Путь маршрута (например, '/' или '*')
+   * @param handler - Функция-обработчик, вызываемая при переходе на маршрут
+   */
+  public register(path: string, handler: () => void): void {
+    this.routes.set(path, { path, handler });
+  }
+
+  /**
+   * Зарегистрировать маршруты из массива конфигураций
    * @param routes - Массив конфигураций маршрутов
    */
   public registerRoutes(routes: Route[]): void {
     routes.forEach(route => {
       this.routes.set(route.path, route);
-      
-      // Установить маршрут 404
-      if (route.path === '*') {
-        this.notFoundRoute = route;
-      }
     });
   }
 
   /**
-   * Инициализировать роутер
-   * Вызвать после регистрации маршрутов
-   */
-  public init(): void {
-    // Обработать начальный маршрут
-    this.handleRoute(window.location.pathname);
-  }
-
-  /**
-   * Перейти по пути
+   * Перейти по указанному пути
    * @param path - Целевой путь
-   * @param options - Опции навигации
    */
-  public navigate(path: string, options: NavigationOptions = {}): void {
-    // Не переходить если тот же путь
+  public navigate(path: string): void {
+    // Не переходить, если тот же путь
     if (path === window.location.pathname) {
       return;
     }
-    
-    // Обновить историю браузера
-    if (options.replace) {
-      window.history.replaceState(options.state, '', path);
-    } else {
-      window.history.pushState(options.state, '', path);
-    }
-    
-    // Обработать изменение маршрута
+
+    // Добавить запись в историю
+    window.history.pushState({}, '', path);
+
+    // Обработать маршрут
     this.handleRoute(path);
-  }
-
-  /**
-   * Назад в истории
-   */
-  public back(): void {
-    window.history.back();
-  }
-
-  /**
-   * Вперёд в истории
-   */
-  public forward(): void {
-    window.history.forward();
-  }
-
-  /**
-   * Перейти на конкретную позицию в истории
-   * @param delta - Количество позиций для перехода
-   */
-  public go(delta: number): void {
-    window.history.go(delta);
   }
 
   /**
@@ -164,174 +117,104 @@ export class Router {
   }
 
   /**
-   * Получить текущие параметры
-   * @returns Текущие параметры маршрута
-   */
-  public getCurrentParams(): Record<string, string> {
-    return { ...this.currentParams };
-  }
-
-  /**
-   * Проверить соответствует ли текущий маршрут пути
-   * @param path - Путь для проверки
-   * @returns Соответствует ли текущий маршрут
-   */
-  public isActive(path: string): boolean {
-    return this.currentRoute?.path === path;
-  }
-
-  /**
    * Подписаться на изменения маршрута
-   * @param listener - Функция слушателя
+   * @param listener - Функция-слушатель
    * @returns Функция отписки
    */
   public subscribe(listener: RouteChangeListener): () => void {
     this.listeners.add(listener);
-    
     return () => {
       this.listeners.delete(listener);
     };
   }
 
   /**
-   * Обработать изменение маршрута
-   * @param path - Текущий путь
+   * Инициализировать роутер
+   * Устанавливает обработчик popstate и обрабатывает текущий URL
    */
-  private handleRoute(path: string): void {
-    const match = this.matchRoute(path);
-    
-    if (!match) {
-      // Обработать 404
-      if (this.notFoundRoute) {
-        this.currentRoute = this.notFoundRoute;
-        this.currentParams = {};
-      } else {
-        console.error(`Маршрут не найден: ${path}`);
-        return;
-      }
-    } else {
-      this.currentRoute = match.route;
-      this.currentParams = match.params;
-    }
-    
-    // Проверить требование авторизации
-    if (this.currentRoute.requiresAuth) {
-      const state = store.getState();
-      if (!state.user.isAuthenticated) {
-        const redirectPath = this.currentRoute.authRedirect || '/';
-        this.navigate(redirectPath, { replace: true });
-        return;
-      }
-    }
-    
-    // Обновить заголовок документа
-    if (this.currentRoute.title) {
-      document.title = `${this.currentRoute.title} | L_Shop`;
-    } else {
-      document.title = 'L_Shop';
-    }
-    
-    // Обновить store
-    store.setRoute(path);
-    
-    // Уведомить слушателей
-    this.notifyListeners();
+  public init(): void {
+    // Добавить обработчик для кнопок браузера назад/вперёд
+    window.addEventListener('popstate', this.boundPopStateHandler);
+
+    // Обработать начальный маршрут
+    this.handleRoute(window.location.pathname);
   }
 
   /**
-   * Сопоставить путь с маршрутом
-   * @param path - Путь для сопоставления
-   * @returns Результат сопоставления маршрута или null
+   * Уничтожить роутер и очистить ресурсы
+   * Удаляет все слушатели событий
    */
-  private matchRoute(path: string): RouteMatch | null {
-    // Сначала попробовать точное совпадение
+  public destroy(): void {
+    window.removeEventListener('popstate', this.boundPopStateHandler);
+    this.routes.clear();
+    this.listeners.clear();
+    this.currentRoute = null;
+  }
+
+  /**
+   * Обработать событие popstate (навигация браузера)
+   * @param event - Событие PopStateEvent
+   */
+  private handlePopState(event: PopStateEvent): void {
+    this.handleRoute(window.location.pathname);
+  }
+
+  /**
+   * Найти маршрут по пути
+   * @param path - Путь для поиска
+   * @returns Найденный маршрут или undefined
+   */
+  private matchRoute(path: string): Route | undefined {
+    // Сначала ищем точное совпадение
     const exactRoute = this.routes.get(path);
     if (exactRoute) {
-      return { route: exactRoute, params: {} };
+      return exactRoute;
     }
-    
-    // Попробовать сопоставление по шаблону для динамических маршрутов
-    for (const [pattern, route] of this.routes) {
-      const params = this.matchPattern(pattern, path);
-      if (params !== null) {
-        return { route, params };
-      }
-    }
-    
-    return null;
+
+    // Если точного совпадения нет, ищем маршрут 404
+    return this.routes.get('*');
   }
 
   /**
-   * Сопоставить шаблон маршрута с путём
-   * @param pattern - Шаблон маршрута (например, /user/:id)
-   * @param path - Фактический путь
-   * @returns Объект параметров или null если нет совпадения
+   * Обработать маршрут
+   * @param path - Путь для обработки
    */
-  private matchPattern(pattern: string, path: string): Record<string, string> | null {
-    const patternParts = pattern.split('/').filter(Boolean);
-    const pathParts = path.split('/').filter(Boolean);
-    
-    // Должно быть одинаковое количество частей
-    if (patternParts.length !== pathParts.length) {
-      return null;
-    }
-    
-    const params: Record<string, string> = {};
-    
-    for (let i = 0; i < patternParts.length; i++) {
-      const patternPart = patternParts[i];
-      const pathPart = pathParts[i];
-      
-      // Динамический параметр
-      if (patternPart.startsWith(':')) {
-        const paramName = patternPart.slice(1);
-        params[paramName] = pathPart;
+  private handleRoute(path: string): void {
+    const route = this.matchRoute(path);
+
+    if (route) {
+      this.currentRoute = route;
+
+      // Обновить заголовок документа
+      if (route.title) {
+        document.title = `${route.title} | L_Shop`;
+      } else {
+        document.title = 'L_Shop';
       }
-      // Требуется точное совпадение
-      else if (patternPart !== pathPart) {
-        return null;
+
+      // Вызвать обработчик если есть
+      if (route.handler) {
+        route.handler();
       }
+
+      // Уведомить слушателей
+      this.notifyListeners();
+    } else {
+      // Если нет обработчика, просто логируем
+      console.warn(`[Router] Нет обработчика для маршрута: ${path}`);
     }
-    
-    return params;
   }
 
   /**
-   * Настроить слушатели событий
-   */
-  private setupEventListeners(): void {
-    // Обработать назад/вперёд браузера
-    window.addEventListener('popstate', () => {
-      this.handleRoute(window.location.pathname);
-    });
-    
-    // Обработать клики по ссылкам
-    document.addEventListener('click', (event) => {
-      const target = event.target as HTMLElement;
-      const link = target.closest('a[href]');
-      
-      if (link) {
-        const href = link.getAttribute('href');
-        
-        // Обрабатывать только внутренние ссылки
-        if (href && href.startsWith('/') && !link.hasAttribute('target')) {
-          event.preventDefault();
-          this.navigate(href);
-        }
-      }
-    });
-  }
-
-  /**
-   * Уведомить слушателей об изменении маршрута
+   * Уведомить всех слушателей об изменении маршрута
    */
   private notifyListeners(): void {
     if (this.currentRoute) {
       this.listeners.forEach(listener => {
         try {
-          listener(this.currentRoute!, this.currentParams);
+          listener(this.currentRoute!);
         } catch (error) {
-          console.error('Ошибка слушателя роутера:', error);
+          console.error('[Router] Ошибка слушателя:', error);
         }
       });
     }
@@ -342,11 +225,12 @@ export class Router {
  * Маршруты приложения
  */
 export const APP_ROUTES: Route[] = [
-  { path: '/', component: 'MainPage', title: 'Главная' },
+  { path: '/', component: 'HomePage', title: 'Главная' },
+  { path: '/profile', component: 'ProfilePage', title: 'Профиль', requiresAuth: true, authRedirect: '/' },
   { path: '*', component: 'NotFoundPage', title: 'Страница не найдена' }
 ];
 
 /**
- * Экземпляр роутера по умолчанию
+ * Экземпляр роутера (singleton)
  */
-export const router = Router.getInstance();
+export const router = new Router();

@@ -148,15 +148,20 @@ export class Header extends Component<HeaderProps> {
    * @returns Элемент логотипа
    */
   private createLogo(): HTMLAnchorElement {
-    const logo = this.createElement(
-      'a',
-      {
-        href: '/',
-        className: 'header__logo',
-        'data-testid': 'header-logo',
-      },
-      [`<span class="header__logo-icon">${LOGO_ICON_SVG}</span>`, `<span>L_Shop</span>`],
-    );
+    const logo = this.createElement('a', {
+      href: '/',
+      className: 'header__logo',
+      'data-testid': 'header-logo',
+    });
+
+    // Создаём span для иконки и вставляем SVG через innerHTML
+    const iconSpan = this.createElement('span', { className: 'header__logo-icon' });
+    iconSpan.innerHTML = LOGO_ICON_SVG;
+    logo.appendChild(iconSpan);
+
+    // Создаём span для текста логотипа (без дополнительного класса)
+    const textSpan = this.createElement('span', {}, ['L_Shop']);
+    logo.appendChild(textSpan);
 
     this.addEventListener(logo, 'click', (e) => {
       e.preventDefault();
@@ -181,29 +186,11 @@ export class Header extends Component<HeaderProps> {
       className: 'header__nav-list',
     });
 
-    // Home link
+    // Ссылка на главную
     const homeItem = this.createElement('li', { className: 'header__nav-item' });
     const homeLink = this.createNavLink('Главная', '/', true);
     homeItem.appendChild(homeLink);
     list.appendChild(homeItem);
-
-    // Shop link
-    const shopItem = this.createElement('li', { className: 'header__nav-item' });
-    const shopLink = this.createNavLink('Магазин', '/shop');
-    shopItem.appendChild(shopLink);
-    list.appendChild(shopItem);
-
-    // About link
-    const aboutItem = this.createElement('li', { className: 'header__nav-item' });
-    const aboutLink = this.createNavLink('О нас', '/about');
-    aboutItem.appendChild(aboutLink);
-    list.appendChild(aboutItem);
-
-    // Contact link
-    const contactItem = this.createElement('li', { className: 'header__nav-item' });
-    const contactLink = this.createNavLink('Контакты', '/contact');
-    contactItem.appendChild(contactLink);
-    list.appendChild(contactItem);
 
     nav.appendChild(list);
     return nav;
@@ -252,9 +239,7 @@ export class Header extends Component<HeaderProps> {
    * @param query - Поисковый запрос
    */
   private handleSearch(query: string): void {
-    // TODO: Реализовать поиск через router.navigate или API вызов
     console.log('[Header] Search query:', query);
-    // Пример: router.navigate(`/search?q=${encodeURIComponent(query)}`);
   }
 
   /**
@@ -378,6 +363,21 @@ export class Header extends Component<HeaderProps> {
     const divider = this.createElement('div', { className: 'header__dropdown-divider' });
     this.userDropdown.appendChild(divider);
 
+    // Profile link
+    const profileItem = this.createElement('div', { className: 'header__dropdown-item' });
+    const profileButton = new Button({
+      text: 'Профиль',
+      variant: 'ghost',
+      size: 'sm',
+      testId: 'header-profile-btn',
+      onClick: () => {
+        this.closeDropdown();
+        router.navigate('/profile');
+      },
+    });
+    profileItem.appendChild(profileButton.render());
+    this.userDropdown.appendChild(profileItem);
+
     // Logout button
     const logoutItem = this.createElement('div', { className: 'header__dropdown-item' });
     const logoutButton = new Button({
@@ -479,7 +479,7 @@ export class Header extends Component<HeaderProps> {
     });
 
      // Ссылки навигации
-     const navList = this.createElement('ul', {
+    const navList = this.createElement('ul', {
       className: 'header__mobile-nav-list',
     });
 
@@ -487,21 +487,6 @@ export class Header extends Component<HeaderProps> {
     const homeLink = this.createMobileNavLink('Главная', '/');
     homeItem.appendChild(homeLink);
     navList.appendChild(homeItem);
-
-    const shopItem = this.createElement('li');
-    const shopLink = this.createMobileNavLink('Магазин', '/shop');
-    shopItem.appendChild(shopLink);
-    navList.appendChild(shopItem);
-
-    const aboutItem = this.createElement('li');
-    const aboutLink = this.createMobileNavLink('О нас', '/about');
-    aboutItem.appendChild(aboutLink);
-    navList.appendChild(aboutItem);
-
-    const contactItem = this.createElement('li');
-    const contactLink = this.createMobileNavLink('Контакты', '/contact');
-    contactItem.appendChild(contactLink);
-    navList.appendChild(contactItem);
 
     menu.appendChild(navList);
 
@@ -689,7 +674,7 @@ export class Header extends Component<HeaderProps> {
   /**
    * Called after component is mounted
    */
-  protected onMounted(): void {
+  protected onMount(): void {
     // Subscribe to store changes
     this.unsubscribe = store.subscribe('user', () => {
       this.updateUserSection();
@@ -706,7 +691,7 @@ export class Header extends Component<HeaderProps> {
   /**
    * Called after component is unmounted
    */
-  protected onUnmounted(): void {
+  protected onUnmount(): void {
     // Unsubscribe from store
     if (this.unsubscribe) {
       this.unsubscribe();

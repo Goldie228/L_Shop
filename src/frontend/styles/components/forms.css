@@ -236,6 +236,109 @@
   height: 20px;
 }
 
+/* ====== Password Toggle Button Styles ====== */
+.auth-form__password-toggle,
+.form-field__password-toggle {
+  position: absolute;
+  right: var(--spacing-3);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  padding: var(--spacing-1);
+  background: none;
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.auth-form__password-toggle:hover,
+.form-field__password-toggle:hover {
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-secondary);
+}
+
+.auth-form__password-toggle:focus-visible,
+.form-field__password-toggle:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+.auth-form__password-toggle svg,
+.form-field__password-toggle svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* Password field container positioning */
+.auth-form__password-field,
+.form-field__password-container {
+  position: relative;
+}
+
+/* ====== Password Strength Indicator ====== */
+.password-strength {
+  margin-top: var(--spacing-2);
+}
+
+.password-strength__bars {
+  display: flex;
+  gap: var(--spacing-1);
+  margin-bottom: var(--spacing-1);
+}
+
+.password-strength__bar {
+  flex: 1;
+  height: 4px;
+  background-color: var(--color-border);
+  border-radius: var(--radius-full);
+  transition: background-color var(--transition-fast);
+}
+
+.password-strength--weak .password-strength__bar:nth-child(1) {
+  background-color: var(--color-error);
+}
+
+.password-strength--medium .password-strength__bar:nth-child(1),
+.password-strength--medium .password-strength__bar:nth-child(2) {
+  background-color: var(--color-warning);
+}
+
+.password-strength--strong .password-strength__bar:nth-child(1),
+.password-strength--strong .password-strength__bar:nth-child(2),
+.password-strength--strong .password-strength__bar:nth-child(3) {
+  background-color: var(--color-success);
+}
+
+.password-strength--very-strong .password-strength__bar {
+  background-color: var(--color-success);
+}
+
+.password-strength__text {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.password-strength--weak .password-strength__text {
+  color: var(--color-error);
+}
+
+.password-strength--medium .password-strength__text {
+  color: var(--color-warning);
+}
+
+.password-strength--strong .password-strength__text,
+.password-strength--very-strong .password-strength__text {
+  color: var(--color-success);
+}
+
 /* ====== Form Actions ====== */
 .auth-form__actions {
   margin-top: var(--spacing-6);
@@ -486,4 +589,151 @@
   .auth-form__row--name {
     flex-direction: row;
   }
+}
+
+/* ====== Dark Theme ====== */
+:root.dark-theme .auth-form__title {
+  color: var(--color-text-primary-dark);
+}
+
+:root.dark-theme .auth-form__subtitle {
+  color: var(--color-text-secondary-dark);
+}
+
+:root.dark-theme .auth-form__tabs {
+  border-bottom-color: var(--color-border-primary-dark);
+}
+
+:root.dark-theme .auth-form__tab {
+  color: var(--color-text-secondary-dark);
+}
+
+:root.dark-theme .auth-form__tab:hover {
+  color: var(--color-text-primary-dark);
+  background-color: var(--color-bg-secondary-dark);
+}
+
+:root.dark-theme .auth-form__tab--active {
+  color: var(--color-accent-primary-dark);
+  border-bottom-color: var(--color-accent-primary-dark);
+}
+
+:root.dark-theme .auth-form__tab--active:hover {
+  background-color: var(--color-accent-muted-dark);
+}
+
+:root.dark-theme .form-field__label {
+  color: var(--color-text-primary-dark);
+}
+
+:root.dark-theme .form-field__input {
+  background-color: var(--color-bg-secondary-dark);
+  border-color: var(--color-border-primary-dark);
+  color: var(--color-text-primary-dark);
+}
+
+:root.dark-theme .form-field__input::placeholder {
+  color: var(--color-text-muted-dark);
+}
+
+:root.dark-theme .form-field__input:hover:not(:disabled):not(:focus) {
+  border-color: var(--color-border-secondary-dark);
+}
+
+:root.dark-theme .form-field__input:focus {
+  border-color: var(--color-accent-primary-dark);
+  box-shadow: var(--shadow-glow-accent-dark);
+}
+
+:root.dark-theme .form-field__input:disabled {
+  background-color: var(--color-bg-tertiary-dark);
+}
+
+:root.dark-theme .form-field--error .form-field__input {
+  border-color: var(--color-error-primary-dark);
+}
+
+:root.dark-theme .form-field--error .form-field__input:focus {
+  border-color: var(--color-error-primary-dark);
+  box-shadow: var(--shadow-glow-error-dark);
+}
+
+:root.dark-theme .form-field--success .form-field__input {
+  border-color: var(--color-success-primary-dark);
+}
+
+:root.dark-theme .form-field--success .form-field__input:focus {
+  border-color: var(--color-success-primary-dark);
+  box-shadow: var(--shadow-glow-success-dark);
+}
+
+:root.dark-theme .form-field__helper {
+  color: var(--color-text-secondary-dark);
+}
+
+:root.dark-theme .form-field__error {
+  color: var(--color-error-primary-dark);
+}
+
+:root.dark-theme .form-field__toggle-password {
+  color: var(--color-text-muted-dark);
+}
+
+:root.dark-theme .form-field__toggle-password:hover {
+  color: var(--color-text-primary-dark);
+  background-color: var(--color-bg-secondary-dark);
+}
+
+:root.dark-theme .auth-form__link {
+  color: var(--color-text-secondary-dark);
+}
+
+:root.dark-theme .auth-form__link a {
+  color: var(--color-accent-primary-dark);
+}
+
+:root.dark-theme .auth-form__link a:hover {
+  color: var(--color-accent-hover-dark);
+}
+
+:root.dark-theme .auth-form__divider {
+  color: var(--color-text-muted-dark);
+}
+
+:root.dark-theme .auth-form__divider::before,
+:root.dark-theme .auth-form__divider::after {
+  background-color: var(--color-border-primary-dark);
+}
+
+:root.dark-theme .auth-form__error-banner {
+  background-color: var(--color-error-muted-dark);
+  border-color: var(--color-error-primary-dark);
+  color: var(--color-error-hover-dark);
+}
+
+:root.dark-theme .auth-form__success-banner {
+  background-color: var(--color-success-muted-dark);
+  border-color: var(--color-success-primary-dark);
+  color: var(--color-success-hover-dark);
+}
+
+:root.dark-theme .form-field__phone-prefix {
+  background-color: var(--color-bg-tertiary-dark);
+  border-color: var(--color-border-primary-dark);
+  color: var(--color-text-secondary-dark);
+}
+
+:root.dark-theme .form-field--checkbox .form-field__input {
+  accent-color: var(--color-accent-primary-dark);
+}
+
+:root.dark-theme .auth-form__password-toggle,
+:root.dark-theme .form-field__password-toggle {
+  color: var(--color-text-muted-dark);
+}
+
+:root.dark-theme .auth-form__password-toggle:hover,
+:root.dark-theme .form-field__password-toggle:hover {
+  color: var(--color-text-primary-dark);
+  background-color: var(--color-bg-secondary-dark);
 }

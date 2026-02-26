@@ -515,10 +515,9 @@ export class Modal extends Component<ModalProps> {
   /**
    * Очистка при отмонтировании
    */
-  protected onUnmounted(): void {
+  protected onUnmount(): void {
     document.removeEventListener('keydown', this.handleKeyDown);
     document.body.classList.remove('modal-open');
-    super.onUnmounted();
   }
 }
 

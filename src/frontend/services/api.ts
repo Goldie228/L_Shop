@@ -73,8 +73,9 @@ export class ApiClient {
            return {} as T;
          }
          
-         const data = await response.json() as ApiResponse<T>;
-         return data.data as T;
+         // Бэкенд возвращает данные напрямую без обёртки
+         const data = await response.json() as T;
+         return data;
        }
        
        // Обработать ответы с ошибками

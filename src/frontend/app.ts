@@ -5,11 +5,44 @@
 
 import { store } from './store/store.js';
 import { router, APP_ROUTES } from './router/router.js';
-import { AuthService } from './services/auth.service.js';
+import { AuthService, AuthEventEmitter } from './services/auth.service.js';
 import { Layout } from './components/layout/Layout.js';
 import { AuthModal } from './components/auth/AuthModal.js';
-import { MainPage } from './pages/MainPage.js';
+import { ProfilePage } from './components/pages/ProfilePage.js';
 import { Route } from './router/router.js';
+
+// Тема по умолчанию
+const THEME_KEY = 'lshop-theme';
+
+/**
+ * Инициализировать тему
+ */
+function initTheme(): void {
+  const savedTheme = localStorage.getItem(THEME_KEY);
+  if (savedTheme) {
+    document.documentElement.className = savedTheme;
+  } else {
+    // По умолчанию тёмная тема
+    document.documentElement.classList.add('dark-theme');
+    localStorage.setItem(THEME_KEY, 'dark-theme');
+  }
+}
+
+/**
+ * Переключить тему
+ */
+export function toggleTheme(): void {
+  const isDark = document.documentElement.classList.contains('dark-theme');
+  if (isDark) {
+    document.documentElement.classList.remove('dark-theme');
+    document.documentElement.classList.add('light-theme');
+    localStorage.setItem(THEME_KEY, 'light-theme');
+  } else {
+    document.documentElement.classList.remove('light-theme');
+    document.documentElement.classList.add('dark-theme');
+    localStorage.setItem(THEME_KEY, 'dark-theme');
+  }
+}
 
 /**
  * Application class
@@ -18,13 +51,10 @@ import { Route } from './router/router.js';
 class App {
   /** Компонент макета */
   private layout: Layout | null = null;
-  
+
   /** Модальное окно аутентификации */
   private authModal: AuthModal | null = null;
-  
-  /** Текущий компонент страницы */
-  private currentPage: MainPage | null = null;
-  
+
   /** Элемент-контейнер приложения */
   private appContainer: HTMLElement | null = null;
 
@@ -103,9 +133,25 @@ class App {
   private renderLayout(): void {
     if (!this.appContainer) return;
     
+    // Создать и инициализировать модальное окно аутентификации
+    this.authModal = new AuthModal({
+      onAuth: () => this.handleAuthSuccess(),
+    });
+    document.body.appendChild(this.authModal.render());
+    
     // Создать макет с Header, основной областью контента и Footer
-    this.layout = new Layout();
+    this.layout = new Layout({
+      onLoginClick: () => this.openAuthModal(),
+    });
     this.layout.mount(this.appContainer);
+  }
+
+  /**
+   * Обработать успешную аутентификацию
+   */
+  private handleAuthSuccess(): void {
+    // Обновить UI после успешной авторизации
+    console.log('Авторизация успешна');
   }
 
   /**
@@ -114,32 +160,74 @@ class App {
    */
   private handleRouteChange(route: Route): void {
     if (!this.layout) return;
-    
+
     const mainContent = this.layout.getMainContent();
     if (!mainContent) return;
-    
-    // Очистить текущую страницу
-    if (this.currentPage) {
-      this.currentPage.unmount();
-      this.currentPage = null;
+
+    // Проверить требуется ли авторизация
+    if (route.requiresAuth && !store.isAuthenticated()) {
+      router.navigate(route.authRedirect || '/');
+      return;
     }
-    
-    // Отрендерить новую страницу на основе маршрута
+
+    // Отрендерить страницу на основе маршрута
     switch (route.component) {
-      case 'MainPage':
-        this.currentPage = new MainPage({
-          onAuthClick: () => this.openAuthModal()
-        });
-        this.currentPage.mount(mainContent);
+      case 'HomePage':
+        this.renderHomePage();
         break;
-        
+
+      case 'ProfilePage':
+        this.renderProfilePage();
+        break;
+
       case 'NotFoundPage':
         this.renderNotFoundPage();
         break;
-        
+
       default:
         this.renderNotFoundPage();
     }
+  }
+
+  /**
+   * Отрендерить страницу профиля
+   */
+  private renderProfilePage(): void {
+    if (!this.layout) return;
+
+    const mainContent = this.layout.getMainContent();
+    if (!mainContent) return;
+
+    const user = store.getUser();
+    if (!user) {
+      router.navigate('/');
+      return;
+    }
+
+    mainContent.innerHTML = '';
+    const profilePage = new ProfilePage({ user });
+    mainContent.appendChild(profilePage.render());
+  }
+
+  /**
+   * Отрендерить домашнюю страницу (заглушка)
+   */
+  private renderHomePage(): void {
+    if (!this.layout) return;
+
+    const mainContent = this.layout.getMainContent();
+    if (!mainContent) return;
+
+    mainContent.innerHTML = `
+      <div class="page home-page">
+        <div class="container text-center">
+          <h1 class="page__title">Добро пожаловать в L_Shop</h1>
+          <p class="text-secondary">
+            Базовый фундамент приложения готов. Авторизация работает.
+          </p>
+        </div>
+      </div>
+    `;
   }
 
   /**
@@ -170,17 +258,7 @@ class App {
       this.authModal.open('login');
     }
   }
-  
-  /**
-   * Обработать успешную аутентификацию
-   */
-  private handleAuthSuccess(): void {
-    // Обновить страницу для обновления состояния пользователя
-    if (this.currentPage) {
-      this.currentPage.update();
-    }
-  }
-  
+
   /**
    * Показать сообщение об ошибке
    * @param message - Сообщение об ошибке
@@ -204,6 +282,9 @@ class App {
 
 // Инициализировать приложение при готовности DOM
 document.addEventListener('DOMContentLoaded', () => {
+  // Инициализировать тему
+  initTheme();
+  
   const app = new App();
   app.init();
 });

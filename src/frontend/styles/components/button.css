@@ -267,3 +267,99 @@
     width: 100%;
   }
 }
+
+/* ====== Dark Theme ====== */
+:root.dark-theme .btn {
+  box-shadow: var(--shadow-dark-2);
+}
+
+:root.dark-theme .btn--primary {
+  background-color: var(--color-accent-primary-dark);
+  color: var(--color-text-inverse);
+  border-color: var(--color-accent-primary-dark);
+}
+
+:root.dark-theme .btn--primary:hover:not(:disabled) {
+  background-color: var(--color-accent-hover-dark);
+  border-color: var(--color-accent-hover-dark);
+  box-shadow: var(--shadow-glow-accent-dark);
+}
+
+:root.dark-theme .btn--primary:active:not(:disabled) {
+  background-color: var(--color-accent-active-dark);
+  border-color: var(--color-accent-active-dark);
+}
+
+:root.dark-theme .btn--secondary {
+  background-color: var(--color-bg-secondary-dark);
+  color: var(--color-text-primary-dark);
+  border-color: var(--color-border-primary-dark);
+}
+
+:root.dark-theme .btn--secondary:hover:not(:disabled) {
+  background-color: var(--color-bg-tertiary-dark);
+  border-color: var(--color-border-secondary-dark);
+  box-shadow: var(--shadow-dark-3);
+}
+
+:root.dark-theme .btn--secondary:active:not(:disabled) {
+  background-color: var(--color-bg-elevated-dark);
+}
+
+:root.dark-theme .btn--ghost {
+  color: var(--color-text-secondary-dark);
+}
+
+:root.dark-theme .btn--ghost:hover:not(:disabled) {
+  background-color: var(--state-hover-bg-dark);
+  color: var(--color-text-primary-dark);
+}
+
+:root.dark-theme .btn--ghost:active:not(:disabled) {
+  background-color: var(--state-active-bg-dark);
+}
+
+:root.dark-theme .btn--danger {
+  background-color: var(--color-error-primary-dark);
+  border-color: var(--color-error-primary-dark);
+}
+
+:root.dark-theme .btn--danger:hover:not(:disabled) {
+  background-color: var(--color-error-hover-dark);
+  border-color: var(--color-error-hover-dark);
+  box-shadow: var(--shadow-glow-error-dark);
+}
+
+:root.dark-theme .btn--success {
+  background-color: var(--color-success-primary-dark);
+  border-color: var(--color-success-primary-dark);
+}
+
+:root.dark-theme .btn--success:hover:not(:disabled) {
+  background-color: var(--color-success-hover-dark);
+  border-color: var(--color-success-hover-dark);
+  box-shadow: var(--shadow-glow-success-dark);
+}
+
+:root.dark-theme .btn--link {
+  color: var(--color-accent-primary-dark);
+}
+
+:root.dark-theme .btn--link:hover:not(:disabled) {
+  color: var(--color-accent-hover-dark);
+}
+
+:root.dark-theme .btn:focus-visible {
+  box-shadow: var(--shadow-glow-accent-dark);
+}
+
+/* Spinner для dark theme */
+:root.dark-theme .btn--loading::after {
+  border-color: var(--color-text-primary-dark);
+  border-top-color: transparent;
+}
+
+:root.dark-theme .btn--primary.btn--loading::after {
+  border-color: var(--color-text-inverse);
+  border-top-color: transparent;
+}

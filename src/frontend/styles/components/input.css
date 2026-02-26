@@ -352,3 +352,205 @@
     border-top-right-radius: 0;
   }
 }
+
+/* ====== Dark Theme ====== */
+:root.dark-theme .form-label {
+  color: var(--color-text-primary-dark);
+}
+
+:root.dark-theme .input {
+  color: var(--color-text-primary-dark);
+  background-color: var(--color-bg-secondary-dark);
+  border-color: var(--color-border-primary-dark);
+}
+
+:root.dark-theme .input::placeholder {
+  color: var(--color-text-muted-dark);
+}
+
+:root.dark-theme .input:hover:not(:disabled):not(:focus) {
+  border-color: var(--color-border-secondary-dark);
+}
+
+:root.dark-theme .input:focus {
+  border-color: var(--color-accent-primary-dark);
+  box-shadow: var(--shadow-glow-accent-dark);
+}
+
+:root.dark-theme .input:disabled {
+  background-color: var(--color-bg-tertiary-dark);
+  color: var(--color-text-muted-dark);
+}
+
+:root.dark-theme .input--error {
+  border-color: var(--color-error-primary-dark);
+}
+
+:root.dark-theme .input--error:hover:not(:disabled):not(:focus) {
+  border-color: var(--color-error-hover-dark);
+}
+
+:root.dark-theme .input--error:focus {
+  border-color: var(--color-error-primary-dark);
+  box-shadow: var(--shadow-glow-error-dark);
+}
+
+:root.dark-theme .input--success {
+  border-color: var(--color-success-primary-dark);
+}
+
+:root.dark-theme .input--success:focus {
+  border-color: var(--color-success-primary-dark);
+  box-shadow: var(--shadow-glow-success-dark);
+}
+
+:root.dark-theme .input-icon {
+  color: var(--color-text-muted-dark);
+}
+
+:root.dark-theme .checkbox__input,
+:root.dark-theme .radio__input {
+  background-color: var(--color-bg-secondary-dark);
+  border-color: var(--color-border-primary-dark);
+}
+
+:root.dark-theme .checkbox__input:hover,
+:root.dark-theme .radio__input:hover {
+  border-color: var(--color-accent-primary-dark);
+}
+
+:root.dark-theme .checkbox__input:focus,
+:root.dark-theme .radio__input:focus {
+  border-color: var(--color-accent-primary-dark);
+  box-shadow: var(--shadow-glow-accent-dark);
+}
+
+:root.dark-theme .checkbox__input:checked,
+:root.dark-theme .radio__input:checked {
+  background-color: var(--color-accent-primary-dark);
+  border-color: var(--color-accent-primary-dark);
+}
+
+:root.dark-theme .checkbox__input:disabled,
+:root.dark-theme .radio__input:disabled {
+  background-color: var(--color-bg-tertiary-dark);
+  border-color: var(--color-border-primary-dark);
+}
+
+:root.dark-theme .checkbox__label,
+:root.dark-theme .radio__label {
+  color: var(--color-text-primary-dark);
+}
+
+:root.dark-theme .form-helper {
+  color: var(--color-text-secondary-dark);
+}
+
+:root.dark-theme .form-helper--error {
+  color: var(--color-error-primary-dark);
+}
+
+:root.dark-theme .form-helper--success {
+  color: var(--color-success-primary-dark);
+}
+
+:root.dark-theme .password-toggle {
+  color: var(--color-text-muted-dark);
+}
+
+:root.dark-theme .password-toggle:hover {
+  color: var(--color-text-primary-dark);
+}
+
+/* ====== Password Toggle Button (from Input component) ====== */
+.form-field__toggle-password {
+  position: absolute;
+  right: var(--spacing-3);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  padding: var(--spacing-1);
+  background: none;
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.form-field__toggle-password:hover {
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-secondary);
+}
+
+.form-field__toggle-password:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+.form-field__toggle-password svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* Positioning for password input wrapper */
+.form-field--password .form-field__input-wrapper {
+  position: relative;
+}
+
+/* Adjust input padding for toggle button */
+.form-field--password .form-field__input {
+  padding-right: 2.75rem;
+}
+
+/* ====== Dark Theme for Password Toggle ====== */
+:root.dark-theme .form-field__toggle-password {
+  color: var(--color-text-muted-dark);
+}
+
+:root.dark-theme .form-field__toggle-password:hover {
+  color: var(--color-text-primary-dark);
+  background-color: var(--color-bg-secondary-dark);
+}
+
+/* ====== Success Icon ====== */
+.form-field__success-icon {
+  position: absolute;
+  right: var(--spacing-3);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  color: var(--color-success);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.form-field__success-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Adjust input padding when success icon is shown */
+.form-field--success .form-field__input {
+  padding-right: 2.75rem;
+}
+
+/* ====== Error Icon ====== */
+.form-field__error-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: var(--color-error);
+}
+
+.form-field__error-text {
+  font-size: var(--font-size-xs);
+}

@@ -399,3 +399,107 @@ table {
     font-size: var(--font-size-2xl);
   }
 }
+
+/* ====== Dark Theme Base ====== */
+:root.dark-theme {
+  background-color: var(--color-bg-base);
+}
+
+:root.dark-theme body {
+  background-color: var(--color-bg-primary-dark);
+  color: var(--color-text-primary-dark);
+}
+
+:root.dark-theme h1,
+:root.dark-theme h2,
+:root.dark-theme h3,
+:root.dark-theme h4,
+:root.dark-theme h5,
+:root.dark-theme h6 {
+  color: var(--color-text-primary-dark);
+}
+
+:root.dark-theme a {
+  color: var(--color-accent-primary-dark);
+}
+
+:root.dark-theme a:hover {
+  color: var(--color-accent-hover-dark);
+}
+
+:root.dark-theme ::selection {
+  background-color: var(--color-accent-muted-dark);
+  color: var(--color-text-primary-dark);
+}
+
+:root.dark-theme ::-webkit-scrollbar-track {
+  background: var(--color-bg-secondary-dark);
+}
+
+:root.dark-theme ::-webkit-scrollbar-thumb {
+  background: var(--color-border-secondary-dark);
+}
+
+:root.dark-theme ::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted-dark);
+}
+
+:root.dark-theme .spinner {
+  border-color: var(--color-border-primary-dark);
+  border-top-color: var(--color-accent-primary-dark);
+}
+
+:root.dark-theme .card {
+  background-color: var(--color-bg-secondary-dark);
+  border-color: var(--color-border-primary-dark);
+}
+
+:root.dark-theme .alert--success {
+  background-color: var(--color-success-muted-dark);
+  color: var(--color-success-hover-dark);
+  border-color: var(--color-success-primary-dark);
+}
+
+:root.dark-theme .alert--error {
+  background-color: var(--color-error-muted-dark);
+  color: var(--color-error-hover-dark);
+  border-color: var(--color-error-primary-dark);
+}
+
+:root.dark-theme .alert--warning {
+  background-color: var(--color-warning-muted-dark);
+  color: var(--color-warning-hover-dark);
+  border-color: var(--color-warning-primary-dark);
+}
+
+:root.dark-theme .page__title {
+  color: var(--color-text-primary-dark);
+}
+
+:root.dark-theme .text-primary {
+  color: var(--color-text-primary-dark);
+}
+
+:root.dark-theme .text-secondary {
+  color: var(--color-text-secondary-dark);
+}
+
+:root.dark-theme .text-muted {
+  color: var(--color-text-muted-dark);
+}
+
+:root.dark-theme .app-loading {
+  color: var(--color-text-secondary-dark);
+}
+
+:root.dark-theme .noscript-warning {
+  background: var(--color-bg-primary-dark);
+}
+
+:root.dark-theme .not-found__title {
+  color: var(--color-accent-primary-dark);
+}
+
+:root.dark-theme .not-found__text {
+  color: var(--color-text-secondary-dark);
+}

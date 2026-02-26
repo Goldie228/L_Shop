@@ -134,26 +134,28 @@ export function validateEmail(email: string): ValidationResult {
 }
 
 /**
- * Валидировать формат логина
- * @param login - Логин для валидации
+ * Валидировать логин или email (для поля входа)
+ * @param loginOrEmail - Логин или email для валидации
  * @returns Результат валидации
  */
-export function validateLogin(login: string): ValidationResult {
-  if (!login.trim()) {
-    return { isValid: false, error: 'Логин обязателен' };
+export function validateLogin(loginOrEmail: string): ValidationResult {
+  if (!loginOrEmail.trim()) {
+    return { isValid: false, error: 'Логин или email обязателен' };
   }
   
-  if (login.length < 3) {
+  // Проверяем, является ли ввод email
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (emailRegex.test(loginOrEmail)) {
+    return { isValid: true, error: null };
+  }
+  
+  // Иначе проверяем как логин
+  if (loginOrEmail.length < 3) {
     return { isValid: false, error: 'Логин должен содержать минимум 3 символа' };
   }
   
-  if (login.length > 30) {
+  if (loginOrEmail.length > 30) {
     return { isValid: false, error: 'Логин должен содержать максимум 30 символов' };
-  }
-  
-  const loginRegex = /^[a-zA-Z0-9_]+$/;
-  if (!loginRegex.test(login)) {
-    return { isValid: false, error: 'Логин может содержать только буквы, цифры и подчеркивания' };
   }
   
   return { isValid: true, error: null };

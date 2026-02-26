@@ -2,7 +2,42 @@
 
 ## Введение
 
-Ты разрабатываешь модуль корзины для интернет-магазина L_Shop. Проект уже содержит базовую инфраструктуру и аутентификацию. Твоя задача — реализовать backend и frontend для работы с корзиной.
+Ты разрабатываешь модуль корзины для интернет-магазина L_Shop. Проект уже содержит базовую инфраструктуру, созданную тимлидом (Глебом):
+
+- ✅ Базовый компонент `Component` с жизненным циклом и state management
+- ✅ Router для навигации
+- ✅ Store для управления состоянием
+- ✅ API клиент с типизацией
+- ✅ AuthService для аутентификации
+- ✅ UI компоненты: Button, Input, Modal
+- ✅ Layout компоненты: Header, Footer, Layout
+- ✅ Jest конфигурация для frontend и backend тестов
+
+Твоя задача — реализовать backend и frontend для работы с корзиной.
+
+## Существующая структура проекта
+
+```
+src/
+├── backend/
+│   ├── controllers/       # Контроллеры (auth.controller.ts готов)
+│   ├── services/           # Сервисы (user.service.ts, session.service.ts)
+│   ├── routes/             # Маршруты (auth.routes.ts готов)
+│   ├── models/             # Модели (user.model.ts, session.model.ts)
+│   ├── utils/              # Утилиты (file.utils.ts, id.utils.ts, validators.ts)
+│   └── __tests__/          # Backend тесты
+├── frontend/
+│   ├── components/
+│   │   ├── base/           # Component.ts - базовый класс
+│   │   ├── ui/             # Button.ts, Input.ts, Modal.ts
+│   │   ├── layout/         # Header.ts, Footer.ts, Layout.ts
+│   │   └── auth/           # AuthModal.ts, LoginForm.ts, RegisterForm.ts
+│   ├── services/           # api.ts, auth.service.ts
+│   ├── store/              # store.ts - управление состоянием
+│   ├── router/             # router.ts - маршрутизация
+│   ├── types/              # user.ts, api.ts
+│   └── __tests__/          # Frontend тесты
+```
 
 ## Вариант 21 - Особенности
 
@@ -15,9 +50,10 @@
 
 ### Файлы для создания:
 
-1. `src/backend/controllers/cart.controller.ts`
-2. `src/backend/services/cart.service.ts`
-3. `src/backend/routes/cart.routes.ts`
+1. `src/backend/models/cart.model.ts` - модель корзины
+2. `src/backend/controllers/cart.controller.ts` - контроллер
+3. `src/backend/services/cart.service.ts` - сервис
+4. `src/backend/routes/cart.routes.ts` - маршруты
 
 ### API Endpoints:
 
@@ -80,19 +116,71 @@
 
 Удалить продукт из корзины.
 
+### Реализация модели:
+
+```typescript
+// src/backend/models/cart.model.ts
+
+/**
+ * Элемент корзины
+ */
+export interface CartItem {
+  /** ID продукта */
+  productId: string;
+  /** Количество */
+  quantity: number;
+}
+
+/**
+ * Корзина пользователя
+ */
+export interface Cart {
+  /** ID пользователя */
+  userId: string;
+  /** Элементы корзины */
+  items: CartItem[];
+  /** Дата обновления */
+  updatedAt: string;
+}
+
+/**
+ * Элемент корзины с данными продукта (для ответа API)
+ */
+export interface CartItemWithProduct extends CartItem {
+  /** Название продукта */
+  name: string;
+  /** Цена продукта */
+  price: number;
+  /** Процент скидки (Вариант 21) */
+  discountPercent?: number;
+  /** Итоговая сумма */
+  total: number;
+}
+
+/**
+ * Корзина с обогащёнными данными (для ответа API)
+ */
+export interface CartWithProducts extends Cart {
+  /** Элементы с данными продуктов */
+  items: CartItemWithProduct[];
+  /** Общая сумма */
+  totalSum: number;
+}
+```
+
 ### Реализация сервиса:
 
 ```typescript
-// cart.service.ts
+// src/backend/services/cart.service.ts
 import { readJsonFile, writeJsonFile } from '../utils/file.utils';
-import { Cart, CartItem } from '../models/cart.model';
+import { Cart, CartItem, CartItemWithProduct, CartWithProducts } from '../models/cart.model';
 import { Product } from '../models/product.model';
 
 const CARTS_FILE = 'carts.json';
 const PRODUCTS_FILE = 'products.json';
 
 export class CartService {
-  async getCart(userId: string) {
+  async getCart(userId: string): Promise<CartWithProducts> {
     const carts = await readJsonFile<Cart>(CARTS_FILE);
     const products = await readJsonFile<Product>(PRODUCTS_FILE);
     
@@ -106,6 +194,7 @@ export class CartService {
       const product = products.find(p => p.id === item.productId);
       const price = product?.price || 0;
       const discount = product?.discountPercent || 0;
+      // Вариант 21: учитываем скидку при расчёте
       const total = item.quantity * price * (1 - discount / 100);
       
       return {
@@ -113,7 +202,7 @@ export class CartService {
         name: product?.name || 'Unknown',
         price,
         discountPercent: discount,
-        total
+        total,
       };
     });
     
@@ -122,16 +211,80 @@ export class CartService {
     return { ...cart, items, totalSum };
   }
   
-  async addItem(userId: string, productId: string, quantity: number) {
-    // Реализуй логику добавления
+  async addItem(userId: string, productId: string, quantity: number): Promise<CartWithProducts> {
+    const carts = await readJsonFile<Cart>(CARTS_FILE);
+    const products = await readJsonFile<Product>(PRODUCTS_FILE);
+    
+    // Проверяем существование продукта
+    const product = products.find(p => p.id === productId);
+    if (!product) {
+      throw new Error('Product not found');
+    }
+    
+    // Проверяем наличие
+    if (!product.inStock) {
+      throw new Error('Product is out of stock');
+    }
+    
+    // Ищем или создаём корзину
+    let cart = carts.find(c => c.userId === userId);
+    if (!cart) {
+      cart = { userId, items: [], updatedAt: new Date().toISOString() };
+      carts.push(cart);
+    }
+    
+    // Добавляем или обновляем элемент
+    const existingItem = cart.items.find(i => i.productId === productId);
+    if (existingItem) {
+      existingItem.quantity += quantity;
+    } else {
+      cart.items.push({ productId, quantity });
+    }
+    
+    cart.updatedAt = new Date().toISOString();
+    await writeJsonFile(CARTS_FILE, carts);
+    
+    return this.getCart(userId);
   }
   
-  async updateItem(userId: string, productId: string, quantity: number) {
-    // Реализуй логику обновления
+  async updateItem(userId: string, productId: string, quantity: number): Promise<CartWithProducts> {
+    const carts = await readJsonFile<Cart>(CARTS_FILE);
+    const cart = carts.find(c => c.userId === userId);
+    
+    if (!cart) {
+      throw new Error('Cart not found');
+    }
+    
+    const item = cart.items.find(i => i.productId === productId);
+    if (!item) {
+      throw new Error('Item not found in cart');
+    }
+    
+    if (quantity <= 0) {
+      cart.items = cart.items.filter(i => i.productId !== productId);
+    } else {
+      item.quantity = quantity;
+    }
+    
+    cart.updatedAt = new Date().toISOString();
+    await writeJsonFile(CARTS_FILE, carts);
+    
+    return this.getCart(userId);
   }
   
-  async removeItem(userId: string, productId: string) {
-    // Реализуй логику удаления
+  async removeItem(userId: string, productId: string): Promise<CartWithProducts> {
+    const carts = await readJsonFile<Cart>(CARTS_FILE);
+    const cart = carts.find(c => c.userId === userId);
+    
+    if (!cart) {
+      throw new Error('Cart not found');
+    }
+    
+    cart.items = cart.items.filter(i => i.productId !== productId);
+    cart.updatedAt = new Date().toISOString();
+    await writeJsonFile(CARTS_FILE, carts);
+    
+    return this.getCart(userId);
   }
 }
 ```
@@ -147,6 +300,80 @@ app.use('/api/cart', cartRoutes);
 
 ## Frontend
 
+### Использование существующей инфраструктуры
+
+#### Базовый компонент
+
+Все твои компоненты должны наследоваться от базового класса:
+
+```typescript
+import { Component, ComponentProps } from '../components/base/Component';
+
+interface CartItemProps extends ComponentProps {
+  item: CartItemWithProduct;
+  onQuantityChange?: (productId: string, quantity: number) => void;
+  onRemove?: (productId: string) => void;
+}
+
+export class CartItemComponent extends Component<CartItemProps> {
+  // Реализация
+}
+```
+
+#### Store для состояния
+
+Используй существующий Store для управления состоянием корзины:
+
+```typescript
+import { Store } from '../store/store';
+
+// Подписка на изменения корзины
+Store.subscribe('cart', (cart) => {
+  // Обновить UI
+});
+
+// Получить текущее состояние
+const user = Store.getState().user;
+const isAuthenticated = Store.getState().isAuthenticated;
+```
+
+#### API клиент
+
+Используй существующий API клиент:
+
+```typescript
+import { api } from '../services/api';
+
+// GET запрос
+const cart = await api.get<CartWithProducts>('/api/cart');
+
+// POST запрос
+await api.post<CartWithProducts>('/api/cart/items', { productId, quantity });
+
+// PUT запрос
+await api.put<CartWithProducts>(`/api/cart/items/${productId}`, { quantity });
+
+// DELETE запрос
+await api.delete<CartWithProducts>(`/api/cart/items/${productId}`);
+```
+
+#### Router
+
+Используй существующий Router:
+
+```typescript
+import { Router } from '../router/router';
+
+// Навигация на страницу доставки
+Router.navigate('/delivery');
+
+// Проверка авторизации перед переходом в корзину
+if (!Store.getState().isAuthenticated) {
+  // Показать модальное окно авторизации
+  Router.navigate('/');
+}
+```
+
 ### Структура файлов для создания:
 
 ```
@@ -158,6 +385,8 @@ src/frontend/
 │       └── CartSummary.ts      # Итого корзины
 ├── pages/
 │   └── CartPage.ts             # Страница корзины
+├── types/
+│   └── cart.ts                 # Типы корзины
 ├── styles/
 │   └── components/
 │       └── cart.css            # Стили корзины
@@ -170,14 +399,134 @@ src/frontend/
 - Цена с атрибутом `data-price="basket"`
 - Кнопки +/- для количества
 - Кнопка удаления
+- **Вариант 21:** Отображение скидки (зачёркнутая старая цена, новая цена)
 
 #### CartPage
 - Только для авторизованных
 - Список товаров
 - Кнопка "Оформить доставку"
 
-### Важно:
-- Используй существующую инфраструктуру (Component, Router, Store, API)
+### Пример реализации CartItem:
+
+```typescript
+// src/frontend/components/cart/CartItem.ts
+import { Component, ComponentProps } from '../base/Component';
+import { Button } from '../ui/Button';
+import { CartItemWithProduct } from '../../types/cart';
+
+export interface CartItemProps extends ComponentProps {
+  item: CartItemWithProduct;
+  onQuantityChange?: (productId: string, quantity: number) => void;
+  onRemove?: (productId: string) => void;
+}
+
+export class CartItemComponent extends Component<CartItemProps> {
+  private decreaseBtn: Button | null = null;
+  private increaseBtn: Button | null = null;
+  private removeBtn: Button | null = null;
+
+  protected getDefaultProps(): CartItemProps {
+    return {
+      ...super.getDefaultProps(),
+      item: {} as CartItemWithProduct,
+    };
+  }
+
+  public render(): HTMLElement {
+    const { item } = this.props;
+    
+    this.element = this.createElement('div', {
+      className: 'cart-item',
+    });
+
+    // Название с data-title="basket"
+    const title = this.createElement('h3', {
+      className: 'cart-item__title',
+      'data-title': 'basket', // Обязательный атрибут
+    }, [item.name]);
+
+    // Цена с data-price="basket"
+    const priceContainer = this.createElement('div', {
+      className: 'cart-item__price-container',
+    });
+
+    // Вариант 21: отображение скидки
+    if (item.discountPercent && item.discountPercent > 0) {
+      const oldPrice = this.createElement('span', {
+        className: 'cart-item__price--old',
+      }, [`${item.price} ₽`]);
+      
+      const newPrice = this.createElement('span', {
+        className: 'cart-item__price--new',
+        'data-price': 'basket', // Обязательный атрибут
+      }, [`${(item.price * (1 - item.discountPercent / 100)).toFixed(2)} ₽`]);
+      
+      const discount = this.createElement('span', {
+        className: 'cart-item__discount',
+      }, [`-${item.discountPercent}%`]);
+      
+      priceContainer.append(oldPrice, newPrice, discount);
+    } else {
+      const price = this.createElement('span', {
+        className: 'cart-item__price',
+        'data-price': 'basket', // Обязательный атрибут
+      }, [`${item.price} ₽`]);
+      priceContainer.appendChild(price);
+    }
+
+    // Управление количеством
+    const quantityControl = this.createElement('div', {
+      className: 'cart-item__quantity',
+    });
+
+    this.decreaseBtn = new Button({
+      text: '-',
+      variant: 'secondary',
+      onClick: () => this.handleQuantityChange(-1),
+    });
+
+    const quantityValue = this.createElement('span', {
+      className: 'cart-item__quantity-value',
+    }, [String(item.quantity)]);
+
+    this.increaseBtn = new Button({
+      text: '+',
+      variant: 'secondary',
+      onClick: () => this.handleQuantityChange(1),
+    });
+
+    this.decreaseBtn.mount(quantityControl);
+    quantityControl.appendChild(quantityValue);
+    this.increaseBtn.mount(quantityControl);
+
+    // Кнопка удаления
+    this.removeBtn = new Button({
+      text: 'Удалить',
+      variant: 'danger',
+      onClick: () => this.props.onRemove?.(item.productId),
+    });
+
+    // Итого для позиции
+    const total = this.createElement('span', {
+      className: 'cart-item__total',
+    }, [`Итого: ${item.total.toFixed(2)} ₽`]);
+
+    // Собираем элемент
+    this.element.append(title, priceContainer, quantityControl);
+    this.removeBtn.mount(this.element);
+    this.element.appendChild(total);
+
+    return this.element;
+  }
+
+  private handleQuantityChange(delta: number): void {
+    const newQuantity = this.props.item.quantity + delta;
+    if (newQuantity > 0) {
+      this.props.onQuantityChange?.(this.props.item.productId, newQuantity);
+    }
+  }
+}
+```
 
 ## Тестирование
 
@@ -296,6 +645,25 @@ describe('CartService', () => {
       const item = savedCart[0].items.find(i => i.productId === 'product-1');
       expect(item?.quantity).toBe(3);
     });
+
+    it('должен выбросить ошибку для несуществующего продукта', async () => {
+      mockReadJsonFile
+        .mockResolvedValueOnce(mockCarts)
+        .mockResolvedValueOnce(mockProducts);
+
+      await expect(cartService.addItem('user-1', 'non-existent', 1))
+        .rejects.toThrow('Product not found');
+    });
+
+    it('должен выбросить ошибку для продукта не в наличии', async () => {
+      const productsNotInStock = [{ ...mockProducts[0], inStock: false }];
+      mockReadJsonFile
+        .mockResolvedValueOnce(mockCarts)
+        .mockResolvedValueOnce(productsNotInStock);
+
+      await expect(cartService.addItem('user-1', 'product-1', 1))
+        .rejects.toThrow('Product is out of stock');
+    });
   });
 
   describe('updateItem', () => {
@@ -308,6 +676,16 @@ describe('CartService', () => {
       const savedCart = mockWriteJsonFile.mock.calls[0][1] as Cart[];
       const item = savedCart[0].items.find(i => i.productId === 'product-1');
       expect(item?.quantity).toBe(5);
+    });
+
+    it('должен удалить товар при количестве 0', async () => {
+      mockReadJsonFile.mockResolvedValueOnce(mockCarts);
+      mockWriteJsonFile.mockResolvedValue();
+
+      await cartService.updateItem('user-1', 'product-1', 0);
+
+      const savedCart = mockWriteJsonFile.mock.calls[0][1] as Cart[];
+      expect(savedCart[0].items).toHaveLength(0);
     });
   });
 
@@ -328,7 +706,8 @@ describe('CartService', () => {
 ### Запуск тестов
 
 ```bash
-npm test                    # Запустить все тесты
+npm test                    # Запустить все backend тесты
+npm run test:frontend       # Запустить frontend тесты
 npm run test:watch          # Режим наблюдения
 npm run test:coverage       # С отчётом покрытия
 ```
@@ -415,15 +794,15 @@ function foo() {
 
 ## Финальный чек-лист
 
-- [ ] Backend: controller, service, routes
+- [ ] Backend: model, controller, service, routes
 - [ ] API: GET /api/cart
 - [ ] API: POST /api/cart/items
 - [ ] API: PUT /api/cart/items/:productId
 - [ ] API: DELETE /api/cart/items/:productId
-- [ ] Frontend: Страница корзины
-- [ ] Frontend: Компоненты Cart, CartItem
+- [ ] Frontend: Типы корзины (cart.ts)
+- [ ] Frontend: Страница корзины (CartPage)
+- [ ] Frontend: Компоненты CartItem, CartList, CartSummary
 - [ ] Data-атрибуты: data-title="basket", data-price="basket"
-- [ ] Вариант 21: скидки, discountPercent
+- [ ] Вариант 21: скидки, discountPercent, отображение скидки
 - [ ] Тесты: unit-тесты для CartService
 - [ ] Git: ветка, коммиты, PR
-

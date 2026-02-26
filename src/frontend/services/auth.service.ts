@@ -52,11 +52,19 @@ export class AuthService {
    * @throws ApiError при ошибке
    */
   public static async login(credentials: LoginUserData): Promise<User> {
+    console.log('[AuthService] Login attempt:', {
+      login: credentials.loginOrEmail,
+      passwordLength: credentials.password?.length
+    });
+    
     const response = await api.post<LoginApiResponse>(AUTH_ENDPOINTS.LOGIN, {
       login: credentials.loginOrEmail,
       password: credentials.password
     });
     
+    console.log('[AuthService] Login response:', response);
+    
+    // Бэкенд возвращает { message, user }
     return response.user;
   }
 
@@ -96,8 +104,9 @@ export class AuthService {
    */
   public static async getCurrentUser(): Promise<User | null> {
     try {
-      const response = await api.get<MeApiResponse>(AUTH_ENDPOINTS.ME);
-      return response.user;
+      // Бэкенд возвращает пользователя напрямую, без обёртки { user: ... }
+      const response = await api.get<User>(AUTH_ENDPOINTS.ME);
+      return response;
     } catch (error) {
       // Возвращать null при ошибках авторизации
       if (error instanceof Error && 'statusCode' in error) {

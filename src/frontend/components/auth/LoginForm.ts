@@ -9,8 +9,9 @@
 import { Component, ComponentProps } from '../base/Component.js';
 import { Input } from '../ui/Input.js';
 import { Button } from '../ui/Button.js';
-import { AuthService } from '../../services/auth.service.js';
+import { AuthService, AuthEventEmitter } from '../../services/auth.service.js';
 import { store } from '../../store/store.js';
+import { router } from '../../router/router.js';
 import { LoginUserData, validateLogin, validatePassword } from '../../types/user.js';
 import { ApiError, NetworkError } from '../../types/api.js';
 
@@ -188,7 +189,7 @@ export class LoginForm extends Component<LoginFormProps> {
   }
 
    /**
-    * Создать поле пароля с кнопкой переключения
+    * Создать поле пароля (Input уже имеет встроенный toggle)
     * @returns Контейнер поля пароля
     */
    private createPasswordField(): HTMLDivElement {
@@ -196,10 +197,10 @@ export class LoginForm extends Component<LoginFormProps> {
       className: 'auth-form__password-field',
     });
     
-    // Password input
+    // Password input - Input компонент уже имеет встроенный toggle для пароля
     const passwordInput = new Input({
       name: 'password',
-      type: this.state.showPassword ? 'text' : 'password',
+      type: 'password',
       label: 'Пароль',
       placeholder: 'Введите пароль',
       required: true,
@@ -213,9 +214,7 @@ export class LoginForm extends Component<LoginFormProps> {
     this.inputs.set('password', passwordInput);
     container.appendChild(passwordInput.render());
     
-    // Password toggle button
-    this.passwordToggleButton = this.createPasswordToggleButton();
-    container.appendChild(this.passwordToggleButton);
+    // Не добавляем отдельную кнопку toggle - Input уже имеет её
     
     return container;
   }
@@ -225,16 +224,15 @@ export class LoginForm extends Component<LoginFormProps> {
     * @returns Элемент кнопки переключения
     */
    private createPasswordToggleButton(): HTMLButtonElement {
-    const button = this.createElement(
-      'button',
-      {
-        type: 'button',
-        className: 'auth-form__password-toggle',
-        'aria-label': this.state.showPassword ? 'Скрыть пароль' : 'Показать пароль',
-        'data-testid': 'password-toggle',
-      },
-      [this.getPasswordToggleIcon()]
-    );
+    const button = this.createElement('button', {
+      type: 'button',
+      className: 'auth-form__password-toggle',
+      'aria-label': this.state.showPassword ? 'Скрыть пароль' : 'Показать пароль',
+      'data-testid': 'password-toggle',
+    });
+    
+    // Вставляем SVG через innerHTML
+    button.innerHTML = this.getPasswordToggleIcon();
     
     this.addEventListener(button, 'click', this.togglePasswordVisibility);
     
@@ -308,42 +306,7 @@ export class LoginForm extends Component<LoginFormProps> {
     });
     container.appendChild(this.submitButton.render());
     
-    // Switch to register link
-    if (this.props.onSwitchToRegister) {
-      const switchLink = this.createElement(
-        'div',
-        { className: 'auth-form__link' },
-        ['Нет аккаунта? ', this.createSwitchLink()]
-      );
-      container.appendChild(switchLink);
-    }
-    
     return container;
-  }
-
-   /**
-    * Создать ссылку переключения на форму регистрации
-    * @returns Элемент ссылки
-    */
-   private createSwitchLink(): HTMLAnchorElement {
-    const link = this.createElement(
-      'a',
-      {
-        href: '#register',
-        role: 'button',
-        'data-testid': 'switch-to-register',
-      },
-      ['Зарегистрироваться']
-    );
-    
-    this.addEventListener(link, 'click', (e) => {
-      e.preventDefault();
-      if (this.props.onSwitchToRegister) {
-        this.props.onSwitchToRegister();
-      }
-    });
-    
-    return link;
   }
 
    /**
@@ -490,6 +453,12 @@ export class LoginForm extends Component<LoginFormProps> {
       
       // Update store
       store.setUser(user);
+      
+      // Emit login event
+      AuthEventEmitter.emit('login', user);
+      
+      // Navigate to profile
+      router.navigate('/profile');
       
       // Call success callback
       if (this.props.onSuccess) {

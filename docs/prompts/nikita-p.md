@@ -2,7 +2,42 @@
 
 ## Введение
 
-Ты разрабатываешь модуль продуктов для интернет-магазина L_Shop. Проект уже содержит базовую инфраструктуру, созданную тимлидом (Глебом). Твоя задача — реализовать backend и frontend для работы с продуктами.
+Ты разрабатываешь модуль продуктов для интернет-магазина L_Shop. Проект уже содержит базовую инфраструктуру, созданную тимлидом (Глебом):
+
+- ✅ Базовый компонент `Component` с жизненным циклом и state management
+- ✅ Router для навигации
+- ✅ Store для управления состоянием
+- ✅ API клиент с типизацией
+- ✅ AuthService для аутентификации
+- ✅ UI компоненты: Button, Input, Modal
+- ✅ Layout компоненты: Header, Footer, Layout
+- ✅ Jest конфигурация для frontend и backend тестов
+
+Твоя задача — реализовать backend и frontend для работы с продуктами.
+
+## Существующая структура проекта
+
+```
+src/
+├── backend/
+│   ├── controllers/       # Контроллеры (auth.controller.ts готов)
+│   ├── services/           # Сервисы (user.service.ts, session.service.ts)
+│   ├── routes/             # Маршруты (auth.routes.ts готов)
+│   ├── models/             # Модели (user.model.ts, session.model.ts)
+│   ├── utils/              # Утилиты (file.utils.ts, id.utils.ts, validators.ts)
+│   └── __tests__/          # Backend тесты
+├── frontend/
+│   ├── components/
+│   │   ├── base/           # Component.ts - базовый класс
+│   │   ├── ui/             # Button.ts, Input.ts, Modal.ts
+│   │   ├── layout/         # Header.ts, Footer.ts, Layout.ts
+│   │   └── auth/           # AuthModal.ts, LoginForm.ts, RegisterForm.ts
+│   ├── services/           # api.ts, auth.service.ts
+│   ├── store/              # store.ts - управление состоянием
+│   ├── router/             # router.ts - маршрутизация
+│   ├── types/              # user.ts, api.ts
+│   └── __tests__/          # Frontend тесты
+```
 
 ## Комментарии
 
@@ -56,7 +91,7 @@ function getProductById(id: string): Product | null { ... }
 for (const product of products) { }
 
 // ❌ Журнальный:
-// Created by John on 19 февраля 2026 года
+//अलग से 19 февраля 2026 года
 // Fixed bug #123
 
 // ❌ Закомментированный код:
@@ -85,9 +120,10 @@ interface Product {
 
 ### Файлы для создания:
 
-1. `src/backend/controllers/product.controller.ts`
-2. `src/backend/services/product.service.ts`
-3. `src/backend/routes/product.routes.ts`
+1. `src/backend/models/product.model.ts` - модель продукта
+2. `src/backend/controllers/product.controller.ts` - контроллер
+3. `src/backend/services/product.service.ts` - сервис
+4. `src/backend/routes/product.routes.ts` - маршруты
 
 ### API Endpoints:
 
@@ -129,10 +165,42 @@ GET /api/products?search=phone&sort=price_asc&category=electronics&inStock=true&
 **Ответ 200:** Объект продукта
 **Ответ 404:** `{ "message": "Product not found" }`
 
+### Реализация модели:
+
+```typescript
+// src/backend/models/product.model.ts
+
+/**
+ * Модель продукта для интернет-магазина
+ */
+export interface Product {
+  /** Уникальный идентификатор */
+  id: string;
+  /** Название продукта */
+  name: string;
+  /** Описание продукта */
+  description: string;
+  /** Цена в рублях */
+  price: number;
+  /** Категория продукта */
+  category: string;
+  /** Есть ли в наличии */
+  inStock: boolean;
+  /** URL изображения */
+  imageUrl?: string;
+  /** Средний рейтинг (1-5) - Вариант 17 */
+  rating?: number;
+  /** Количество отзывов - Вариант 17 */
+  reviewsCount?: number;
+  /** Дата создания */
+  createdAt?: string;
+}
+```
+
 ### Реализация сервиса:
 
 ```typescript
-// product.service.ts
+// src/backend/services/product.service.ts
 import { readJsonFile } from '../utils/file.utils';
 import { Product } from '../models/product.model';
 
@@ -201,6 +269,74 @@ app.use('/api/products', productRoutes);
 
 ## Frontend
 
+### Использование существующей инфраструктуры
+
+#### Базовый компонент
+
+Все твои компоненты должны наследоваться от базового класса:
+
+```typescript
+import { Component, ComponentProps } from '../components/base/Component';
+
+interface ProductCardProps extends ComponentProps {
+  product: Product;
+  onAddToCart?: (productId: string) => void;
+}
+
+export class ProductCard extends Component<ProductCardProps> {
+  // Реализация
+}
+```
+
+#### Store для состояния
+
+Используй существующий Store для управления состоянием продуктов:
+
+```typescript
+import { Store } from '../store/store';
+
+// Подписка на изменения
+Store.subscribe('products', (products) => {
+  // Обновить UI
+});
+
+// Получить текущее состояние
+const user = Store.getState().user;
+const isAuthenticated = Store.getState().isAuthenticated;
+```
+
+#### API клиент
+
+Используй существующий API клиент:
+
+```typescript
+import { api } from '../services/api';
+
+// GET запрос
+const products = await api.get<Product[]>('/api/products', { search: 'phone' });
+
+// Обработка ошибок
+try {
+  const products = await api.get<Product[]>('/api/products');
+} catch (error) {
+  // error уже обработан api клиентом
+}
+```
+
+#### Router
+
+Используй существующий Router:
+
+```typescript
+import { Router } from '../router/router';
+
+// Навигация
+Router.navigate('/cart');
+
+// Получить текущий маршрут
+const currentPath = Router.getCurrentPath();
+```
+
 ### Структура файлов для создания:
 
 ```
@@ -212,6 +348,8 @@ src/frontend/
 │       └── ProductFilters.ts   # Фильтры товаров
 ├── pages/
 │   └── MainPage.ts             # Обновить главную страницу
+├── types/
+│   └── product.ts              # Типы продукта
 ├── styles/
 │   └── components/
 │       └── product-card.css    # Стили карточки товара
@@ -233,14 +371,90 @@ src/frontend/
 - Чекбокс "В наличии"
 - Поле минимального рейтинга (вариант 17)
 
-### Важно:
-- Используй базовый класс Component из `src/frontend/components/base/Component.ts`
-- Используй Router из `src/frontend/router/router.ts`
-- Используй Store из `src/frontend/store/store.ts`
-- Используй API клиент из `src/frontend/services/api.ts`
-- Следуй стилям из CODING_STANDARDS.md
+### Пример реализации ProductCard:
 
-### Структура файлов:
+```typescript
+// src/frontend/components/product/ProductCard.ts
+import { Component, ComponentProps } from '../base/Component';
+import { Button } from '../ui/Button';
+import { Product } from '../../types/product';
+
+export interface ProductCardProps extends ComponentProps {
+  product: Product;
+  isAuthenticated: boolean;
+  onAddToCart?: (productId: string) => void;
+}
+
+export class ProductCard extends Component<ProductCardProps> {
+  private addButton: Button | null = null;
+
+  protected getDefaultProps(): ProductCardProps {
+    return {
+      ...super.getDefaultProps(),
+      product: {} as Product,
+      isAuthenticated: false,
+    };
+  }
+
+  public render(): HTMLElement {
+    const { product, isAuthenticated } = this.props;
+    
+    this.element = this.createElement('div', {
+      className: 'product-card',
+    });
+
+    // Изображение
+    const imageContainer = this.createElement('div', {
+      className: 'product-card__image',
+    });
+    if (product.imageUrl) {
+      const img = this.createElement('img', {
+        src: product.imageUrl,
+        alt: product.name,
+      });
+      imageContainer.appendChild(img);
+    }
+
+    // Название с data-title
+    const title = this.createElement('h3', {
+      className: 'product-card__title',
+      'data-title': '', // Обязательный атрибут для тестирования
+    }, [product.name]);
+
+    // Цена с data-price
+    const price = this.createElement('span', {
+      className: 'product-card__price',
+      'data-price': '', // Обязательный атрибут для тестирования
+    }, [`${product.price} ₽`]);
+
+    // Рейтинг и отзывы (вариант 17)
+    if (product.rating !== undefined) {
+      const ratingInfo = this.createElement('div', {
+        className: 'product-card__rating',
+      }, [
+        `★ ${product.rating.toFixed(1)}`,
+        product.reviewsCount ? ` (${product.reviewsCount} отзывов)` : '',
+      ]);
+      this.element.appendChild(ratingInfo);
+    }
+
+    // Кнопка "В корзину" только для авторизованных
+    if (isAuthenticated) {
+      this.addButton = new Button({
+        text: 'В корзину',
+        variant: 'primary',
+        onClick: () => this.props.onAddToCart?.(product.id),
+      });
+      this.addButton.mount(this.element);
+    }
+
+    // Собираем карточку
+    this.element.append(imageContainer, title, price);
+
+    return this.element;
+  }
+}
+```
 
 ## Git
 
@@ -382,18 +596,20 @@ describe('ProductService', () => {
 ### Запуск тестов
 
 ```bash
-npm test                    # Запустить все тесты
+npm test                    # Запустить все backend тесты
+npm run test:frontend       # Запустить frontend тесты
 npm run test:watch          # Режим наблюдения
 npm run test:coverage       # С отчётом покрытия
 ```
 
 ## Финальный чек-лист
 
-- [ ] Backend: controller, service, routes
+- [ ] Backend: model, controller, service, routes
 - [ ] API: GET /api/products с фильтрами
 - [ ] API: GET /api/products/:id
-- [ ] Frontend: Главная страница
-- [ ] Frontend: Компоненты ProductCard, Filters
+- [ ] Frontend: Типы продукта (product.ts)
+- [ ] Frontend: Компоненты ProductCard, ProductList, ProductFilters
+- [ ] Frontend: Обновить MainPage
 - [ ] Data-атрибуты: data-title, data-price
 - [ ] Вариант 17: rating, reviewsCount, фильтр minRating
 - [ ] Тесты: unit-тесты для ProductService

@@ -1,10 +1,21 @@
 /**
  * Базовый компонент - L_Shop Frontend
- * Абстрактный базовый класс для всех UI компонентов
+ * Абстрактный базовый класс для всех UI компонентов с жизненным циклом и state management
  */
 
 /**
- * Интерфейс пропсов компонента
+ * Интерфейс базового состояния компонента
+ */
+export interface ComponentState {
+  /** Загружается ли компонент */
+  loading?: boolean;
+  /** Сообщение об ошибке */
+  error?: string | null;
+}
+
+/**
+ * Интерфейс пропсов компонента (для обратной совместимости)
+ * @deprecated Используйте ComponentState и setState
  */
 export interface ComponentProps {
   /** CSS классы */
@@ -20,13 +31,15 @@ export interface ComponentProps {
 }
 
 /**
- * Интерфейс состояния компонента
+ * Конфигурация компонента
  */
-export interface ComponentState {
-  /** Загружается ли компонент */
-  loading?: boolean;
-  /** Сообщение об ошибке */
-  error?: string | null;
+export interface ComponentConfig {
+  /** CSS классы */
+  className?: string;
+  /** HTML атрибуты */
+  attributes?: Record<string, string>;
+  /** Data атрибуты для тестирования */
+  dataAttributes?: Record<string, string>;
 }
 
 /**
@@ -35,20 +48,49 @@ export interface ComponentState {
 export type EventHandler<E = Event> = (event: E) => void;
 
 /**
- * Базовый класс компонента
- * Предоставляет общую функциональность для всех UI компонентов
+ * Тип обработчика событий с автоматической очисткой
+ */
+type EventListenerEntry = {
+  element: Element;
+  event: string;
+  handler: EventListener;
+};
+
+/**
+ * Базовый абстрактный класс для всех UI компонентов
+ * Предоставляет жизненный цикл, управление состоянием и автоматическую очистку событий
+ * 
+ * @typeParam TProps - Тип пропсов компонента (для обратной совместимости)
+ * 
+ * @example
+ * ```typescript
+ * interface ButtonProps extends ComponentProps {
+ *   label: string;
+ *   onClick?: () => void;
+ * }
+ * 
+ * class Button extends Component<ButtonProps> {
+ *   public render(): HTMLElement {
+ *     const btn = this.createElement('button', {
+ *       className: 'btn',
+ *     });
+ *     btn.textContent = this.props.label;
+ *     return btn;
+ *   }
+ * }
+ * ```
  */
 export abstract class Component<TProps extends ComponentProps = ComponentProps> {
   /** Пропсы компонента */
   protected props: TProps;
-  
-  /** Корневой элемент */
+
+  /** Корневой DOM-элемент компонента */
   protected element: HTMLElement | null = null;
-  
+
   /** Дочерние компоненты */
   protected children: Component[] = [];
-  
-  /** Слушатели событий для очистки */
+
+  /** Зарегистрированные слушатели событий для автоматической очистки */
   private eventListeners: Map<Element, Map<string, EventHandler>> = new Map();
 
   /**
@@ -77,7 +119,7 @@ export abstract class Component<TProps extends ComponentProps = ComponentProps> 
    */
   public setProps(props: Partial<TProps>): void {
     this.props = { ...this.props, ...props };
-    
+
     if (this.element) {
       this.updateElement();
     }
@@ -91,20 +133,20 @@ export abstract class Component<TProps extends ComponentProps = ComponentProps> 
   public abstract render(): HTMLElement;
 
   /**
-   * Примонтировать компонент к контейнеру
-   * @param container - Контейнер
-   * @param position - Позиция вставки
+   * Монтировать компонент в DOM
+   * @param parent - Родительский элемент
    */
-  public mount(
-    container: Element,
-    position: InsertPosition = 'beforeend'
-  ): void {
+  public mount(parent: HTMLElement): void {
+    if (!parent) {
+      throw new Error('Родительский элемент не найден');
+    }
+    
     if (!this.element) {
       this.element = this.render();
     }
     
-    container.insertAdjacentElement(position, this.element);
-    this.onMounted();
+    parent.appendChild(this.element);
+    this.onMount();
   }
 
   /**
@@ -114,17 +156,17 @@ export abstract class Component<TProps extends ComponentProps = ComponentProps> 
     // Отмонтировать дочерние элементы сначала
     this.children.forEach(child => child.unmount());
     this.children = [];
-    
+
     // Удалить слушатели событий
     this.removeAllEventListeners();
-    
+
     // Удалить элемент из DOM
     if (this.element && this.element.parentNode) {
       this.element.parentNode.removeChild(this.element);
     }
-    
+
     this.element = null;
-    this.onUnmounted();
+    this.onUnmount();
   }
 
   /**
@@ -167,17 +209,6 @@ export abstract class Component<TProps extends ComponentProps = ComponentProps> 
       this.element.setAttribute('aria-hidden', 'true');
     }
     this.props.visible = false;
-  }
-
-  /**
-   * Переключить видимость компонента
-   */
-  public toggle(): void {
-    if (this.props.visible) {
-      this.hide();
-    } else {
-      this.show();
-    }
   }
 
   /**
@@ -235,7 +266,7 @@ export abstract class Component<TProps extends ComponentProps = ComponentProps> 
     children: (Element | string)[] = []
   ): HTMLElementTagNameMap[K] {
     const element = document.createElement(tag);
-    
+
     // Установить атрибуты
     for (const [key, value] of Object.entries(attrs)) {
       if (key === 'className') {
@@ -250,7 +281,7 @@ export abstract class Component<TProps extends ComponentProps = ComponentProps> 
         element.setAttribute(key, String(value));
       }
     }
-    
+
     // Добавить дочерние элементы
     children.forEach(child => {
       if (typeof child === 'string') {
@@ -259,7 +290,7 @@ export abstract class Component<TProps extends ComponentProps = ComponentProps> 
         element.appendChild(child);
       }
     });
-    
+
     return element;
   }
 
@@ -277,7 +308,7 @@ export abstract class Component<TProps extends ComponentProps = ComponentProps> 
     options?: boolean | AddEventListenerOptions
   ): void {
     element.addEventListener(event, handler as EventListener, options);
-    
+
     // Отслеживать для очистки
     if (!this.eventListeners.has(element)) {
       this.eventListeners.set(element, new Map());
@@ -318,31 +349,31 @@ export abstract class Component<TProps extends ComponentProps = ComponentProps> 
    */
   protected updateElement(): void {
     if (!this.element) return;
-    
+
     // Обновить классы
     if (this.props.className) {
       this.element.className = this.props.className;
     }
-    
+
     // Обновить id
     if (this.props.id) {
       this.element.id = this.props.id;
     }
-    
+
     // Обновить data атрибуты
     if (this.props.dataAttrs) {
       Object.entries(this.props.dataAttrs).forEach(([key, value]) => {
         this.element!.dataset[key] = value;
       });
     }
-    
+
     // Обновить состояние disabled
     if (this.props.disabled) {
       this.disable();
     } else {
       this.enable();
     }
-    
+
     // Обновить видимость
     if (this.props.visible) {
       this.show();
@@ -355,7 +386,7 @@ export abstract class Component<TProps extends ComponentProps = ComponentProps> 
    * Вызывается после монтирования компонента
    * Переопределите в дочерних классах
    */
-  protected onMounted(): void {
+  protected onMount(): void {
     // Переопределите в дочерних классах
   }
 
@@ -363,7 +394,7 @@ export abstract class Component<TProps extends ComponentProps = ComponentProps> 
    * Вызывается после отмонтирования компонента
    * Переопределите в дочерних классах
    */
-  protected onUnmounted(): void {
+  protected onUnmount(): void {
     // Переопределите в дочерних классах
   }
 
