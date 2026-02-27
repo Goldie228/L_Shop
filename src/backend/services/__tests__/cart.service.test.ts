@@ -12,6 +12,15 @@ jest.mock('../../utils/file.utils');
 const mockReadJsonFile = readJsonFile as jest.MockedFunction<typeof readJsonFile>;
 const mockWriteJsonFile = writeJsonFile as jest.MockedFunction<typeof writeJsonFile>;
 
+// Хелпер для создания глубокой копии корзин
+const getFreshCarts = (): Cart[] => [
+  {
+    userId: 'user-1',
+    items: [{ productId: 'product-1', quantity: 2 }],
+    updatedAt: '2026-02-19T10:00:00Z',
+  },
+];
+
 describe('CartService', () => {
   let cartService: CartService;
 
@@ -23,7 +32,7 @@ describe('CartService', () => {
       price: 1000,
       category: 'electronics',
       inStock: true,
-      discountPercent: 10, // Вариант 21
+      discountPercent: 10,
       createdAt: '2026-02-19T10:00:00Z',
       updatedAt: '2026-02-19T10:00:00Z',
     },
@@ -49,14 +58,6 @@ describe('CartService', () => {
     },
   ];
 
-  const mockCarts: Cart[] = [
-    {
-      userId: 'user-1',
-      items: [{ productId: 'product-1', quantity: 2 }],
-      updatedAt: '2026-02-19T10:00:00Z',
-    },
-  ];
-
   beforeEach(() => {
     cartService = new CartService();
     jest.clearAllMocks();
@@ -65,7 +66,7 @@ describe('CartService', () => {
   describe('getCart', () => {
     it('должен вернуть корзину с обогащёнными элементами', async () => {
       mockReadJsonFile
-        .mockResolvedValueOnce(mockCarts)
+        .mockResolvedValueOnce(getFreshCarts())
         .mockResolvedValueOnce(mockProducts);
 
       const result = await cartService.getCart('user-1');
@@ -77,12 +78,11 @@ describe('CartService', () => {
 
     it('должен корректно рассчитывать скидку (вариант 21)', async () => {
       mockReadJsonFile
-        .mockResolvedValueOnce(mockCarts)
+        .mockResolvedValueOnce(getFreshCarts())
         .mockResolvedValueOnce(mockProducts);
 
       const result = await cartService.getCart('user-1');
 
-      // 2 товара * 1000 цена * 0.9 (10% скидка) = 1800
       expect(result.items[0].total).toBe(1800);
       expect(result.items[0].discountPercent).toBe(10);
     });
@@ -103,8 +103,8 @@ describe('CartService', () => {
         {
           userId: 'user-1',
           items: [
-            { productId: 'product-1', quantity: 1 }, // 1000 * 0.9 = 900
-            { productId: 'product-2', quantity: 2 }, // 800 * 2 = 1600
+            { productId: 'product-1', quantity: 1 },
+            { productId: 'product-2', quantity: 2 },
           ],
           updatedAt: '2026-02-19T10:00:00Z',
         },
@@ -116,7 +116,6 @@ describe('CartService', () => {
 
       const result = await cartService.getCart('user-1');
 
-      // 900 + 1600 = 2500
       expect(result.totalSum).toBe(2500);
     });
   });
@@ -124,25 +123,30 @@ describe('CartService', () => {
   describe('addItem', () => {
     it('должен добавить новый товар в корзину', async () => {
       mockReadJsonFile
-        .mockResolvedValueOnce(mockCarts)
+        .mockResolvedValueOnce(getFreshCarts())
+        .mockResolvedValueOnce(mockProducts)
+        .mockResolvedValueOnce(getFreshCarts())
         .mockResolvedValueOnce(mockProducts);
       mockWriteJsonFile.mockResolvedValue();
 
-      const result = await cartService.addItem('user-1', 'product-2', 1);
+      await cartService.addItem('user-1', 'product-2', 1);
 
-      expect(mockWriteJsonFile).toHaveBeenCalled();
-      expect(result.items).toHaveLength(2);
+      // Проверяем что было записано в файл (2 товара: product-1 и product-2)
+      const savedCart = mockWriteJsonFile.mock.calls[0][1] as Cart[];
+      expect(savedCart[0].items).toHaveLength(2);
+      expect(savedCart[0].items.find((i) => i.productId === 'product-2')).toBeDefined();
     });
 
     it('должен увеличить количество, если товар уже есть', async () => {
       mockReadJsonFile
-        .mockResolvedValueOnce(mockCarts)
+        .mockResolvedValueOnce(getFreshCarts())
+        .mockResolvedValueOnce(mockProducts)
+        .mockResolvedValueOnce(getFreshCarts())
         .mockResolvedValueOnce(mockProducts);
       mockWriteJsonFile.mockResolvedValue();
 
       await cartService.addItem('user-1', 'product-1', 1);
 
-      // Должен увеличить с 2 до 3
       const savedCart = mockWriteJsonFile.mock.calls[0][1] as Cart[];
       const item = savedCart[0].items.find((i) => i.productId === 'product-1');
       expect(item?.quantity).toBe(3);
@@ -150,7 +154,7 @@ describe('CartService', () => {
 
     it('должен выбросить ошибку для несуществующего продукта', async () => {
       mockReadJsonFile
-        .mockResolvedValueOnce(mockCarts)
+        .mockResolvedValueOnce(getFreshCarts())
         .mockResolvedValueOnce(mockProducts);
 
       await expect(cartService.addItem('user-1', 'non-existent', 1)).rejects.toThrow(
@@ -160,7 +164,7 @@ describe('CartService', () => {
 
     it('должен выбросить ошибку для продукта не в наличии', async () => {
       mockReadJsonFile
-        .mockResolvedValueOnce(mockCarts)
+        .mockResolvedValueOnce(getFreshCarts())
         .mockResolvedValueOnce(mockProducts);
 
       await expect(cartService.addItem('user-1', 'product-3', 1)).rejects.toThrow(
@@ -170,7 +174,9 @@ describe('CartService', () => {
 
     it('должен создать новую корзину для нового пользователя', async () => {
       mockReadJsonFile
-        .mockResolvedValueOnce([]) // Нет корзин
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce(mockProducts)
+        .mockResolvedValueOnce([{ userId: 'new-user', items: [{ productId: 'product-1', quantity: 1 }], updatedAt: '2026-02-19T10:00:00Z' }])
         .mockResolvedValueOnce(mockProducts);
       mockWriteJsonFile.mockResolvedValue();
 
@@ -184,7 +190,9 @@ describe('CartService', () => {
 
   describe('updateItem', () => {
     it('должен обновить количество товара', async () => {
-      mockReadJsonFile.mockResolvedValueOnce(mockCarts);
+      mockReadJsonFile
+        .mockResolvedValueOnce(getFreshCarts())
+        .mockResolvedValueOnce(mockProducts);
       mockWriteJsonFile.mockResolvedValue();
 
       await cartService.updateItem('user-1', 'product-1', 5);
@@ -195,7 +203,9 @@ describe('CartService', () => {
     });
 
     it('должен удалить товар при количестве 0', async () => {
-      mockReadJsonFile.mockResolvedValueOnce(mockCarts);
+      mockReadJsonFile
+        .mockResolvedValueOnce(getFreshCarts())
+        .mockResolvedValueOnce(mockProducts);
       mockWriteJsonFile.mockResolvedValue();
 
       await cartService.updateItem('user-1', 'product-1', 0);
@@ -213,7 +223,7 @@ describe('CartService', () => {
     });
 
     it('должен выбросить ошибку, если товар не найден в корзине', async () => {
-      mockReadJsonFile.mockResolvedValueOnce(mockCarts);
+      mockReadJsonFile.mockResolvedValueOnce(getFreshCarts());
 
       await expect(
         cartService.updateItem('user-1', 'product-2', 5),
@@ -223,7 +233,9 @@ describe('CartService', () => {
 
   describe('removeItem', () => {
     it('должен удалить товар из корзины', async () => {
-      mockReadJsonFile.mockResolvedValueOnce(mockCarts);
+      mockReadJsonFile
+        .mockResolvedValueOnce(getFreshCarts())
+        .mockResolvedValueOnce(mockProducts);
       mockWriteJsonFile.mockResolvedValue();
 
       await cartService.removeItem('user-1', 'product-1');
@@ -243,7 +255,7 @@ describe('CartService', () => {
 
   describe('clearCart', () => {
     it('должен очистить корзину пользователя', async () => {
-      mockReadJsonFile.mockResolvedValueOnce(mockCarts);
+      mockReadJsonFile.mockResolvedValueOnce(getFreshCarts());
       mockWriteJsonFile.mockResolvedValue();
 
       await cartService.clearCart('user-1');
@@ -255,7 +267,6 @@ describe('CartService', () => {
     it('не должен выбрасывать ошибку, если корзина не найдена', async () => {
       mockReadJsonFile.mockResolvedValueOnce([]);
 
-      // Не должен выбросить ошибку
       await expect(cartService.clearCart('unknown-user')).resolves.not.toThrow();
     });
   });
