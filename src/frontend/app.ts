@@ -9,6 +9,7 @@ import { AuthService, AuthEventEmitter } from './services/auth.service.js';
 import { Layout } from './components/layout/Layout.js';
 import { AuthModal } from './components/auth/AuthModal.js';
 import { ProfilePage } from './components/pages/ProfilePage.js';
+import { CartPage } from './components/pages/CartPage.js';
 import { Route } from './router/router.js';
 
 // Тема по умолчанию
@@ -180,6 +181,10 @@ class App {
         this.renderProfilePage();
         break;
 
+      case 'CartPage':
+        this.renderCartPage();
+        break;
+
       case 'NotFoundPage':
         this.renderNotFoundPage();
         break;
@@ -207,6 +212,20 @@ class App {
     mainContent.innerHTML = '';
     const profilePage = new ProfilePage({ user });
     mainContent.appendChild(profilePage.render());
+  }
+
+  /**
+   * Отрендерить страницу корзины
+   */
+  private renderCartPage(): void {
+    if (!this.layout) return;
+
+    const mainContent = this.layout.getMainContent();
+    if (!mainContent) return;
+
+    mainContent.innerHTML = '';
+    const cartPage = new CartPage({});
+    mainContent.appendChild(cartPage.render());
   }
 
   /**

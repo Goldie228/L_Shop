@@ -7,6 +7,7 @@ import express, { Express } from 'express';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import authRoutes from './routes/auth.routes';
+import cartRoutes from './routes/cart.routes';
 import { errorHandler } from './middleware/error.middleware';
 import { ensureDataFiles } from './utils/file.utils';
 import { config } from './config/constants';
@@ -91,6 +92,7 @@ app.get('/health', (_req, res) => {
 
 // API маршруты
 app.use('/api/auth', authRoutes);
+app.use('/api/cart', cartRoutes);
 
 // Обработчик ошибок должен быть последним middleware
 app.use(errorHandler);
