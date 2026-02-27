@@ -76,11 +76,9 @@ export class OrderService {
     await writeJsonFile(ORDERS_FILE, orders);
 
     // 6. Очистить корзину пользователя
-    const updatedCarts = carts.map((c) =>
-      c.userId === userId
-        ? { ...c, items: [], updatedAt: new Date().toISOString() }
-        : c,
-    );
+    const updatedCarts = carts.map((c) => (c.userId === userId
+      ? { ...c, items: [], updatedAt: new Date().toISOString() }
+      : c));
     await writeJsonFile(CARTS_FILE, updatedCarts);
 
     return newOrder;
@@ -96,8 +94,7 @@ export class OrderService {
     return orders
       .filter((o) => o.userId === userId)
       .sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       );
   }
 
