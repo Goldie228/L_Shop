@@ -9,7 +9,11 @@ import { AuthService, AuthEventEmitter } from './services/auth.service.js';
 import { Layout } from './components/layout/Layout.js';
 import { AuthModal } from './components/auth/AuthModal.js';
 import { ProfilePage } from './components/pages/ProfilePage.js';
+import { DeliveryPage } from './components/pages/DeliveryPage.js';
 import { Route } from './router/router.js';
+
+// Импорт стилей страниц
+import './styles/pages/delivery.css';
 
 // Тема по умолчанию
 const THEME_KEY = 'lshop-theme';
@@ -180,6 +184,14 @@ class App {
         this.renderProfilePage();
         break;
 
+      case 'DeliveryPage':
+        this.renderDeliveryPage();
+        break;
+
+      case 'OrdersPage':
+        this.renderOrdersPage();
+        break;
+
       case 'NotFoundPage':
         this.renderNotFoundPage();
         break;
@@ -245,6 +257,40 @@ class App {
           <h1 class="not-found__title">404</h1>
           <p class="not-found__text">Страница не найдена</p>
           <a href="/" class="btn btn--primary">На главную</a>
+        </div>
+      </div>
+    `;
+  }
+
+  /**
+   * Отрендерить страницу оформления доставки
+   */
+  private renderDeliveryPage(): void {
+    if (!this.layout) return;
+
+    const mainContent = this.layout.getMainContent();
+    if (!mainContent) return;
+
+    mainContent.innerHTML = '';
+    const deliveryPage = new DeliveryPage();
+    mainContent.appendChild(deliveryPage.render());
+  }
+
+  /**
+   * Отрендерить страницу заказов пользователя
+   */
+  private renderOrdersPage(): void {
+    if (!this.layout) return;
+
+    const mainContent = this.layout.getMainContent();
+    if (!mainContent) return;
+
+    // Заглушка для страницы заказов
+    mainContent.innerHTML = `
+      <div class="page orders-page">
+        <div class="container">
+          <h1 class="page__title">Мои заказы</h1>
+          <p class="text-secondary">Список ваших заказов будет отображён здесь.</p>
         </div>
       </div>
     `;
