@@ -1,5 +1,6 @@
 /**
- * Модель продукта
+ * Модель продукта - L_Shop
+ * Вариант 17: добавлены поля rating и reviewsCount
  */
 
 /**
@@ -17,14 +18,20 @@ export interface Product {
   name: string;
   /** Описание продукта */
   description: string;
-  /** Цена продукта */
+  /** Цена в рублях */
   price: number;
   /** Категория продукта */
   category: string;
-  /** Количество на складе */
+  /** Есть ли в наличии */
   inStock: boolean;
+  /** URL изображения */
+  imageUrl?: string;
   /** Процент скидки */
   discountPercent?: number;
+  /** Средний рейтинг (1-5) - Вариант 17 */
+  rating?: number;
+  /** Количество отзывов - Вариант 17 */
+  reviewsCount?: number;
   /** Дата создания */
   createdAt: string;
   /** Дата обновления */
