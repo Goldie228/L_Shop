@@ -11,10 +11,12 @@ import { AuthModal } from './components/auth/AuthModal.js';
 import { ProfilePage } from './components/pages/ProfilePage.js';
 import { CartPage } from './components/pages/CartPage.js';
 import { DeliveryPage } from './components/pages/DeliveryPage.js';
+import { MainPage } from './components/pages/MainPage.js';
 import { Route } from './router/router.js';
 
 // Импорт стилей страниц
 import './styles/pages/delivery.css';
+import './styles/components/product-card.css';
 
 // Тема по умолчанию
 const THEME_KEY = 'lshop-theme';
@@ -227,21 +229,7 @@ class App {
   }
 
   /**
-   * Отрендерить страницу корзины
-   */
-  private renderCartPage(): void {
-    if (!this.layout) return;
-
-    const mainContent = this.layout.getMainContent();
-    if (!mainContent) return;
-
-    mainContent.innerHTML = '';
-    const cartPage = new CartPage({});
-    mainContent.appendChild(cartPage.render());
-  }
-
-  /**
-   * Отрендерить домашнюю страницу (заглушка)
+   * Отрендерить домашнюю страницу с каталогом продуктов
    */
   private renderHomePage(): void {
     if (!this.layout) return;
@@ -249,16 +237,13 @@ class App {
     const mainContent = this.layout.getMainContent();
     if (!mainContent) return;
 
-    mainContent.innerHTML = `
-      <div class="page home-page">
-        <div class="container text-center">
-          <h1 class="page__title">Добро пожаловать в L_Shop</h1>
-          <p class="text-secondary">
-            Базовый фундамент приложения готов. Авторизация работает.
-          </p>
-        </div>
-      </div>
-    `;
+    mainContent.innerHTML = '';
+    const mainPage = new MainPage({
+      onAddToCart: (productId) => {
+        console.log('Добавлен в корзину:', productId);
+      },
+    });
+    mainContent.appendChild(mainPage.render());
   }
 
   /**

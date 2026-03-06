@@ -48,15 +48,6 @@ export interface ComponentConfig {
 export type EventHandler<E = Event> = (event: E) => void;
 
 /**
- * Тип обработчика событий с автоматической очисткой
- */
-type EventListenerEntry = {
-  element: Element;
-  event: string;
-  handler: EventListener;
-};
-
-/**
  * Базовый абстрактный класс для всех UI компонентов
  * Предоставляет жизненный цикл, управление состоянием и автоматическую очистку событий
  * 
