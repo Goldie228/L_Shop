@@ -1,5 +1,5 @@
 /**
- * Модель продукта
+ * Модель продукта - L_Shop
  */
 
 /**
@@ -21,10 +21,12 @@ export interface Product {
   price: number;
   /** Категория продукта */
   category: string;
-  /** Количество на складе */
+  /** Наличие на складе */
   inStock: boolean;
-  /** Процент скидки */
+  /** Процент скидки (Вариант 21: 0-100) */
   discountPercent?: number;
+  /** URL изображения */
+  imageUrl?: string;
   /** Дата создания */
   createdAt: string;
   /** Дата обновления */

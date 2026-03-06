@@ -1,0 +1,207 @@
+/**
+ * Стили корзины - L_Shop Frontend
+ * Вариант 21: поддержка скидок
+ */
+
+/* ============================================
+   Элемент корзины
+   ============================================ */
+.cart-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-md, 1rem);
+  padding: var(--spacing-md, 1rem);
+  border-bottom: 1px solid var(--color-border, #e0e0e0);
+}
+
+.cart-item:last-child {
+  border-bottom: none;
+}
+
+.cart-item__title {
+  flex: 1 1 100%;
+  margin: 0;
+  font-size: var(--font-size-lg, 1.125rem);
+  font-weight: 600;
+  color: var(--color-text-primary, #1a1a1a);
+}
+
+/* Контейнер цены */
+.cart-item__price-container {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm, 0.5rem);
+}
+
+/* Обычная цена */
+.cart-item__price {
+  font-size: var(--font-size-md, 1rem);
+  font-weight: 600;
+  color: var(--color-text-primary, #1a1a1a);
+}
+
+/* Старая цена (зачёркнутая) - Вариант 21 */
+.cart-item__price--old {
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--color-text-secondary, #666);
+  text-decoration: line-through;
+}
+
+/* Новая цена со скидкой - Вариант 21 */
+.cart-item__price--new {
+  font-size: var(--font-size-md, 1rem);
+  font-weight: 700;
+  color: var(--color-primary, #2563eb);
+}
+
+/* Бейдж скидки - Вариант 21 */
+.cart-item__discount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xs, 0.25rem) var(--spacing-sm, 0.5rem);
+  font-size: var(--font-size-xs, 0.75rem);
+  font-weight: 700;
+  color: white;
+  background-color: var(--color-success, #22c55e);
+  border-radius: var(--radius-sm, 4px);
+}
+
+/* Управление количеством */
+.cart-item__quantity {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm, 0.5rem);
+}
+
+.cart-item__quantity-value {
+  min-width: 2rem;
+  text-align: center;
+  font-size: var(--font-size-md, 1rem);
+  font-weight: 600;
+}
+
+/* Кнопка удаления */
+.cart-item__remove {
+  margin-left: auto;
+}
+
+/* Итого для позиции */
+.cart-item__total {
+  flex: 1 1 100%;
+  text-align: right;
+  font-size: var(--font-size-md, 1rem);
+  font-weight: 600;
+  color: var(--color-text-primary, #1a1a1a);
+}
+
+/* ============================================
+   Список корзины
+   ============================================ */
+.cart-list {
+  flex: 1;
+  background-color: var(--color-surface, #ffffff);
+  border-radius: var(--radius-md, 8px);
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.1));
+}
+
+.cart-list__empty {
+  padding: var(--spacing-xl, 2rem);
+  text-align: center;
+  font-size: var(--font-size-lg, 1.125rem);
+  color: var(--color-text-secondary, #666);
+}
+
+/* ============================================
+   Итоги корзины
+   ============================================ */
+.cart-summary {
+  position: sticky;
+  top: var(--spacing-md, 1rem);
+  padding: var(--spacing-lg, 1.5rem);
+  background-color: var(--color-surface, #ffffff);
+  border-radius: var(--radius-md, 8px);
+  box-shadow: var(--shadow-md, 0 4px 6px rgba(0, 0, 0, 0.1));
+}
+
+.cart-summary__title {
+  margin: 0 0 var(--spacing-md, 1rem);
+  font-size: var(--font-size-xl, 1.25rem);
+  font-weight: 700;
+  color: var(--color-text-primary, #1a1a1a);
+}
+
+.cart-summary__count {
+  margin: 0 0 var(--spacing-sm, 0.5rem);
+  font-size: var(--font-size-md, 1rem);
+  color: var(--color-text-secondary, #666);
+}
+
+.cart-summary__total {
+  margin: 0 0 var(--spacing-lg, 1.5rem);
+  font-size: var(--font-size-xl, 1.25rem);
+  font-weight: 700;
+  color: var(--color-text-primary, #1a1a1a);
+}
+
+/* ============================================
+   Страница корзины
+   ============================================ */
+.cart-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-lg, 1.5rem);
+}
+
+.cart-page__title {
+  margin: 0 0 var(--spacing-lg, 1.5rem);
+  font-size: var(--font-size-2xl, 1.5rem);
+  font-weight: 700;
+  color: var(--color-text-primary, #1a1a1a);
+}
+
+.cart-page__content {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: var(--spacing-lg, 1.5rem);
+}
+
+.cart-page__auth-required {
+  padding: var(--spacing-xl, 2rem);
+  text-align: center;
+}
+
+.cart-page__auth-required h1 {
+  margin: 0 0 var(--spacing-md, 1rem);
+}
+
+.cart-page__auth-required p {
+  color: var(--color-text-secondary, #666);
+}
+
+.cart-page__error {
+  padding: var(--spacing-md, 1rem);
+  color: var(--color-error, #ef4444);
+  text-align: center;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .cart-page__content {
+    grid-template-columns: 1fr;
+  }
+
+  .cart-summary {
+    position: static;
+  }
+
+  .cart-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .cart-item__total {
+    text-align: left;
+  }
+}

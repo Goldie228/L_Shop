@@ -554,6 +554,40 @@ body.menu-open {
   }
 }
 
+/* ====== Cart Button ====== */
+.header__cart-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: var(--spacing-2);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast),
+    color var(--transition-fast), transform var(--transition-fast);
+}
+
+.header__cart-btn:hover {
+  background-color: var(--color-bg-secondary);
+  border-color: var(--color-border-hover);
+  color: var(--color-primary);
+  transform: scale(1.05);
+}
+
+.header__cart-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+.header__cart-icon {
+  width: 20px;
+  height: 20px;
+}
+
 /* ====== Dark Theme ====== */
 :root.dark-theme .header {
   background-color: var(--color-bg-primary-dark);
