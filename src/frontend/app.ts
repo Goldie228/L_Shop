@@ -9,6 +9,7 @@ import { AuthService, AuthEventEmitter } from './services/auth.service.js';
 import { Layout } from './components/layout/Layout.js';
 import { AuthModal } from './components/auth/AuthModal.js';
 import { ProfilePage } from './components/pages/ProfilePage.js';
+import { CartPage } from './components/pages/CartPage.js';
 import { DeliveryPage } from './components/pages/DeliveryPage.js';
 import { MainPage } from './components/pages/MainPage.js';
 import { Route } from './router/router.js';
@@ -184,6 +185,10 @@ class App {
 
       case 'ProfilePage':
         this.renderProfilePage();
+        break;
+
+      case 'CartPage':
+        this.renderCartPage();
         break;
 
       case 'DeliveryPage':

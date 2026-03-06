@@ -47,6 +47,14 @@ const SEARCH_ICON = `
   </svg>
 `;
 
+const CART_ICON = `
+  <svg class="header__cart-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="9" cy="21" r="1"></circle>
+    <circle cx="20" cy="21" r="1"></circle>
+    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+  </svg>
+`;
+
 /**
  * SVG логотип L_Shop
  * Масштабируемый векторный логотип с буквой L
@@ -124,6 +132,10 @@ export class Header extends Component<HeaderProps> {
     // Search
     const search = this.createSearch();
     container.appendChild(search);
+
+    // Cart button
+    const cartButton = this.createCartButton();
+    container.appendChild(cartButton);
 
     // User section
     this.userSection = this.createUserSection();
@@ -240,6 +252,27 @@ export class Header extends Component<HeaderProps> {
    */
   private handleSearch(query: string): void {
     console.log('[Header] Search query:', query);
+  }
+
+  /**
+   * Создать кнопку корзины
+   * @returns Элемент кнопки корзины
+   */
+  private createCartButton(): HTMLButtonElement {
+    const cartButton = this.createElement('button', {
+      type: 'button',
+      className: 'header__cart-btn',
+      'aria-label': 'Корзина',
+      'data-testid': 'header-cart-btn',
+    });
+
+    cartButton.innerHTML = CART_ICON;
+
+    this.addEventListener(cartButton, 'click', () => {
+      router.navigate('/cart');
+    });
+
+    return cartButton;
   }
 
   /**
