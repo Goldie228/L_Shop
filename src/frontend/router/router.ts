@@ -228,6 +228,8 @@ export const APP_ROUTES: Route[] = [
   { path: '/', component: 'HomePage', title: 'Главная' },
   { path: '/profile', component: 'ProfilePage', title: 'Профиль', requiresAuth: true, authRedirect: '/' },
   { path: '/cart', component: 'CartPage', title: 'Корзина', requiresAuth: true, authRedirect: '/' },
+  { path: '/delivery', component: 'DeliveryPage', title: 'Оформление заказа', requiresAuth: true, authRedirect: '/' },
+  { path: '/orders', component: 'OrdersPage', title: 'Мои заказы', requiresAuth: true, authRedirect: '/' },
   { path: '*', component: 'NotFoundPage', title: 'Страница не найдена' }
 ];
 

@@ -1,8 +1,17 @@
 /**
- * Модель продукта
+ * Модель продукта - L_Shop
+ */
+
+/**
+ * Статус продукта
+ */
+export type ProductStatus = 'active' | 'inactive' | 'discontinued';
+
+/**
+ * Продукт
  */
 export interface Product {
-  /** ID продукта */
+  /** Уникальный идентификатор */
   id: string;
   /** Название продукта */
   name: string;
@@ -21,5 +30,5 @@ export interface Product {
   /** Дата создания */
   createdAt: string;
   /** Дата обновления */
-  updatedAt: string;
+  updatedAt?: string;
 }
