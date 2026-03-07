@@ -1,101 +1,116 @@
-# instrukciya po razrabotke L_Shop
+# Инструкция по разработке L_Shop
 
-## Vvedenie
+## Содержание
 
-L_Shop - eto prototip internet-magazina, razrabotannyj na Express + TypeScript (backend) i SPA na chistom TypeScript (frontend). Proekt ispol'zuet fajlovoe hranenie dannyh (JSON) bez vneshnih baz dannyh.
-
-### Cel' proekta
-
-Sozdanie funkcional'nogo prototipa internet-magazina s:
-- Polnocennoj sistemoj autentifikacii
-- Katalogom tovarov s fil'traciej
-- Korzinoj pokupok
-- Oformleniem zakazov
-
-### Komanda razrabotchikov
-
-| Razrabotchik | Rol' | Variant | Otvetstvennost' |
-|--------------|------|---------|-----------------|
-| **Gleb** | Timlid | - | Infrastruktura, autentifikacija, integracija |
-| **Nikita P.** | Backend/Frontend | 17 | Modul' produktov |
-| **Timofej** | Backend/Frontend | 21 | Modul' korziny |
-| **Nikita T.** | Backend/Frontend | 24 | Modul' zakazov/dostavki |
+1. [Введение](#введение)
+2. [Требования к окружению](#требования-к-окружению)
+3. [Установка и запуск проекта](#установка-и-запуск-проекта)
+4. [Структура проекта](#структура-проекта)
+5. [Работа с Git](#работа-с-git)
+6. [Запуск тестов](#запуск-тестов)
+7. [Отладка и логирование](#отладка-и-логирование)
+8. [Частые проблемы и решения](#частые-проблемы-и-решения)
+9. [Полезные команды](#полезные-команды)
+10. [Дополнительные ресурсы](#дополнительные-ресурсы)
 
 ---
 
-## Trebovanija k okruzheniju
+## Введение
 
-### Obyazatel'nye trebovanija
+L_Shop — это прототип интернет-магазина, разработанный на Express + TypeScript (backend) и SPA на чистом TypeScript (frontend). Проект использует файловое хранение данных (JSON) без внешних баз данных.
 
-| Programmnoe obespechenie | Minimal'naja versija | Rekomenduemaja versija |
-|--------------------------|---------------------|------------------------|
+### Цель проекта
+
+Создание функционального прототипа интернет-магазина с:
+- Полноценной системой аутентификации
+- Каталогом товаров с фильтрацией
+- Корзиной покупок
+- Оформлением заказов
+
+### Команда разработчиков
+
+| Разработчик | Роль | Вариант | Ответственность |
+|--------------|------|---------|-----------------|
+| **Глеб** | Тимлид | 8 | Инфраструктура, аутентификация, интеграция |
+| **Никита П.** | Backend/Frontend | 17 | Модуль продуктов |
+| **Тимофей** | Backend/Frontend | 21 | Модуль корзины |
+| **Никита Т.** | Backend/Frontend | 24 | Модуль заказов/доставки |
+
+---
+
+## Требования к окружению
+
+### Обязательные требования
+
+| Программное обеспечение | Минимальная версия | Рекомендуемая версия |
+|-------------------------|---------------------|----------------------|
 | Node.js | v18.0.0 | v20.x LTS |
 | npm | v9.0.0 | v10.x |
 
-### Proverka versij
+### Проверка версий
 
 ```bash
-# Proverit' versiju Node.js
+# Проверить версию Node.js
 node --version
 
-# Proverit' versiju npm
+# Проверить версию npm
 npm --version
 ```
 
-### Rekomenduemye instrumenty
+### Рекомендуемые инструменты
 
-- **VS Code** - redaktor koda
-- **Git** - sistema kontrolja versij
-- **Postman** ili **Insomnia** - testirovanie API
+- **VS Code** — редактор кода
+- **Git** — система контроля версий
+- **Postman** или **Insomnia** — тестирование API
 
-### Rasshirenija VS Code (rekomenduemye)
+### Расширения VS Code (рекомендуемые)
 
 - ESLint
-- Prettier - Code formatter
+- Prettier — Code formatter
 - TypeScript Hero
-- Thunder Client (dlja testirovanija API)
+- Thunder Client (для тестирования API)
 
 ---
 
-## Ustanovka i zapusk proekta
+## Установка и запуск проекта
 
-### Pervichnaja ustanovka
+### Первичная установка
 
 ```bash
-# 1. Klonirovat' repozitorij
-git clone <url-repozitorija>
+# 1. Клонировать репозиторий
+git clone <url-репозитория>
 cd L_Shop
 
-# 2. Ustanovit' zavisimosti
+# 2. Установить зависимости
 npm install
 
-# 3. Skopirovat' fajl okruzhenija
+# 3. Скопировать файл окружения
 cp .env.example .env
 
-# 4. Redaktirovat' .env pri neobhodimosti
+# 4. Редактировать .env при необходимости
 ```
 
-### Konfiguracija okruzhenija (.env)
+### Конфигурация окружения (.env)
 
-Proekt ispol'zuet fajl `.env` dlja konfiguracii. Skopirujte primer i nastrojte pri neobhodimosti:
+Проект использует файл `.env` для конфигурации. Скопируйте пример и настройте при необходимости:
 
 ```bash
 cp .env.example .env
 ```
 
-#### Peremennye okruzhenija
+#### Переменные окружения
 
-| Peremennaja | Po umolchaniju | Opisanie |
-|-------------|----------------|----------|
-| `PORT` | `3001` | Port backend servera |
-| `FRONTEND_PORT` | `3000` | Port frontend servera |
-| `FRONTEND_URL` | `http://localhost:3000` | URL frontend dlja CORS |
-| `VITE_API_URL` | `http://localhost:3001` | URL API dlja frontend (ispol'zuetsja v Vite) |
-| `NODE_ENV` | `development` | Rezhim raboty |
-| `SESSION_DURATION_MINUTES` | `10` | Vremja zhizni sessii (minuty) |
-| `DATA_DIR` | `./src/backend/data` | Direktorija dlja JSON-fajlov |
+| Переменная | По умолчанию | Описание |
+|------------|--------------|----------|
+| `PORT` | `3001` | Порт backend сервера |
+| `FRONTEND_PORT` | `3000` | Порт frontend сервера |
+| `FRONTEND_URL` | `http://localhost:3000` | URL frontend для CORS |
+| `VITE_API_URL` | `http://localhost:3001` | URL API для frontend (используется в Vite) |
+| `NODE_ENV` | `development` | Режим работы |
+| `SESSION_DURATION_MINUTES` | `10` | Время жизни сессии (минуты) |
+| `DATA_DIR` | `./src/backend/data` | Директория для JSON-файлов |
 
-#### Primer .env fajla
+#### Пример .env файла
 
 ```env
 # Server Configuration
@@ -116,211 +131,249 @@ SESSION_DURATION_MINUTES=10
 DATA_DIR=./src/backend/data
 ```
 
-### Zapusk v rezhime razrabotki
+### Запуск в режиме разработки
 
-**Rekomenduemyj sposob** — odnovremennyj zapusk frontend i backend:
+**Рекомендуемый способ** — одновременный запуск frontend и backend:
 
 ```bash
-# Zapusk frontend i backend parallel'no (cherez concurrently)
+# Запуск frontend и backend параллельно (через concurrently)
 npm run dev
 ```
 
-Eta komanda zapuskaet oba servera:
+Эта команда запускает оба сервера:
 - Backend: `http://localhost:3001`
 - Frontend: `http://localhost:3000`
 
-**Al'ternativnye sposoby:**
+**Альтернативные способы:**
 
 ```bash
-# Tol'ko backend s avtoperezagruzkoj (nodemon)
+# Только backend с автоперезагрузкой (nodemon)
 npm run dev:backend
 
-# Tol'ko frontend
+# Только frontend
 npm run dev:frontend
 
-# Zapusk frontend na konkretnom portu
+# Запуск frontend на конкретном порту
 FRONTEND_PORT=8080 npm run dev:frontend
 ```
 
-### Kompiljacija proekta
+### Компиляция проекта
 
 ```bash
-# Sgenerirovat' JavaScript fajly v dist/
+# Сгенерировать JavaScript файлы в dist/
 npm run build
 ```
 
-### Zapusk produkshn versii
+### Запуск production версии
 
 ```bash
-# Zapusk skompilirovannogo proekta
+# Запуск скомпилированного проекта
 npm start
 ```
 
-### Zapolnenie testovymi dannymi
+### Заполнение тестовыми данными
 
 ```bash
-# Sozdat' testovyh pol'zovatelej i dannye
+# Создать тестовых пользователей и данные
 npm run seed
 ```
 
 ---
 
-## Struktura proekta
+## Структура проекта
 
 ```
 L_Shop/
-|-- src/
-|   |-- backend/                 # Backend na Express + TypeScript
-|   |   |-- app.ts               # Tochka vhoda, konfiguracija servera
-|   |   |-- config/              # Konfiguracionnye fajly
-|   |   |   |-- constants.ts     # Konstanty proekta
-|   |   |-- controllers/         # Kontrollery (obrabotka HTTP-zaprosov)
-|   |   |   |-- auth.controller.ts
-|   |   |-- data/                # JSON-fajly s dannymi
-|   |   |   |-- users.json
-|   |   |   |-- sessions.json
-|   |   |   |-- products.json
-|   |   |   |-- carts.json
-|   |   |   |-- orders.json
-|   |   |-- middleware/          # Middleware (promzhutochnaja obrabotka)
-|   |   |   |-- auth.middleware.ts    # Proverka avtorizacii
-|   |   |   |-- error.middleware.ts   # Obrabotka oshibok
-|   |   |   |-- auth-request.ts      # Rasshirenie Request
-|   |   |-- models/              # Modeli dannyh (TypeScript interfaces)
-|   |   |   |-- user.model.ts
-|   |   |   |-- session.model.ts
-|   |   |   |-- product.model.ts
-|   |   |   |-- cart.model.ts
-|   |   |   |-- order.model.ts
-|   |   |-- routes/              # Marshruty API
-|   |   |   |-- auth.routes.ts
-|   |   |-- scripts/             # Skripty
-|   |   |   |-- seed.ts          # Zapolnenie testovymi dannymi
-|   |   |-- services/            # Biznes-logika
-|   |   |   |-- user.service.ts
-|   |   |   |-- session.service.ts
-|   |   |-- types/               # TypeScript tipy i deklaracii
-|   |   |   |-- express.d.ts     # Rasshirenie Express Request
-|   |   |-- utils/               # Vspomogatel'nye funkcii
-|   |       |-- file.utils.ts    # Rabota s fajlami
-|   |       |-- hash.utils.ts    # Heshirovanie parolej
-|   |       |-- id.utils.ts      # Generacija ID
-|   |       |-- validators.ts    # Validacija dannyh
-|   |-- frontend/                # SPA frontend (planiruetsja)
-|-- docs/                        # Dokumentacija
-|   |-- API.md                   # API dokumentacija
-|   |-- ARCHITECTURE.md          # Arhitektura proekta
-|   |-- DEVELOPMENT.md           # Instrukcija po razrabotke
-|   |-- CODING_STANDARDS.md      # Standarty oformlenija koda
-|   |-- CONTRIBUTING.md          # Pravila vklada
-|-- dist/                        # Skompilirovannyj kod (sozdaetsja avtomaticheski)
-|-- node_modules/                # Zavisimosti (ne versiruetsja)
-|-- .env.example                 # Primer konfiguracii
-|-- .eslintrc.js                 # Nastrojki ESLint
-|-- .prettierrc                  # Nastrojki Prettier
-|-- .gitignore                   # Ignoriruemye fajly Git
-|-- jest.config.js               # Nastrojki Jest
-|-- package.json                 # Opisanie proekta i skripty
-|-- tsconfig.json                # Nastrojki TypeScript
-|-- LICENSE                      # Licenzija MIT
+├── src/
+│   ├── backend/                 # Backend на Express + TypeScript
+│   │   ├── app.ts               # Точка входа, конфигурация сервера
+│   │   ├── config/              # Конфигурационные файлы
+│   │   │   └── constants.ts     # Константы проекта
+│   │   ├── controllers/         # Контроллеры (обработка HTTP-запросов)
+│   │   │   ├── auth.controller.ts
+│   │   │   ├── cart.controller.ts
+│   │   │   ├── order.controller.ts
+│   │   │   └── product.controller.ts
+│   │   ├── data/                # JSON-файлы с данными
+│   │   │   ├── users.json
+│   │   │   ├── sessions.json
+│   │   │   ├── products.json
+│   │   │   ├── carts.json
+│   │   │   └── orders.json
+│   │   ├── middleware/          # Middleware (промежуточная обработка)
+│   │   │   ├── auth.middleware.ts    # Проверка авторизации
+│   │   │   ├── error.middleware.ts   # Обработка ошибок
+│   │   │   └── auth-request.ts      # Расширение Request
+│   │   ├── models/              # Модели данных (TypeScript interfaces)
+│   │   │   ├── user.model.ts
+│   │   │   ├── session.model.ts
+│   │   │   ├── product.model.ts
+│   │   │   ├── cart.model.ts
+│   │   │   └── order.model.ts
+│   │   ├── routes/              # Маршруты API
+│   │   │   ├── auth.routes.ts
+│   │   │   ├── cart.routes.ts
+│   │   │   ├── order.routes.ts
+│   │   │   └── product.routes.ts
+│   │   ├── scripts/             # Скрипты
+│   │   │   └── seed.ts          # Заполнение тестовыми данными
+│   │   ├── services/            # Бизнес-логика
+│   │   │   ├── user.service.ts
+│   │   │   ├── session.service.ts
+│   │   │   ├── cart.service.ts
+│   │   │   ├── order.service.ts
+│   │   │   └── product.service.ts
+│   │   ├── types/               # TypeScript типы и декларации
+│   │   │   └── express.d.ts     # Расширение Express Request
+│   │   ├── utils/               # Вспомогательные функции
+│   │   │   ├── file.utils.ts    # Работа с файлами
+│   │   │   ├── hash.utils.ts    # Хеширование паролей
+│   │   │   ├── id.utils.ts      # Генерация ID
+│   │   │   └── validators.ts    # Валидация данных
+│   │   └── __tests__/           # Тесты
+│   │
+│   └── frontend/                # Frontend приложение
+│       ├── index.html           # HTML точка входа
+│       ├── app.ts               # TypeScript точка входа
+│       ├── components/          # UI компоненты
+│       │   ├── auth/            # Компоненты авторизации
+│       │   ├── base/            # Базовый компонент
+│       │   ├── cart/            # Компоненты корзины
+│       │   ├── layout/          # Компоненты layout
+│       │   ├── order/           # Компоненты заказа
+│       │   ├── pages/           # Страницы
+│       │   ├── product/         # Компоненты продуктов
+│       │   └── ui/              # UI элементы
+│       ├── router/              # Клиентский роутер
+│       ├── services/            # API сервисы
+│       ├── store/               # Состояние приложения
+│       ├── styles/              # CSS стили
+│       └── types/               # TypeScript типы
+│
+├── docs/                        # Документация
+│   ├── API.md                   # API документация
+│   ├── ARCHITECTURE.md          # Архитектура проекта
+│   ├── BACKEND.md               # Документация бэкенда
+│   ├── FRONTEND.md              # Документация фронтенда
+│   ├── USE_CASES.md             # Use Cases
+│   ├── CODING_STANDARDS.md      # Стандарты кода
+│   ├── DESIGN_SYSTEM.md         # Дизайн-система
+│   ├── DEVELOPMENT.md           # Этот файл
+│   └── CONTRIBUTING.md          # Правила вклада
+│
+├── cypress/                     # E2E тесты
+├── plans/                       # Планы разработки
+├── dist/                        # Скомпилированный код (создаётся автоматически)
+├── node_modules/                # Зависимости (не версионируется)
+├── .env.example                 # Пример конфигурации
+├── .eslintrc.js                 # Настройки ESLint
+├── .prettierrc.js               # Настройки Prettier
+├── .gitignore                   # Игнорируемые файлы Git
+├── jest.config.js               # Настройки Jest
+├── jest.frontend.config.js      # Настройки Jest для frontend
+├── cypress.config.ts            # Настройки Cypress
+├── package.json                 # Описание проекта и скрипты
+├── tsconfig.json                # Настройки TypeScript
+├── vite.config.ts               # Настройки Vite
+└── LICENSE                      # Лицензия MIT
 ```
 
-### Opisanie katalogov
+### Описание каталогов
 
 #### `src/backend/`
 
-Osnovnoj katalog backend-a. Soderzhit ves' kod servernoj chasti.
+Основной каталог backend. Содержит весь код серверной части.
 
 #### `src/backend/config/`
 
-Konfiguracionnye fajly s konstantami i nastrojkami.
+Конфигурационные файлы с константами и настройками.
 
 #### `src/backend/controllers/`
 
-Kontrollery prinimajut HTTP-zaprosy, provodjat validaciju vhodnyh dannyh i vozvrashhajut otvety. Ne dolzhny soderzhat' biznes-logiku.
+Контроллеры принимают HTTP-запросы, проводят валидацию входных данных и возвращают ответы. Не должны содержать бизнес-логику.
 
 #### `src/backend/middleware/`
 
-Middleware - promzhutochnye funkcii, kotorye vypolnjajutsja do kontrollerov:
-- `auth.middleware.ts` - proverka autentifikacii
-- `error.middleware.ts` - centralizovannaja obrabotka oshibok
+Middleware — промежуточные функции, которые выполняются до контроллеров:
+- `auth.middleware.ts` — проверка аутентификации
+- `error.middleware.ts` — централизованная обработка ошибок
 
 #### `src/backend/models/`
 
-TypeScript interfejsy i tipy dannyh. Opisyvajut strukturu hranimyh ob'ektov.
+TypeScript интерфейсы и типы данных. Описывают структуру хранимых объектов.
 
 #### `src/backend/routes/`
 
-Opisanie marshrutov API. Svjazyvajut URL s kontrollerami.
+Описание маршрутов API. Связывают URL с контроллерами.
 
 #### `src/backend/services/`
 
-Biznes-logika prilozhenija. Rabota s dannymi, vypolnenie operacij.
+Бизнес-логика приложения. Работа с данными, выполнение операций.
 
 #### `src/backend/utils/`
 
-Vspomogatel'nye funkcii:
-- heshirovanie parolej
-- generacija ID
-- validacija dannyh
-- rabota s fajlami
+Вспомогательные функции:
+- хеширование паролей
+- генерация ID
+- валидация данных
+- работа с файлами
 
 #### `src/backend/data/`
 
-JSON-fajly s dannymi pol'zovatelej, sessij, tovarov i t.d.
+JSON-файлы с данными пользователей, сессий, товаров и т.д.
 
 ---
 
-## Rabota s Git
+## Работа с Git
 
-### Vetki
+### Ветки
 
-| Vetka | Naznachenie |
-|-------|-------------|
-| `main` | Zashhishhennaja vetka, tol'ko cherez PR |
-| `review` | Pustaja vetka dlja rev'ju |
-| `feature/<modul'>-<imja>` | Feature-vetki dlja novyh funkcij |
-| `fix/<opisanie>` | Vetki dlja ispravlenija bagov |
+| Ветка | Назначение |
+|-------|------------|
+| `main` | Защищённая ветка, только через PR |
+| `review` | Пустая ветка для ревью |
+| `feature/<модуль>-<имя>` | Feature-ветки для новых функций |
+| `fix/<описание>` | Ветки для исправления багов |
 
-### Sozdanie feature-vetki
+### Создание feature-ветки
 
 ```bash
-# Sozdat' novuju vetku ot main
+# Создать новую ветку от main
 git checkout main
 git pull origin main
 git checkout -b feature/auth-login
 
-# Rabotat' v vetke
+# Работать в ветке
 git add .
 git commit -m "feat(auth): add login functionality"
 
-# Otpravit' vetku v repozitorij
+# Отправить ветку в репозиторий
 git push origin feature/auth-login
 ```
 
 ### Conventional Commits
 
-Ispol'zuem format conventional commits:
+Используем формат conventional commits:
 
 ```
-<tip>(<oblast'>): <opisanie>
+<тип>(<область>): <описание>
 
-[neobjazatel'noe telo]
+[необязательное тело]
 ```
 
-#### Tipy commitov
+#### Типы коммитов
 
-| Tip | Opisanie |
+| Тип | Описание |
 |-----|----------|
-| `feat` | Novaja funkcija |
-| `fix` | Ispravlenie baga |
-| `docs` | Izmenenie dokumentacii |
-| `style` | Formatirovanie, nedostajushhie tochki s zapjatoj |
-| `refactor` | Refaktoring bez izmenenija funkcional'nosti |
-| `test` | Dobavlenie ili ispravlenie testov |
-| `chore` | Obnovlenie zavisimostej, konfiguracii |
+| `feat` | Новая функция |
+| `fix` | Исправление бага |
+| `docs` | Изменение документации |
+| `style` | Форматирование, недостающие точки с запятой |
+| `refactor` | Рефакторинг без изменения функциональности |
+| `test` | Добавление или исправление тестов |
+| `chore` | Обновление зависимостей, конфигурации |
 
-#### Primery
+#### Примеры
 
 ```bash
 feat(auth): add password hashing
@@ -332,77 +385,103 @@ test(session): add unit tests for session service
 
 ### Pull Request
 
-1. Sozdat' vetku ot `main`
-2. Vnesti izmenenija
-3. Otkryt' Pull Request v `main`
-4. Zhdat' code review
-5. Ispravit' zamechanija
-6. Smerzh' posle odobrenija
+1. Создать ветку от `main`
+2. Внести изменения
+3. Открыть Pull Request в `main`
+4. Ждать code review
+5. Исправить замечания
+6. Смержить после одобрения
 
 ---
 
-## Zapusk testov
+## Запуск тестов
 
-### Vse testy
+### Все тесты
 
 ```bash
 npm test
 ```
 
-### Rezhim slezhenija
+### Режим слежения
 
 ```bash
 npm run test:watch
 ```
 
-### Otchet o pokrytii
+### Отчёт о покрытии
 
 ```bash
 npm run test:coverage
 ```
 
-### Struktura testov
+### E2E тесты (Cypress)
 
-Testy raspolagajutsja v katalogah `__tests__`:
+```bash
+# Headless режим
+npm run test:e2e
+
+# Интерактивный режим
+npm run test:e2e:open
+```
+
+### Структура тестов
+
+Тесты располагаются в каталогах `__tests__`:
 
 ```
 src/backend/
-|-- services/
-|   |-- __tests__/
-|   |   |-- session.service.test.ts
-|-- utils/
-    |-- __tests__/
-        |-- validators.test.ts
-        |-- id.utils.test.ts
+├── services/
+│   └── __tests__/
+│       ├── user.service.test.ts
+│       ├── session.service.test.ts
+│       ├── cart.service.test.ts
+│       ├── order.service.test.ts
+│       └── product.service.test.ts
+├── controllers/
+│   └── __tests__/
+│       └── product.controller.test.ts
+└── utils/
+    └── __tests__/
+        ├── validators.test.ts
+        ├── id.utils.test.ts
+        └── hash.utils.test.ts
+
+src/frontend/
+└── __tests__/
+    └── setup.ts
+
+cypress/
+└── e2e/
+    └── auth.cy.ts
 ```
 
-### Imenovanie testov
+### Именование тестов
 
-- Fajly testov: `<imja>.test.ts`
-- Opisyvajut povedenie: "dolzhen...", "pri ... dolzhen..."
+- Файлы тестов: `<имя>.test.ts`
+- Описывают поведение: "должен...", "при ... должен..."
 
 ---
 
-## Otladka i logirovanie
+## Отладка и логирование
 
-### Logirovanie v kontrollery
+### Логирование в контроллерах
 
 ```typescript
-// Ispol'zujte console.log dlja otladki
+// Используйте console.log для отладки
 console.log('[AuthController] Login attempt:', { login });
 
-// Ispol'zujte console.error dlja oshibok
+// Используйте console.error для ошибок
 console.error('[AuthController] Login error:', error);
 ```
 
-### Otladka v VS Code
+### Отладка в VS Code
 
-1. Otkryt' fajl dlja otladki
-2. Postavit' tochku ostanova (F9)
-3. Zapustit' otladku (F5)
-4. Vybrat' konfiguraciju "Node.js"
+1. Открыть файл для отладки
+2. Поставить точку останова (F9)
+3. Запустить отладку (F5)
+4. Выбрать конфигурацию "Node.js"
 
-### Konfiguracija otladki (.vscode/launch.json)
+### Конфигурация отладки (.vscode/launch.json)
 
 ```json
 {
@@ -422,132 +501,136 @@ console.error('[AuthController] Login error:', error);
 
 ---
 
-## Chastye problemy i reshenija
+## Частые проблемы и решения
 
-### Port uzhe ispol'zuetsja
+### Порт уже используется
 
-**Oshibka:** `Error: listen EADDRINUSE: address already in use :::3000`
+**Ошибка:** `Error: listen EADDRINUSE: address already in use :::3000`
 
-**Reshenie:**
+**Решение:**
 ```bash
-# Najti process na portu 3000
+# Найти процесс на порту 3000
 lsof -i :3000
 
-# Ubit' process
+# Убить процесс
 kill -9 <PID>
 ```
 
-### Moduli ne najdeny
+### Модули не найдены
 
-**Oshibka:** `Cannot find module '...'`
+**Ошибка:** `Cannot find module '...'`
 
-**Reshenie:**
+**Решение:**
 ```bash
-# Pereustanovit' zavisimosti
+# Переустановить зависимости
 rm -rf node_modules package-lock.json
 npm install
 ```
 
-### Oshibki TypeScript
+### Ошибки TypeScript
 
-**Oshibka:** `Type '...' is not assignable to type '...'`
+**Ошибка:** `Type '...' is not assignable to type '...'`
 
-**Reshenie:**
-- Prover'te sootvetstvie tipov
-- Ispol'zujte tipizaciju argumentov i vozvrashhaemyh znachenij
-- Izbezhajte `any`
+**Решение:**
+- Проверьте соответствие типов
+- Используйте типизацию аргументов и возвращаемых значений
+- Избегайте `any`
 
-### ESLint oshibki
+### ESLint ошибки
 
-**Oshibka:** `ESLint: ...`
+**Ошибка:** `ESLint: ...`
 
-**Reshenie:**
+**Решение:**
 ```bash
-# Avtomaticheski ispravit' prostye oshibki
+# Автоматически исправить простые ошибки
 npm run lint -- --fix
 
-# Formatirovat' kod
+# Отформатировать код
 npm run format
 ```
 
-### Testy ne prohodjat
+### Тесты не проходят
 
-**Oshibka:** Testy padajut
+**Ошибка:** Тесты падают
 
-**Reshenie:**
-- Prover'te, chto vse zavisimosti ustanovleny
-- Prover'te, chto fajly dannyh sushhestvujut
-- Zapustite `npm run seed` dlja sozdanija testovyh dannyh
+**Решение:**
+- Проверьте, что все зависимости установлены
+- Проверьте, что файлы данных существуют
+- Запустите `npm run seed` для создания тестовых данных
 
 ---
 
-## Poleznye komandy
+## Полезные команды
 
-### Razrabotka
+### Разработка
 
 ```bash
-# Odnovremennyj zapusk frontend i backend (rekomenduetsja)
+# Одновременный запуск frontend и backend (рекомендуется)
 npm run dev
 
-# Zapusk tol'ko backend s avtoperezagruzkoj
+# Запуск только backend с автоперезагрузкой
 npm run dev:backend
 
-# Zapusk tol'ko frontend
+# Запуск только frontend
 npm run dev:frontend
 
-# Zapusk frontend na konkretnom portu
+# Запуск frontend на конкретном порту
 FRONTEND_PORT=8080 npm run dev:frontend
 
-# Proverka koda
+# Проверка кода
 npm run lint
 
-# Formatirovanie koda
+# Форматирование кода
 npm run format
 
-# Kompiljacija
+# Компиляция
 npm run build
 ```
 
-### Dostupnye URL
+### Доступные URL
 
-Pri zapuske `npm run dev`:
+При запуске `npm run dev`:
 
-| Servis | URL | Opisanie |
+| Сервис | URL | Описание |
 |--------|-----|----------|
 | Backend API | `http://localhost:3001` | Express server |
-| Frontend | `http://localhost:3000` | SPA prilozhenie |
+| Frontend | `http://localhost:3000` | SPA приложение |
 
-**Primechanie:** Porty mozhno izmenit' cherez peremennye okruzhenija v `.env` faile.
+**Примечание:** Порты можно изменить через переменные окружения в `.env` файле.
 
-### Testirovanie
+### Тестирование
 
 ```bash
-# Zapusk vseh testov
+# Запуск всех тестов
 npm test
 
-# Zapusk konkretnogo testa
+# Запуск конкретного теста
 npm test -- --testPathPattern=validators
 
-# Rezhim slezhenija
+# Режим слежения
 npm run test:watch
 
-# Otchet o pokrytii
+# Отчёт о покрытии
 npm run test:coverage
+
+# E2E тесты
+npm run test:e2e
+npm run test:e2e:open
 ```
 
 ### Git
 
 ```bash
-# Status
+# Статус
 git status
 
-# Istorija commitov
+# История коммитов
 git log --oneline -10
 
-# Raznica
+# Разница
 git diff
 
-# Otpravit' izmenenija
+# Отправить изменения
 git add .
 git commit -m "feat: description"
 git push origin <branch>
@@ -556,21 +639,26 @@ git push origin <branch>
 ### NPM
 
 ```bash
-# Proverit' ustarevshie pakety
+# Проверить устаревшие пакеты
 npm outdated
 
-# Obnovit' pakety
+# Обновить пакеты
 npm update
 
-# Ustanovit' konkretnuju versiju
+# Установить конкретную версию
 npm install package@version
 ```
 
 ---
 
-## Dopolnitel'nye resursy
+## Дополнительные ресурсы
 
-- [Arhitektura proekta](ARCHITECTURE.md)
-- [API dokumentacija](API.md)
-- [Standarty oformlenija koda](CODING_STANDARDS.md)
-- [Pravila vklada](CONTRIBUTING.md)
+- [Архитектура проекта](ARCHITECTURE.md)
+- [API документация](API.md)
+- [Стандарты оформления кода](CODING_STANDARDS.md)
+- [Правила вклада](CONTRIBUTING.md)
+- [Дизайн-система](DESIGN_SYSTEM.md)
+
+---
+
+*Документ обновлён: март 2026*

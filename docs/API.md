@@ -1,6 +1,6 @@
 # API Документация L_Shop
 
-Базовый URL: `http://localhost:3000/api`
+Базовый URL: `http://localhost:3001/api`
 
 ## Содержание
 
@@ -133,17 +133,18 @@
 
 ## Продукты
 
-> **Примечание:** API продуктов будет реализовано позже (ответственный: Никита П.)
-
 ### GET /products
 
-Получение списка продуктов.
+Получение списка продуктов с фильтрацией и сортировкой.
 
 **Query параметры:**
-- `category` - фильтр по категории
-- `inStock` - фильтр по наличию (true/false)
-- `minPrice` - минимальная цена
-- `maxPrice` - максимальная цена
+| Параметр | Тип | Описание |
+|----------|-----|----------|
+| `search` | string | Поиск по названию и описанию |
+| `sort` | string | Сортировка: `price_asc`, `price_desc` |
+| `category` | string | Фильтр по категории |
+| `inStock` | string | Фильтр по наличию: `true`, `false` |
+| `minRating` | number | Минимальный рейтинг (1-5) |
 
 **Ответ 200:**
 ```json
@@ -154,6 +155,8 @@
     "description": "Описание товара",
     "price": 100.00,
     "category": "electronics",
+    "rating": 4.5,
+    "reviewsCount": 42,
     "inStock": true,
     "discountPercent": 10,
     "imageUrl": "/images/product.jpg",
@@ -161,6 +164,45 @@
   }
 ]
 ```
+
+**Ошибки:**
+| Код | Код ошибки | Описание |
+|-----|------------|----------|
+| 400 | INVALID_SORT_PARAMETER | Некорректный параметр sort |
+| 400 | INVALID_INSTOCK_PARAMETER | Некорректный параметр inStock |
+| 400 | INVALID_MINRATING_PARAMETER | minRating должен быть от 1 до 5 |
+
+---
+
+### GET /products/:id
+
+Получить продукт по ID.
+
+**Параметры URL:**
+- `id` - ID продукта
+
+**Ответ 200:**
+```json
+{
+  "id": "uuid",
+  "name": "Название товара",
+  "description": "Описание товара",
+  "price": 100.00,
+  "category": "electronics",
+  "rating": 4.5,
+  "reviewsCount": 42,
+  "inStock": true,
+  "discountPercent": 10,
+  "imageUrl": "/images/product.jpg",
+  "createdAt": "2026-03-01T00:00:00.000Z"
+}
+```
+
+**Ошибки:**
+| Код | Код ошибки | Описание |
+|-----|------------|----------|
+| 400 | MISSING_PRODUCT_ID | ID продукта не указан |
+| 404 | PRODUCT_NOT_FOUND | Продукт не найден |
 
 ---
 

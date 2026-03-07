@@ -12,6 +12,11 @@
 8. [Микро-взаимодействия](#микро-взаимодействия)
 9. [Визуальная иерархия](#визуальная-иерархия)
 10. [Применение в компонентах](#применение-в-компонентах)
+11. [Иерархия компонентов](#иерархия-компонентов)
+12. [Состояния компонентов](#состояния-компонентов)
+13. [Сетка и адаптивность](#сетка-и-адаптивность)
+14. [Анимации и переходы](#анимации-и-переходы)
+15. [Примеры использования](#примеры-использования)
 
 ---
 
@@ -853,8 +858,614 @@ graph TD
 
 ---
 
-## Версионирование
+## Иерархия компонентов
 
-| Версия | Дата | Изменения |
-|--------|------|-----------|
-| 1.0.0 | 2026-02-19 | Начальная версия дизайн-системы |
+### Принципы построения
+
+Дизайн-система L_Shop следует атомарному дизайну. Компоненты разделены на уровни:
+
+```mermaid
+graph TD
+    A[Atoms] --> B[Molecules]
+    B --> C[Organisms]
+    C --> D[Templates]
+    D --> E[Pages]
+    
+    A1[Button] --> A
+    A2[Input] --> A
+    A3[Icon] --> A
+    A4[Badge] --> A
+    A5[Spinner] --> A
+    
+    B1[FormField] --> B
+    B2[SearchBar] --> B
+    B3[CartItem] --> B
+    
+    C1[Header] --> C
+    C2[ProductCard] --> C
+    C3[ProductList] --> C
+    C4[CartSummary] --> C
+    
+    D1[MainLayout] --> D
+    D2[AuthModal] --> D
+    
+    E1[MainPage] --> E
+    E2[CartPage] --> E
+    E3[ProfilePage] --> E
+```
+
+### Уровень 1: Атомы (Atoms)
+
+Базовые элементы, которые нельзя разделить дальше.
+
+| Компонент | Файл | Описание |
+|-----------|------|----------|
+| Button | `components/ui/Button.ts` | Кнопки всех вариантов |
+| Input | `components/ui/Input.ts` | Поля ввода |
+| Icon | — | Иконки (SVG) |
+| Badge | — | Бейджи и метки |
+| Spinner | — | Индикатор загрузки |
+| Avatar | — | Аватар пользователя |
+
+### Уровень 2: Молекулы (Molecules)
+
+Простые комбинации атомов.
+
+| Компонент | Файл | Состав |
+|-----------|------|--------|
+| FormField | — | Label + Input + Error |
+| SearchBar | — | Input + Button |
+| CartItem | `components/cart/CartItem.ts` | Image + Title + Price + Controls |
+| ProductFilters | `components/product/ProductFilters.ts` | Selects + Inputs + Checkboxes |
+
+### Уровень 3: Организмы (Organisms)
+
+Сложные составные компоненты.
+
+| Компонент | Файл | Описание |
+|-----------|------|----------|
+| Header | `components/layout/Header.ts` | Навигация, логотип, авторизация |
+| Footer | `components/layout/Footer.ts` | Подвал сайта |
+| ProductCard | `components/product/ProductCard.ts` | Карточка товара |
+| ProductList | `components/product/ProductList.ts` | Список товаров |
+| CartList | `components/cart/CartList.ts` | Список корзины |
+| CartSummary | `components/cart/CartSummary.ts` | Итого корзины |
+| AuthModal | `components/auth/AuthModal.ts` | Модальное окно авторизации |
+
+### Уровень 4: Шаблоны (Templates)
+
+Структуры страниц без контента.
+
+| Компонент | Файл | Описание |
+|-----------|------|----------|
+| Layout | `components/layout/Layout.ts` | Основной layout с Header/Footer |
+
+### Уровень 5: Страницы (Pages)
+
+Конечные страницы с реальным контентом.
+
+| Компонент | Файл | Роут |
+|-----------|------|------|
+| MainPage | `components/pages/MainPage.ts` | `/` |
+| CartPage | `components/pages/CartPage.ts` | `/cart` |
+| DeliveryPage | `components/pages/DeliveryPage.ts` | `/delivery` |
+| ProfilePage | `components/pages/ProfilePage.ts` | `/profile` |
+
+---
+
+## Состояния компонентов
+
+### Общие состояния интерактивных элементов
+
+Все интерактивные элементы должны иметь следующие состояния:
+
+| Состояние | CSS | Описание | Визуальные изменения |
+|-----------|-----|----------|---------------------|
+| Default | `:default` | Базовое состояние | Базовый цвет, стандартная тень |
+| Hover | `:hover` | Наведение курсора | Цвет темнее на 1 шаг, тень elevation+1 |
+| Focus | `:focus-visible` | Фокус с клавиатуры | `box-shadow: var(--shadow-focus)` |
+| Active | `:active` | Нажатие | Цвет темнее на 2 шага, `scale(0.98)` |
+| Disabled | `:disabled` | Отключено | `opacity: 0.6`, `cursor: not-allowed` |
+| Loading | `.is-loading` | Загрузка | Spinner, текст скрыт |
+| Error | `.is-error` | Ошибка | Красная граница, сообщение об ошибке |
+
+### Button — детализация состояний
+
+```css
+/* Default */
+.btn--primary {
+  background-color: var(--color-primary-600);
+  color: var(--color-neutral-0);
+  border-color: var(--color-primary-600);
+  box-shadow: var(--shadow-1);
+}
+
+/* Hover */
+.btn--primary:hover:not(:disabled) {
+  background-color: var(--color-primary-700);
+  border-color: var(--color-primary-700);
+  box-shadow: var(--shadow-primary);
+  transform: translateY(-1px);
+}
+
+/* Focus */
+.btn:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+/* Active */
+.btn--primary:active:not(:disabled) {
+  background-color: var(--color-primary-800);
+  border-color: var(--color-primary-800);
+  transform: translateY(0);
+}
+
+/* Disabled */
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Loading */
+.btn--loading {
+  color: transparent;
+  position: relative;
+}
+
+.btn--loading::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+```
+
+### Input — детализация состояний
+
+```css
+/* Default */
+.input {
+  background-color: var(--color-neutral-0);
+  border: 1px solid var(--color-neutral-200);
+  color: var(--color-neutral-700);
+}
+
+/* Hover */
+.input:hover:not(:disabled):not(:focus) {
+  border-color: var(--color-neutral-300);
+}
+
+/* Focus */
+.input:focus {
+  border-color: var(--color-primary-500);
+  box-shadow: var(--shadow-focus);
+  outline: none;
+}
+
+/* Error */
+.input--error {
+  border-color: var(--color-error-500);
+}
+
+.input--error:focus {
+  box-shadow: var(--shadow-focus-error);
+}
+
+/* Success */
+.input--success {
+  border-color: var(--color-success-500);
+}
+
+.input--success:focus {
+  box-shadow: var(--shadow-focus-success);
+}
+
+/* Disabled */
+.input:disabled {
+  background-color: var(--color-neutral-100);
+  color: var(--color-neutral-400);
+  cursor: not-allowed;
+}
+```
+
+### ProductCard — состояния
+
+| Состояние | Класс | Изменения |
+|-----------|-------|-----------|
+| Default | `.product-card` | Базовый вид, тень elevation-1 |
+| Hover | `.product-card:hover` | `translateY(-4px)`, тень elevation-4 |
+| Out of Stock | `.product-card--out-of-stock` | `opacity: 0.7`, курсор default |
+| Discount | `.product-card__discount-badge` | Бейдж со скидкой в углу |
+
+### Modal — состояния
+
+| Состояние | Класс | Изменения |
+|-----------|-------|-----------|
+| Hidden | `.modal` | `opacity: 0`, `visibility: hidden`, `scale(0.95)` |
+| Visible | `.modal--visible` | `opacity: 1`, `visibility: visible`, `scale(1)` |
+| Backdrop | `.modal-backdrop` | Полупрозрачный фон `rgba(0,0,0,0.5)` |
+
+### Таблица цветов состояний
+
+| Состояние | Background | Border | Text | Shadow |
+|-----------|------------|--------|------|--------|
+| Default Primary | `primary-600` | `primary-600` | `neutral-0` | `shadow-1` |
+| Hover Primary | `primary-700` | `primary-700` | `neutral-0` | `shadow-primary` |
+| Active Primary | `primary-800` | `primary-800` | `neutral-0` | `shadow-1` |
+| Error | `error-500` | `error-500` | `neutral-0` | `shadow-error` |
+| Success | `success-500` | `success-500` | `neutral-0` | `shadow-success` |
+| Disabled | — | — | — | `opacity: 0.6` |
+
+---
+
+## Сетка и адаптивность
+
+### Брейкпоинты
+
+Система использует 5 брейкпоинтов:
+
+| Название | Размер | Описание |
+|----------|--------|----------|
+| xs | 0 - 639px | Мобильные устройства |
+| sm | 640px - 767px | Большие телефоны |
+| md | 768px - 1023px | Планшеты |
+| lg | 1024px - 1279px | Ноутбуки |
+| xl | 1280px+ | Десктопы |
+
+### CSS Media Queries
+
+```css
+/* Mobile First подход */
+
+/* Small devices (landscape phones) */
+@media (min-width: 640px) { }
+
+/* Medium devices (tablets) */
+@media (min-width: 768px) { }
+
+/* Large devices (desktops) */
+@media (min-width: 1024px) { }
+
+/* Extra large devices (large desktops) */
+@media (min-width: 1280px) { }
+```
+
+### Контейнер
+
+```css
+.container {
+  width: 100%;
+  max-width: var(--container-max-width); /* 1200px */
+  margin: 0 auto;
+  padding: 0 var(--spacing-4); /* 16px */
+}
+
+@media (min-width: 768px) {
+  .container {
+    padding: 0 var(--spacing-6); /* 24px */
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    padding: 0 var(--spacing-8); /* 32px */
+  }
+}
+```
+
+### Сетка ProductList
+
+```css
+.product-list__grid {
+  display: grid;
+  gap: var(--spacing-6); /* 24px */
+}
+
+/* Mobile: 1 колонка */
+@media (max-width: 639px) {
+  .product-list__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Tablet: 2 колонки */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .product-list__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Desktop: auto-fill */
+@media (min-width: 1024px) {
+  .product-list__grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+}
+```
+
+### Поведение компонентов на разных экранах
+
+#### Header
+
+| Экран | Логотип | Навигация | Действия |
+|-------|---------|-----------|----------|
+| Mobile (< 768px) | Компактный | Hamburger menu | Иконки |
+| Tablet (768-1023px) | Полный | Сокращённая | Иконки + текст |
+| Desktop (1024px+) | Полный | Полная | Все элементы |
+
+#### MainPage (фильтры + продукты)
+
+| Экран | Макет | Фильтры |
+|-------|-------|---------|
+| Mobile (< 900px) | 1 колонка | Сверху, collapsible |
+| Desktop (900px+) | 2 колонки (280px + 1fr) | Sidebar, sticky |
+
+#### ProductCard
+
+| Экран | Размер | Изображение | Информация |
+|-------|--------|-------------|------------|
+| Mobile | 100% | Квадрат | Компактная |
+| Tablet | 50% | Квадрат | Стандартная |
+| Desktop | ~280-320px | Квадрат | Полная |
+
+#### CartPage
+
+| Экран | Макет | CartList | CartSummary |
+|-------|-------|----------|-------------|
+| Mobile (< 768px) | 1 колонка | 100% | Внизу, fixed |
+| Desktop (768px+) | 2 колонки | 1fr | 320px, sticky |
+
+### Минимальные размеры области касания
+
+Для мобильных устройств минимальный размер касаемой области — 44x44px.
+
+```css
+/* Применяется ко всем интерактивным элементам на мобильных */
+@media (max-width: 767px) {
+  .btn,
+  .input,
+  .product-card__add-button {
+    min-height: 44px;
+  }
+}
+```
+
+---
+
+## Анимации и переходы
+
+### Принципы анимаций
+
+1. **Целесообразность** — анимация должна нести смысл, а не быть ради анимации
+2. **Быстрота** — большинство анимаций 150-300ms
+3. **Естественность** — использовать ease-out для входа, ease-in для выхода
+4. **Производительность** — анимировать только transform и opacity
+
+### Стандартные переходы
+
+| Тип | Длительность | Timing | Использование |
+|-----|--------------|--------|---------------|
+| Fast | 150ms | ease-out | Hover, focus состояния |
+| Normal | 250ms | ease-out | Открытие/закрытие |
+| Slow | 350ms | ease-out | Сложные трансформации |
+| Modal | 250ms | ease-out | Появление модальных окон |
+
+### Готовые transition-классы
+
+```css
+.transition-colors {
+  transition: color, background-color, border-color var(--duration-fast) var(--ease-out);
+}
+
+.transition-opacity {
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.transition-transform {
+  transition: transform var(--duration-normal) var(--ease-out);
+}
+
+.transition-shadow {
+  transition: box-shadow var(--duration-normal) var(--ease-out);
+}
+
+.transition-all {
+  transition: all var(--duration-normal) var(--ease-out);
+}
+```
+
+### Анимации появления
+
+```css
+/* Fade In */
+.animate-fade-in {
+  animation: fadeIn var(--duration-normal) var(--ease-out);
+}
+
+/* Slide Up */
+.animate-slide-up {
+  animation: slideInUp var(--duration-normal) var(--ease-out);
+}
+
+/* Scale In */
+.animate-scale-in {
+  animation: scaleIn var(--duration-normal) var(--ease-out);
+}
+
+/* Для модальных окон */
+.modal--visible {
+  animation: scaleIn var(--duration-normal) var(--ease-out);
+}
+```
+
+### Анимации загрузки
+
+```css
+/* Spinner */
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Pulse */
+.animate-pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+```
+
+### Анимации обратной связи
+
+```css
+/* Shake для ошибок валидации */
+.animate-shake {
+  animation: shake 0.5s var(--ease-out);
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+```
+
+### Hover-эффекты для карточек
+
+```css
+/* ProductCard hover */
+.product-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Button hover */
+.btn {
+  transition: background-color, border-color, box-shadow, transform 
+              var(--duration-fast) var(--ease-out);
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+```
+
+### Staggered animations (каскадные)
+
+Для списков элементов с задержкой появления:
+
+```css
+.product-card:nth-child(1) { animation-delay: 0ms; }
+.product-card:nth-child(2) { animation-delay: 50ms; }
+.product-card:nth-child(3) { animation-delay: 100ms; }
+.product-card:nth-child(4) { animation-delay: 150ms; }
+.product-card:nth-child(5) { animation-delay: 200ms; }
+.product-card:nth-child(6) { animation-delay: 250ms; }
+```
+
+### Отключение анимаций
+
+Для пользователей с настройкой "уменьшить движение":
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+```
+
+---
+
+## Примеры использования
+
+### MainPage — структура
+
+```
+┌────────────────────────────────────────────────────────────┐
+│                        Header                              │
+│  [Logo]     [Каталог] [О нас] [Контакты]    [🛒] [Войти]   │
+└────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────┐
+│                     Hero Section                           │
+│         "Добро пожаловать в L_Shop"                        │
+│         [Смотреть каталог]                                 │
+└────────────────────────────────────────────────────────────┘
+┌─────────────┬──────────────────────────────────────────────┐
+│   Filters   │              ProductList                     │
+│             │  ┌──────────┐ ┌──────────┐ ┌──────────┐      │
+│  Поиск:     │  │ Product  │ │ Product  │ │ Product  │      │
+│  [_______]  │  │  Card    │ │  Card    │ │  Card    │      │
+│             │  │          │ │          │ │          │      │
+│  Категория: │  │ ★ 4.5   │ │ ★ 4.8   │ │ ★ 4.2   │      │
+│  [Выпад.]   │  │ 999 ₽   │ │ 1499 ₽  │ │ 599 ₽   │      │
+│             │  │ [В корз] │ │ [В корз] │ │ [В корз] │      │
+│  Сортировка:│  └──────────┘ └──────────┘ └──────────┘      │
+│  [Выпад.]   │                                              │
+│             │  ┌──────────┐ ┌──────────┐ ┌──────────┐      │
+│  Рейтинг:   │  │ Product  │ │ Product  │ │ Product  │      │
+│  [____]     │  │  Card    │ │  Card    │ │  Card    │      │
+│             │  └──────────┘ └──────────┘ └──────────┘      │
+│  [Сбросить] │                                              │
+└─────────────┴──────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────┐
+│                        Footer                              │
+│         © 2026 L_Shop. Все права защищены.                 │
+└────────────────────────────────────────────────────────────┘
+```
+
+### CartPage — структура
+
+```
+┌────────────────────────────────────────────────────────────┐
+│                        Header                              │
+└────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────┬─────────────────────┐
+│            CartList                  │    CartSummary      │
+│  ┌────────────────────────────────┐  │                     │
+│  │ [Img] Товар 1          - 1 +   │  │  Товаров: 3        │
+│  │       999 ₽         [Удалить]  │  │  Сумма: 2997 ₽     │
+│  └────────────────────────────────┘  │                     │
+│  ┌────────────────────────────────┐  │  Доставка: 300 ₽    │
+│  │ [Img] Товар 2          - 2 +   │  │                     │
+│  │       1499 ₽        [Удалить]  │  │  ───────────────    │
+│  └────────────────────────────────┘  │  Итого: 3297 ₽     │
+│  ┌────────────────────────────────┐  │                     │
+│  │ [Img] Товар 3          - 1 +   │  │  [Оформить заказ]   │
+│  │       599 ₽         [Удалить]  │  │                     │
+│  └────────────────────────────────┘  │                     │
+└──────────────────────────────────────┴─────────────────────┘
+```
+
+### AuthModal — структура
+
+```
+┌─────────────────────────────────────┐
+│  [X]                                │
+│                                     │
+│       Вход в аккаунт                │
+│                                     │
+│  Email                              │
+│  [________________________]         │
+│                                     │
+│  Пароль                             │
+│  [________________________]         │
+│                                     │
+│  [ Забыли пароль? ]                 │
+│                                     │
+│  ┌────────
