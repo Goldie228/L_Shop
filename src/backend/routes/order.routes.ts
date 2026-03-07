@@ -3,11 +3,7 @@
  */
 
 import { Router } from 'express';
-import {
-  createOrder,
-  getOrders,
-  getOrderById,
-} from '../controllers/order.controller';
+import { createOrder, getOrders, getOrderById } from '../controllers/order.controller';
 import { authMiddleware } from '../middleware/auth.middleware';
 
 const router = Router();

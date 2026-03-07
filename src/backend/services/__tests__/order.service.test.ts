@@ -47,9 +47,9 @@ describe('OrderService', () => {
   describe('createOrder', () => {
     it('должен создать заказ из корзины', async () => {
       mockReadJsonFile
-        .mockResolvedValueOnce(mockCarts)     // carts
-        .mockResolvedValueOnce(mockProducts)  // products
-        .mockResolvedValueOnce(mockOrders);   // orders
+        .mockResolvedValueOnce(mockCarts) // carts
+        .mockResolvedValueOnce(mockProducts) // products
+        .mockResolvedValueOnce(mockOrders); // orders
       mockWriteJsonFile.mockResolvedValue();
 
       const result = await orderService.createOrder('user-1', {
@@ -71,12 +71,14 @@ describe('OrderService', () => {
     it('должен выбросить ошибку для пустой корзины', async () => {
       mockReadJsonFile.mockResolvedValueOnce([]); // пустые корзины
 
-      await expect(orderService.createOrder('user-1', {
-        deliveryAddress: 'ул. Пушкина, д. 10',
-        phone: '+375291234567',
-        email: 'test@example.com',
-        paymentMethod: 'cash',
-      })).rejects.toThrow('Cart is empty');
+      await expect(
+        orderService.createOrder('user-1', {
+          deliveryAddress: 'ул. Пушкина, д. 10',
+          phone: '+375291234567',
+          email: 'test@example.com',
+          paymentMethod: 'cash',
+        }),
+      ).rejects.toThrow('Cart is empty');
     });
 
     it('должен очистить корзину после создания заказа', async () => {

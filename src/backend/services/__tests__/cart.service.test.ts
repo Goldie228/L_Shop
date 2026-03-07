@@ -65,9 +65,7 @@ describe('CartService', () => {
 
   describe('getCart', () => {
     it('должен вернуть корзину с обогащёнными элементами', async () => {
-      mockReadJsonFile
-        .mockResolvedValueOnce(getFreshCarts())
-        .mockResolvedValueOnce(mockProducts);
+      mockReadJsonFile.mockResolvedValueOnce(getFreshCarts()).mockResolvedValueOnce(mockProducts);
 
       const result = await cartService.getCart('user-1');
 
@@ -77,9 +75,7 @@ describe('CartService', () => {
     });
 
     it('должен корректно рассчитывать скидку (вариант 21)', async () => {
-      mockReadJsonFile
-        .mockResolvedValueOnce(getFreshCarts())
-        .mockResolvedValueOnce(mockProducts);
+      mockReadJsonFile.mockResolvedValueOnce(getFreshCarts()).mockResolvedValueOnce(mockProducts);
 
       const result = await cartService.getCart('user-1');
 
@@ -88,9 +84,7 @@ describe('CartService', () => {
     });
 
     it('должен вернуть пустую корзину для нового пользователя', async () => {
-      mockReadJsonFile
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce(mockProducts);
+      mockReadJsonFile.mockResolvedValueOnce([]).mockResolvedValueOnce(mockProducts);
 
       const result = await cartService.getCart('new-user');
 
@@ -153,9 +147,7 @@ describe('CartService', () => {
     });
 
     it('должен выбросить ошибку для несуществующего продукта', async () => {
-      mockReadJsonFile
-        .mockResolvedValueOnce(getFreshCarts())
-        .mockResolvedValueOnce(mockProducts);
+      mockReadJsonFile.mockResolvedValueOnce(getFreshCarts()).mockResolvedValueOnce(mockProducts);
 
       await expect(cartService.addItem('user-1', 'non-existent', 1)).rejects.toThrow(
         'Product not found',
@@ -163,9 +155,7 @@ describe('CartService', () => {
     });
 
     it('должен выбросить ошибку для продукта не в наличии', async () => {
-      mockReadJsonFile
-        .mockResolvedValueOnce(getFreshCarts())
-        .mockResolvedValueOnce(mockProducts);
+      mockReadJsonFile.mockResolvedValueOnce(getFreshCarts()).mockResolvedValueOnce(mockProducts);
 
       await expect(cartService.addItem('user-1', 'product-3', 1)).rejects.toThrow(
         'Product is out of stock',
@@ -176,7 +166,13 @@ describe('CartService', () => {
       mockReadJsonFile
         .mockResolvedValueOnce([])
         .mockResolvedValueOnce(mockProducts)
-        .mockResolvedValueOnce([{ userId: 'new-user', items: [{ productId: 'product-1', quantity: 1 }], updatedAt: '2026-02-19T10:00:00Z' }])
+        .mockResolvedValueOnce([
+          {
+            userId: 'new-user',
+            items: [{ productId: 'product-1', quantity: 1 }],
+            updatedAt: '2026-02-19T10:00:00Z',
+          },
+        ])
         .mockResolvedValueOnce(mockProducts);
       mockWriteJsonFile.mockResolvedValue();
 
@@ -190,9 +186,7 @@ describe('CartService', () => {
 
   describe('updateItem', () => {
     it('должен обновить количество товара', async () => {
-      mockReadJsonFile
-        .mockResolvedValueOnce(getFreshCarts())
-        .mockResolvedValueOnce(mockProducts);
+      mockReadJsonFile.mockResolvedValueOnce(getFreshCarts()).mockResolvedValueOnce(mockProducts);
       mockWriteJsonFile.mockResolvedValue();
 
       await cartService.updateItem('user-1', 'product-1', 5);
@@ -203,9 +197,7 @@ describe('CartService', () => {
     });
 
     it('должен удалить товар при количестве 0', async () => {
-      mockReadJsonFile
-        .mockResolvedValueOnce(getFreshCarts())
-        .mockResolvedValueOnce(mockProducts);
+      mockReadJsonFile.mockResolvedValueOnce(getFreshCarts()).mockResolvedValueOnce(mockProducts);
       mockWriteJsonFile.mockResolvedValue();
 
       await cartService.updateItem('user-1', 'product-1', 0);
@@ -225,17 +217,15 @@ describe('CartService', () => {
     it('должен выбросить ошибку, если товар не найден в корзине', async () => {
       mockReadJsonFile.mockResolvedValueOnce(getFreshCarts());
 
-      await expect(
-        cartService.updateItem('user-1', 'product-2', 5),
-      ).rejects.toThrow('Item not found in cart');
+      await expect(cartService.updateItem('user-1', 'product-2', 5)).rejects.toThrow(
+        'Item not found in cart',
+      );
     });
   });
 
   describe('removeItem', () => {
     it('должен удалить товар из корзины', async () => {
-      mockReadJsonFile
-        .mockResolvedValueOnce(getFreshCarts())
-        .mockResolvedValueOnce(mockProducts);
+      mockReadJsonFile.mockResolvedValueOnce(getFreshCarts()).mockResolvedValueOnce(mockProducts);
       mockWriteJsonFile.mockResolvedValue();
 
       await cartService.removeItem('user-1', 'product-1');

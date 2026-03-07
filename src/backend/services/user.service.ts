@@ -2,11 +2,13 @@
  * Сервис работы с пользователями
  */
 
-import { readJsonFile, writeJsonFile } from '../utils/file.utils';
+import { readJsonFile, modifyJsonFile } from '../utils/file.utils';
 import { User } from '../models/user.model';
 import { generateId } from '../utils/id.utils';
 import { hashPassword } from '../utils/hash.utils';
+import { createContextLogger } from '../utils/logger';
 
+const logger = createContextLogger('UserService');
 const USERS_FILE = 'users.json';
 
 export class UserService {
@@ -38,8 +40,8 @@ export class UserService {
     login: string;
     phone: string;
     password: string;
+    role?: string; // Опционально, по умолчанию 'user'
   }): Promise<User> {
-    const users = await this.getAllUsers();
     const now = new Date().toISOString();
 
     // Пароль хешируется перед сохранением
@@ -52,12 +54,17 @@ export class UserService {
       login: data.login.trim(),
       phone: data.phone.trim(),
       password: hashedPassword,
+      role: data.role ?? 'user', // Роль по умолчанию 'user'
       createdAt: now,
       updatedAt: now,
     };
 
-    users.push(newUser);
-    await writeJsonFile(USERS_FILE, users);
+    await modifyJsonFile<User>(USERS_FILE, (users) => {
+      users.push(newUser);
+      return users;
+    });
+
+    logger.debug({ userId: newUser.id, email: newUser.email }, 'Пользователь создан');
 
     return newUser;
   }
@@ -66,20 +73,189 @@ export class UserService {
     id: string,
     data: Partial<Omit<User, 'id' | 'createdAt'>>,
   ): Promise<User | null> {
-    const users = await this.getAllUsers();
-    const index = users.findIndex((u) => u.id === id);
+    let updatedUser: User | null = null;
 
-    if (index === -1) {
-      return null;
+    // eslint-disable-next-line no-param-reassign
+    await modifyJsonFile<User>(USERS_FILE, (users) => {
+      const index = users.findIndex((u) => u.id === id);
+
+      if (index === -1) {
+        return users; // Не найден - возвращаем без изменений
+      }
+
+      // Не позволяем обновлять пароль через этот метод
+      const { password, ...updateData } = data;
+
+      // eslint-disable-next-line no-param-reassign
+      users[index] = {
+        ...users[index],
+        ...updateData,
+        updatedAt: new Date().toISOString(),
+      };
+
+      updatedUser = users[index];
+      return users;
+    });
+
+    if (updatedUser) {
+      logger.debug({ userId: id }, 'Пользователь обновлён');
     }
 
-    users[index] = {
-      ...users[index],
-      ...data,
-      updatedAt: new Date().toISOString(),
-    };
+    return updatedUser;
+  }
 
-    await writeJsonFile(USERS_FILE, users);
-    return users[index];
+  /**
+   * Обновить роль пользователя (только для администраторов)
+   * @param userId - ID пользователя
+   * @param role - Новая роль
+   * @returns Обновлённый пользователь или null
+   */
+  async updateUserRole(userId: string, role: string): Promise<User | null> {
+    let updatedUser: User | null = null;
+
+    // eslint-disable-next-line no-param-reassign
+    await modifyJsonFile<User>(USERS_FILE, (users) => {
+      const index = users.findIndex((u) => u.id === userId);
+
+      if (index === -1) {
+        return users;
+      }
+
+      // eslint-disable-next-line no-param-reassign
+      users[index] = {
+        ...users[index],
+        role,
+        updatedAt: new Date().toISOString(),
+      };
+
+      updatedUser = users[index];
+      return users;
+    });
+
+    if (updatedUser) {
+      logger.info({ userId, newRole: role }, 'Роль пользователя обновлена');
+    }
+
+    return updatedUser;
+  }
+
+  /**
+   * Переключить статус блокировки пользователя
+   * @param userId - ID пользователя
+   * @returns Обновлённый пользователь или null
+   */
+  async toggleUserBlock(userId: string): Promise<User | null> {
+    let updatedUser: User | null = null;
+
+    // eslint-disable-next-line no-param-reassign
+    await modifyJsonFile<User>(USERS_FILE, (users) => {
+      const index = users.findIndex((u) => u.id === userId);
+
+      if (index === -1) {
+        return users;
+      }
+
+      const isBlocked = users[index].isBlocked ?? false;
+
+      // eslint-disable-next-line no-param-reassign
+      users[index] = {
+        ...users[index],
+        isBlocked: !isBlocked,
+        updatedAt: new Date().toISOString(),
+      };
+
+      updatedUser = users[index];
+      return users;
+    });
+
+    if (updatedUser !== null) {
+      const user = updatedUser as User;
+      logger.info({ userId, isBlocked: user.isBlocked ?? false }, 'Статус блокировки изменён');
+    }
+
+    return updatedUser;
+  }
+
+  /**
+   * Обновить профиль пользователя (имя, email)
+   * @param userId - ID пользователя
+   * @param name - Новое имя
+   * @param email - Новый email
+   * @returns Обновлённый пользователь или null
+   */
+  async updateProfile(userId: string, name: string, email: string): Promise<User | null> {
+    let updatedUser: User | null = null;
+
+    // Проверка уникальности email
+    const allUsers = await this.getAllUsers();
+    const existingUser = allUsers.find(
+      (u) => u.email.toLowerCase() === email.toLowerCase() && u.id !== userId,
+    );
+
+    if (existingUser) {
+      logger.warn({ userId, email }, 'Email уже используется');
+      throw new Error('EMAIL_EXISTS');
+    }
+
+    // eslint-disable-next-line no-param-reassign
+    await modifyJsonFile<User>(USERS_FILE, (users) => {
+      const index = users.findIndex((u) => u.id === userId);
+
+      if (index === -1) {
+        return users;
+      }
+
+      // eslint-disable-next-line no-param-reassign
+      users[index] = {
+        ...users[index],
+        name: name.trim(),
+        email: email.toLowerCase().trim(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      updatedUser = users[index];
+      return users;
+    });
+
+    if (updatedUser) {
+      logger.info({ userId }, 'Профиль пользователя обновлён');
+    }
+
+    return updatedUser;
+  }
+
+  /**
+   * Обновить пароль пользователя
+   * @param userId - ID пользователя
+   * @param newPassword - Новый пароль (уже хешированный)
+   * @returns Обновлённый пользователь или null
+   */
+  async updatePassword(userId: string, newPassword: string): Promise<User | null> {
+    let updatedUser: User | null = null;
+
+    // eslint-disable-next-line no-param-reassign
+    await modifyJsonFile<User>(USERS_FILE, (users) => {
+      const index = users.findIndex((u) => u.id === userId);
+
+      if (index === -1) {
+        return users;
+      }
+
+      // eslint-disable-next-line no-param-reassign
+      users[index] = {
+        ...users[index],
+        password: newPassword,
+        updatedAt: new Date().toISOString(),
+      };
+
+      updatedUser = users[index];
+      return users;
+    });
+
+    if (updatedUser) {
+      logger.info({ userId }, 'Пароль пользователя обновлён');
+    }
+
+    return updatedUser;
   }
 }

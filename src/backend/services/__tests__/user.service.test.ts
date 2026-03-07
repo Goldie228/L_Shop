@@ -3,7 +3,7 @@
  */
 
 import { UserService } from '../user.service';
-import { readJsonFile, writeJsonFile } from '../../utils/file.utils';
+import { readJsonFile, modifyJsonFile } from '../../utils/file.utils';
 import { User } from '../../models/user.model';
 import { hashPassword } from '../../utils/hash.utils';
 
@@ -11,7 +11,7 @@ jest.mock('../../utils/file.utils');
 jest.mock('../../utils/hash.utils');
 
 const mockReadJsonFile = readJsonFile as jest.MockedFunction<typeof readJsonFile>;
-const mockWriteJsonFile = writeJsonFile as jest.MockedFunction<typeof writeJsonFile>;
+const mockModifyJsonFile = modifyJsonFile as jest.MockedFunction<typeof modifyJsonFile>;
 const mockHashPassword = hashPassword as jest.MockedFunction<typeof hashPassword>;
 
 describe('Тесты UserService', () => {
@@ -35,6 +35,7 @@ describe('Тесты UserService', () => {
           password: 'hash',
           createdAt: '2026-02-19',
           updatedAt: '2026-02-19',
+          role: 'user',
         },
       ];
       mockReadJsonFile.mockResolvedValue(mockUsers);
@@ -58,6 +59,7 @@ describe('Тесты UserService', () => {
           password: 'hash',
           createdAt: '2026-02-19',
           updatedAt: '2026-02-19',
+          role: 'user',
         },
       ];
       mockReadJsonFile.mockResolvedValue(mockUsers);
@@ -88,6 +90,7 @@ describe('Тесты UserService', () => {
           password: 'hash',
           createdAt: '2026-02-19',
           updatedAt: '2026-02-19',
+          role: 'user',
         },
       ];
       mockReadJsonFile.mockResolvedValue(mockUsers);
@@ -108,6 +111,7 @@ describe('Тесты UserService', () => {
           password: 'hash',
           createdAt: '2026-02-19',
           updatedAt: '2026-02-19',
+          role: 'user',
         },
       ];
       mockReadJsonFile.mockResolvedValue(mockUsers);
@@ -138,6 +142,7 @@ describe('Тесты UserService', () => {
           password: 'hash',
           createdAt: '2026-02-19',
           updatedAt: '2026-02-19',
+          role: 'user',
         },
       ];
       mockReadJsonFile.mockResolvedValue(mockUsers);
@@ -152,8 +157,10 @@ describe('Тесты UserService', () => {
 
   describe('Создание пользователя', () => {
     it('должен создавать нового пользователя', async () => {
-      mockReadJsonFile.mockResolvedValue([]);
-      mockWriteJsonFile.mockResolvedValue();
+      mockModifyJsonFile.mockImplementation(async (_filename, modifier) => {
+        const users: User[] = [];
+        return modifier(users);
+      });
 
       const userData = {
         name: '  Тестовый Пользователь  ',
@@ -171,7 +178,7 @@ describe('Тесты UserService', () => {
       expect(user.phone).toBe('+1234567890');
       expect(user.password).toBe('hashed-password');
       expect(mockHashPassword).toHaveBeenCalledWith('password123');
-      expect(mockWriteJsonFile).toHaveBeenCalled();
+      expect(mockModifyJsonFile).toHaveBeenCalled();
     });
   });
 
@@ -187,19 +194,26 @@ describe('Тесты UserService', () => {
           password: 'hash',
           createdAt: '2026-02-19',
           updatedAt: '2026-02-19',
+          role: 'user',
         },
       ];
-      mockReadJsonFile.mockResolvedValue(mockUsers);
-      mockWriteJsonFile.mockResolvedValue();
+
+      mockModifyJsonFile.mockImplementation(async (_filename, modifier) => {
+        const users = [...mockUsers];
+        const result = modifier(users);
+        return result;
+      });
 
       const updatedUser = await userService.updateUser('user-1', { name: 'Новое Имя' });
 
       expect(updatedUser?.name).toBe('Новое Имя');
-      expect(mockWriteJsonFile).toHaveBeenCalled();
+      expect(mockModifyJsonFile).toHaveBeenCalled();
     });
 
     it('должен возвращать null если пользователь не найден', async () => {
-      mockReadJsonFile.mockResolvedValue([]);
+      mockModifyJsonFile.mockImplementation(async (_filename, modifier) => {
+        return modifier([]);
+      });
 
       const result = await userService.updateUser('non-existent', { name: 'Новое Имя' });
 

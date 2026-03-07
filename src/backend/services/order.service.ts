@@ -76,9 +76,12 @@ export class OrderService {
     await writeJsonFile(ORDERS_FILE, orders);
 
     // 6. Очистить корзину пользователя
-    const updatedCarts = carts.map((c) => (c.userId === userId
-      ? { ...c, items: [], updatedAt: new Date().toISOString() }
-      : c));
+    const updatedCarts = carts.map((c) => {
+      if (c.userId === userId) {
+        return { ...c, items: [], updatedAt: new Date().toISOString() };
+      }
+      return c;
+    });
     await writeJsonFile(CARTS_FILE, updatedCarts);
 
     return newOrder;
@@ -93,9 +96,7 @@ export class OrderService {
     const orders = await readJsonFile<Order>(ORDERS_FILE);
     return orders
       .filter((o) => o.userId === userId)
-      .sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      );
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
 
   /**
@@ -115,10 +116,7 @@ export class OrderService {
    * @param status - Новый статус
    * @returns Обновлённый заказ или null
    */
-  async updateOrderStatus(
-    orderId: string,
-    status: Order['status'],
-  ): Promise<Order | null> {
+  async updateOrderStatus(orderId: string, status: Order['status']): Promise<Order | null> {
     const orders = await readJsonFile<Order>(ORDERS_FILE);
     const index = orders.findIndex((o) => o.id === orderId);
 
@@ -134,5 +132,31 @@ export class OrderService {
 
     await writeJsonFile(ORDERS_FILE, orders);
     return orders[index];
+  }
+
+  /**
+   * Получить все заказы (для администратора)
+   * @returns Массив всех заказов, отсортированный по дате создания
+   */
+  async getAllOrders(): Promise<Order[]> {
+    const orders = await readJsonFile<Order>(ORDERS_FILE);
+    return orders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  /**
+   * Удалить заказ по ID (для администратора)
+   * @param orderId - ID заказа
+   * @returns true если заказ удален, false если не найден
+   */
+  async deleteOrder(orderId: string): Promise<boolean> {
+    const orders = await readJsonFile<Order>(ORDERS_FILE);
+    const filtered = orders.filter((o) => o.id !== orderId);
+
+    if (filtered.length === orders.length) {
+      return false; // Заказ не найден
+    }
+
+    await writeJsonFile(ORDERS_FILE, filtered);
+    return true;
   }
 }

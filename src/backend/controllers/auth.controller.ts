@@ -7,10 +7,12 @@ import { Request, Response } from 'express';
 import { AuthRequest } from '../middleware/auth-request';
 import { SessionService } from '../services/session.service';
 import { UserService } from '../services/user.service';
-import { isValidEmail, isValidPhone } from '../utils/validators';
+import { registerSchema, loginRequestSchema, validate } from '../utils/validation';
 import { comparePassword } from '../utils/hash.utils';
 import { config } from '../config/constants';
+import { createContextLogger } from '../utils/logger';
 
+const logger = createContextLogger('AuthController');
 const sessionService = new SessionService();
 const userService = new UserService();
 
@@ -20,42 +22,19 @@ const userService = new UserService();
  */
 export async function register(req: Request, res: Response): Promise<void> {
   try {
-    const {
-      name, email, login: userLogin, phone, password,
-    } = req.body;
+    // Валидация входных данных через Zod
+    const validation = validate(registerSchema, req.body);
 
-    if (!name || !email || !userLogin || !phone || !password) {
+    if (!validation.success) {
       res.status(400).json({
-        message: 'Все поля обязательны: name, email, login, phone, password',
-        error: 'MISSING_FIELDS',
+        message: validation.error,
+        error: 'VALIDATION_ERROR',
+        field: validation.field,
       });
       return;
     }
 
-    if (!isValidEmail(email)) {
-      res.status(400).json({
-        message: 'Некорректный формат email',
-        error: 'INVALID_EMAIL',
-      });
-      return;
-    }
-
-    // Формат телефона: +1234567890 (10-15 цифр)
-    if (!isValidPhone(phone)) {
-      res.status(400).json({
-        message: 'Некорректный формат телефона. Ожидается: +1234567890 (10-15 цифр)',
-        error: 'INVALID_PHONE',
-      });
-      return;
-    }
-
-    if (password.length < 6) {
-      res.status(400).json({
-        message: 'Пароль должен содержать минимум 6 символов',
-        error: 'WEAK_PASSWORD',
-      });
-      return;
-    }
+    const { name, email, login: userLogin, phone, password } = validation.data!;
 
     const existingUser = await userService.findByEmailOrLogin(email, userLogin);
     if (existingUser) {
@@ -90,16 +69,19 @@ export async function register(req: Request, res: Response): Promise<void> {
       maxAge: config.sessionDurationMs,
     });
 
+    logger.info({ userId: newUser.id, email: newUser.email }, 'Пользователь зарегистрирован');
+
     res.status(201).json({
       message: 'Регистрация успешна',
       user: {
         id: newUser.id,
         name: newUser.name,
         email: newUser.email,
+        role: newUser.role,
       },
     });
   } catch (error) {
-    console.error('[AuthController] Ошибка регистрации:', error);
+    logger.error({ error }, 'Ошибка регистрации');
     res.status(500).json({
       message: 'Ошибка при регистрации',
       error: 'REGISTRATION_ERROR',
@@ -113,21 +95,24 @@ export async function register(req: Request, res: Response): Promise<void> {
  */
 export async function login(req: Request, res: Response): Promise<void> {
   try {
-    console.log('[AuthController] Login request body:', JSON.stringify(req.body));
-    const { login: userLogin, password } = req.body;
-    console.log('[AuthController] Extracted:', { userLogin, passwordLength: password?.length });
+    // Валидация входных данных через Zod
+    const validation = validate(loginRequestSchema, req.body);
 
-    if (!userLogin || !password) {
+    if (!validation.success) {
       res.status(400).json({
-        message: 'Логин и пароль обязательны',
-        error: 'MISSING_CREDENTIALS',
+        message: validation.error,
+        error: 'VALIDATION_ERROR',
+        field: validation.field,
       });
       return;
     }
 
+    const { login: userLogin, password } = validation.data!;
+
     const user = await userService.findByLoginOrEmail(userLogin);
 
     if (!user) {
+      logger.warn({ login: userLogin }, 'Попытка входа с несуществующим логином');
       res.status(401).json({
         message: 'Неверный логин или пароль',
         error: 'INVALID_CREDENTIALS',
@@ -135,9 +120,20 @@ export async function login(req: Request, res: Response): Promise<void> {
       return;
     }
 
+    // Проверка блокировки пользователя
+    if (user.isBlocked) {
+      logger.warn({ userId: user.id }, 'Попытка входа заблокированного пользователя');
+      res.status(403).json({
+        message: 'Аккаунт заблокирован',
+        error: 'ACCOUNT_BLOCKED',
+      });
+      return;
+    }
+
     const isPasswordValid = await comparePassword(password, user.password);
 
     if (!isPasswordValid) {
+      logger.warn({ userId: user.id }, 'Неверный пароль при входе');
       res.status(401).json({
         message: 'Неверный логин или пароль',
         error: 'INVALID_CREDENTIALS',
@@ -153,16 +149,19 @@ export async function login(req: Request, res: Response): Promise<void> {
       maxAge: config.sessionDurationMs,
     });
 
+    logger.info({ userId: user.id, email: user.email }, 'Пользователь вошёл в систему');
+
     res.json({
       message: 'Вход выполнен успешно',
       user: {
         id: user.id,
         name: user.name,
         email: user.email,
+        role: user.role,
       },
     });
   } catch (error) {
-    console.error('[AuthController] Ошибка входа:', error);
+    logger.error({ error }, 'Ошибка входа');
     res.status(500).json({
       message: 'Ошибка при входе',
       error: 'LOGIN_ERROR',
@@ -186,10 +185,12 @@ export async function logout(req: Request, res: Response): Promise<void> {
       });
     }
 
+    logger.info('Пользователь вышел из системы');
+
     res.json({ message: 'Выход выполнен успешно' });
   } catch (error) {
     // Даже при ошибке возвращаем успешный ответ, чтобы клиент мог очистить cookie
-    console.error('[AuthController] Ошибка выхода:', error);
+    logger.error({ error }, 'Ошибка выхода');
     res.json({ message: 'Выход выполнен успешно' });
   }
 }
@@ -220,6 +221,15 @@ export async function getCurrentUser(req: AuthRequest, res: Response): Promise<v
       return;
     }
 
+    // Проверка блокировки
+    if (user.isBlocked) {
+      res.status(403).json({
+        message: 'Аккаунт заблокирован',
+        error: 'ACCOUNT_BLOCKED',
+      });
+      return;
+    }
+
     // Возвращаем данные пользователя без пароля
     res.json({
       id: user.id,
@@ -227,14 +237,25 @@ export async function getCurrentUser(req: AuthRequest, res: Response): Promise<v
       email: user.email,
       login: user.login,
       phone: user.phone,
+      role: user.role,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     });
   } catch (error) {
-    console.error('[AuthController] Ошибка получения пользователя:', error);
+    logger.error({ error }, 'Ошибка получения пользователя');
     res.status(500).json({
       message: 'Ошибка при получении данных пользователя',
       error: 'GET_USER_ERROR',
     });
   }
+}
+
+/**
+ * Получение конфигурации сессии (публичный endpoint)
+ * Возвращает длительность сессии в минутах
+ */
+export function getSessionConfig(_req: Request, res: Response): void {
+  res.json({
+    sessionDurationMinutes: config.sessionDurationMinutes,
+  });
 }

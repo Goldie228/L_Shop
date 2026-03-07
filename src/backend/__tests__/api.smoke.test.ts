@@ -19,8 +19,8 @@ function createTestApp(): Express {
   app.use(express.json());
   app.use(cookieParser());
 
-   // Проверка работоспособности
-   app.get('/health', (_req, res) => {
+  // Проверка работоспособности
+  app.get('/health', (_req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
   });
 

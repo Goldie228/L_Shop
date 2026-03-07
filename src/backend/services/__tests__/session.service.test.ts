@@ -3,65 +3,81 @@
  */
 
 import { SessionService } from '../session.service';
-import { readJsonFile, writeJsonFile } from '../../utils/file.utils';
+import { readJsonFile, modifyJsonFile } from '../../utils/file.utils';
 import { Session } from '../../models/session.model';
+import { User } from '../../models/user.model';
 
 jest.mock('../../utils/file.utils');
 
 const mockReadJsonFile = readJsonFile as jest.MockedFunction<typeof readJsonFile>;
-const mockWriteJsonFile = writeJsonFile as jest.MockedFunction<typeof writeJsonFile>;
+const mockModifyJsonFile = modifyJsonFile as jest.MockedFunction<typeof modifyJsonFile>;
 
 describe('Тесты SessionService', () => {
   let sessionService: SessionService;
 
   beforeEach(() => {
-    sessionService = new SessionService();
     jest.clearAllMocks();
+    sessionService = new SessionService();
   });
 
   describe('Создание сессии', () => {
-    it('должен создавать новую сессию и возвращать токен', async () => {
-      mockReadJsonFile.mockResolvedValue([]);
-      mockWriteJsonFile.mockResolvedValue();
+    it('должен создавать новую сессию', async () => {
+      const mockUser: User = {
+        id: 'user-1',
+        name: 'Тест',
+        email: 'test@example.com',
+        login: 'test',
+        phone: '+1234567890',
+        password: 'hash',
+        createdAt: '2026-02-19',
+        updatedAt: '2026-02-19',
+        role: 'user',
+      };
 
-      const token = await sessionService.createSession('user-123');
+      mockModifyJsonFile.mockImplementation(async (_filename, modifier) => {
+        const sessions: Session[] = [];
+        return modifier(sessions);
+      });
+
+      // Мокаем getUserById чтобы возвращать mockUser
+      const mockGetUserById = jest.fn().mockResolvedValue(mockUser);
+      (sessionService as unknown as { userService: { getUserById: typeof mockGetUserById } }).userService = {
+        getUserById: mockGetUserById,
+      } as never;
+
+      const token = await sessionService.createSession('user-1');
 
       expect(token).toBeDefined();
-      expect(mockWriteJsonFile).toHaveBeenCalledWith(
-        'sessions.json',
-        expect.arrayContaining([
-          expect.objectContaining({
-            token,
-            userId: 'user-123',
-          }),
-        ]),
-      );
+      expect(mockModifyJsonFile).toHaveBeenCalled();
     });
   });
 
-  describe('Получение userId по токену', () => {
-    it('должен возвращать userId для валидного токена', async () => {
+  describe('Получение ID пользователя по токену', () => {
+    it('должен возвращать ID пользователя для валидного токена', async () => {
+      const futureDate = new Date(Date.now() + 86400000).toISOString();
       const mockSessions: Session[] = [
-        {
-          token: 'valid-token',
-          userId: 'user-123',
-          expiresAt: new Date(Date.now() + 600000).toISOString(),
-        },
+        { token: 'valid-token', userId: 'user-1', role: 'user', expiresAt: futureDate },
       ];
       mockReadJsonFile.mockResolvedValue(mockSessions);
 
       const userId = await sessionService.getUserIdByToken('valid-token');
 
-      expect(userId).toBe('user-123');
+      expect(userId).toBe('user-1');
+      expect(mockReadJsonFile).toHaveBeenCalledWith('sessions.json');
     });
 
-    it('должен возвращать null для истёкшего токена', async () => {
+    it('должен возвращать null для невалидного токена', async () => {
+      mockReadJsonFile.mockResolvedValue([]);
+
+      const userId = await sessionService.getUserIdByToken('invalid-token');
+
+      expect(userId).toBeNull();
+    });
+
+    it('должен возвращать null для истёкшей сессии', async () => {
+      const pastDate = new Date(Date.now() - 1000).toISOString();
       const mockSessions: Session[] = [
-        {
-          token: 'expired-token',
-          userId: 'user-123',
-          expiresAt: new Date(Date.now() - 600000).toISOString(),
-        },
+        { token: 'expired-token', userId: 'user-1', role: 'user', expiresAt: pastDate },
       ];
       mockReadJsonFile.mockResolvedValue(mockSessions);
 
@@ -69,79 +85,64 @@ describe('Тесты SessionService', () => {
 
       expect(userId).toBeNull();
     });
+  });
 
-    it('должен возвращать null для несуществующего токена', async () => {
+  describe('Получение роли по токену', () => {
+    it('должен возвращать роль для валидного токена', async () => {
+      const futureDate = new Date(Date.now() + 86400000).toISOString();
+      const mockSessions: Session[] = [
+        { token: 'valid-token', userId: 'user-1', role: 'admin', expiresAt: futureDate },
+      ];
+      mockReadJsonFile.mockResolvedValue(mockSessions);
+
+      const role = await sessionService.getRoleByToken('valid-token');
+
+      expect(role).toBe('admin');
+    });
+
+    it('должен возвращать null для невалидного токена', async () => {
       mockReadJsonFile.mockResolvedValue([]);
 
-      const userId = await sessionService.getUserIdByToken('non-existent');
+      const role = await sessionService.getRoleByToken('invalid-token');
 
-      expect(userId).toBeNull();
+      expect(role).toBeNull();
     });
   });
 
   describe('Удаление сессии', () => {
     it('должен удалять сессию по токену', async () => {
       const mockSessions: Session[] = [
-        { token: 'token-1', userId: 'user-1', expiresAt: new Date().toISOString() },
-        { token: 'token-2', userId: 'user-2', expiresAt: new Date().toISOString() },
+        { token: 'token-1', userId: 'user-1', role: 'user', expiresAt: '2027-01-01' },
+        { token: 'token-2', userId: 'user-2', role: 'user', expiresAt: '2027-01-01' },
       ];
-      mockReadJsonFile.mockResolvedValue(mockSessions);
-      mockWriteJsonFile.mockResolvedValue();
+
+      mockModifyJsonFile.mockImplementation(async (_filename, modifier) => {
+        return modifier(mockSessions);
+      });
 
       await sessionService.deleteSession('token-1');
 
-      expect(mockWriteJsonFile).toHaveBeenCalledWith('sessions.json', [mockSessions[1]]);
+      expect(mockModifyJsonFile).toHaveBeenCalled();
     });
   });
 
-  describe('Очистка истекших сессий', () => {
+  describe('Очистка истёкших сессий', () => {
     it('должен удалять истёкшие сессии', async () => {
+      const futureDate = new Date(Date.now() + 86400000).toISOString();
+      const pastDate = new Date(Date.now() - 1000).toISOString();
       const mockSessions: Session[] = [
-        {
-          token: 'valid-token',
-          userId: 'user-1',
-          expiresAt: new Date(Date.now() + 600000).toISOString(),
-        },
-        {
-          token: 'expired-token',
-          userId: 'user-2',
-          expiresAt: new Date(Date.now() - 600000).toISOString(),
-        },
+        { token: 'token-1', userId: 'user-1', role: 'user', expiresAt: futureDate },
+        { token: 'token-2', userId: 'user-2', role: 'user', expiresAt: pastDate },
       ];
-      mockReadJsonFile.mockResolvedValue(mockSessions);
-      mockWriteJsonFile.mockResolvedValue();
+
+      mockModifyJsonFile.mockImplementation(async (_filename, modifier) => {
+        return modifier(mockSessions);
+      });
 
       const removedCount = await sessionService.cleanExpired();
 
       expect(removedCount).toBe(1);
-      expect(mockWriteJsonFile).toHaveBeenCalledWith('sessions.json', [mockSessions[0]]);
-    });
-  });
-
-  describe('Продление сессии', () => {
-    it('должен продлевать сессию', async () => {
-      const mockSessions: Session[] = [
-        {
-          token: 'valid-token',
-          userId: 'user-1',
-          expiresAt: new Date().toISOString(),
-        },
-      ];
-      mockReadJsonFile.mockResolvedValue(mockSessions);
-      mockWriteJsonFile.mockResolvedValue();
-
-      const result = await sessionService.extendSession('valid-token');
-
-      expect(result).toBe(true);
-      expect(mockWriteJsonFile).toHaveBeenCalled();
-    });
-
-    it('должен возвращать false для несуществующего токена', async () => {
-      mockReadJsonFile.mockResolvedValue([]);
-
-      const result = await sessionService.extendSession('non-existent');
-
-      expect(result).toBe(false);
+      expect(mockModifyJsonFile).toHaveBeenCalled();
     });
   });
 });

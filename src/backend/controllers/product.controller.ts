@@ -12,10 +12,7 @@ const productService = new ProductService();
  * Получить список продуктов с фильтрацией
  * Публичный endpoint - авторизация не требуется
  */
-export async function getProducts(
-  req: Request,
-  res: Response,
-): Promise<void> {
+export async function getProducts(req: Request, res: Response): Promise<void> {
   try {
     // Извлечение query-параметров
     const filters: ProductFilters = {
@@ -71,10 +68,7 @@ export async function getProducts(
  * Получить продукт по ID
  * Публичный endpoint - авторизация не требуется
  */
-export async function getProductById(
-  req: Request,
-  res: Response,
-): Promise<void> {
+export async function getProductById(req: Request, res: Response): Promise<void> {
   try {
     const { id } = req.params;
 
@@ -102,6 +96,272 @@ export async function getProductById(
     res.status(500).json({
       message: 'Ошибка при получении продукта',
       error: 'GET_PRODUCT_ERROR',
+    });
+  }
+}
+
+/**
+ * Получить все продукты (админ)
+ * GET /api/admin/products
+ */
+export async function getAllProductsAdmin(_req: Request, res: Response): Promise<void> {
+  try {
+    const products = await productService.getAllProducts();
+    res.json(products);
+  } catch (error) {
+    console.error('[ProductController] Ошибка получения всех продуктов:', error);
+    res.status(500).json({
+      message: 'Ошибка при получении всех продуктов',
+      error: 'GET_ALL_PRODUCTS_ERROR',
+    });
+  }
+}
+
+/**
+ * Создать новый продукт (админ)
+ * POST /api/admin/products
+ */
+export async function createProduct(req: Request, res: Response): Promise<void> {
+  try {
+    const {
+      name,
+      description,
+      price,
+      category,
+      inStock,
+      imageUrl,
+      discountPercent,
+      rating,
+      reviewsCount,
+    } = req.body;
+
+    // Валидация обязательных полей
+    if (!name || !description || price === undefined || !category || inStock === undefined) {
+      res.status(400).json({
+        message: 'Обязательные поля: name, description, price, category, inStock',
+        error: 'MISSING_REQUIRED_FIELDS',
+      });
+      return;
+    }
+
+    // Валидация цены
+    if (typeof price !== 'number' || price < 0) {
+      res.status(400).json({
+        message: 'Цена должна быть неотрицательным числом',
+        error: 'INVALID_PRICE',
+      });
+      return;
+    }
+
+    // Валидация inStock (должен быть boolean)
+    if (typeof inStock !== 'boolean') {
+      res.status(400).json({
+        message: 'Поле inStock должно быть булевым значением',
+        error: 'INVALID_IN_STOCK',
+      });
+      return;
+    }
+
+    // Валидация discountPercent если указано
+    if (discountPercent !== undefined) {
+      if (typeof discountPercent !== 'number' || discountPercent < 0 || discountPercent > 100) {
+        res.status(400).json({
+          message: 'Скидка должна быть числом от 0 до 100',
+          error: 'INVALID_DISCOUNT',
+        });
+        return;
+      }
+    }
+
+    // Валидация rating если указано
+    if (rating !== undefined) {
+      if (typeof rating !== 'number' || rating < 1 || rating > 5) {
+        res.status(400).json({
+          message: 'Рейтинг должен быть числом от 1 до 5',
+          error: 'INVALID_RATING',
+        });
+        return;
+      }
+    }
+
+    // Валидация reviewsCount если указано
+    if (reviewsCount !== undefined) {
+      if (typeof reviewsCount !== 'number' || reviewsCount < 0) {
+        res.status(400).json({
+          message: 'Количество отзывов должно быть неотрицательным числом',
+          error: 'INVALID_REVIEWS_COUNT',
+        });
+        return;
+      }
+    }
+
+    const product = await productService.createProduct({
+      name: name.trim(),
+      description: description.trim(),
+      price,
+      category: category.trim(),
+      inStock,
+      imageUrl: imageUrl?.trim(),
+      discountPercent,
+      rating,
+      reviewsCount,
+    });
+
+    res.status(201).json(product);
+  } catch (error) {
+    console.error('[ProductController] Ошибка создания продукта:', error);
+    res.status(500).json({
+      message: 'Ошибка при создании продукта',
+      error: 'CREATE_PRODUCT_ERROR',
+    });
+  }
+}
+
+/**
+ * Обновить продукт (админ)
+ * PUT /api/admin/products/:id
+ */
+export async function updateProduct(req: Request, res: Response): Promise<void> {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      res.status(400).json({
+        message: 'ID продукта не указан',
+        error: 'MISSING_PRODUCT_ID',
+      });
+      return;
+    }
+
+    const {
+      name,
+      description,
+      price,
+      category,
+      inStock,
+      imageUrl,
+      discountPercent,
+      rating,
+      reviewsCount,
+    } = req.body;
+
+    // Валидация цены если указана
+    if (price !== undefined) {
+      if (typeof price !== 'number' || price < 0) {
+        res.status(400).json({
+          message: 'Цена должна быть неотрицательным числом',
+          error: 'INVALID_PRICE',
+        });
+        return;
+      }
+    }
+
+    // Валидация inStock если указано
+    if (inStock !== undefined) {
+      if (typeof inStock !== 'boolean') {
+        res.status(400).json({
+          message: 'Поле inStock должно быть булевым значением',
+          error: 'INVALID_IN_STOCK',
+        });
+        return;
+      }
+    }
+
+    // Валидация discountPercent если указано
+    if (discountPercent !== undefined) {
+      if (typeof discountPercent !== 'number' || discountPercent < 0 || discountPercent > 100) {
+        res.status(400).json({
+          message: 'Скидка должна быть числом от 0 до 100',
+          error: 'INVALID_DISCOUNT',
+        });
+        return;
+      }
+    }
+
+    // Валидация rating если указано
+    if (rating !== undefined) {
+      if (typeof rating !== 'number' || rating < 1 || rating > 5) {
+        res.status(400).json({
+          message: 'Рейтинг должен быть числом от 1 до 5',
+          error: 'INVALID_RATING',
+        });
+        return;
+      }
+    }
+
+    // Валидация reviewsCount если указано
+    if (reviewsCount !== undefined) {
+      if (typeof reviewsCount !== 'number' || reviewsCount < 0) {
+        res.status(400).json({
+          message: 'Количество отзывов должно быть неотрицательным числом',
+          error: 'INVALID_REVIEWS_COUNT',
+        });
+        return;
+      }
+    }
+
+    const product = await productService.updateProduct(id, {
+      name: name?.trim(),
+      description: description?.trim(),
+      price,
+      category: category?.trim(),
+      inStock,
+      imageUrl: imageUrl?.trim(),
+      discountPercent,
+      rating,
+      reviewsCount,
+    });
+
+    if (!product) {
+      res.status(404).json({
+        message: 'Product not found',
+        error: 'PRODUCT_NOT_FOUND',
+      });
+      return;
+    }
+
+    res.json(product);
+  } catch (error) {
+    console.error('[ProductController] Ошибка обновления продукта:', error);
+    res.status(500).json({
+      message: 'Ошибка при обновлении продукта',
+      error: 'UPDATE_PRODUCT_ERROR',
+    });
+  }
+}
+
+/**
+ * Удалить продукт (админ)
+ * DELETE /api/admin/products/:id
+ */
+export async function deleteProduct(req: Request, res: Response): Promise<void> {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      res.status(400).json({
+        message: 'ID продукта не указан',
+        error: 'MISSING_PRODUCT_ID',
+      });
+      return;
+    }
+
+    const deleted = await productService.deleteProduct(id);
+
+    if (!deleted) {
+      res.status(404).json({
+        message: 'Product not found',
+        error: 'PRODUCT_NOT_FOUND',
+      });
+      return;
+    }
+
+    res.status(204).send(); // No Content
+  } catch (error) {
+    console.error('[ProductController] Ошибка удаления продукта:', error);
+    res.status(500).json({
+      message: 'Ошибка при удалении продукта',
+      error: 'DELETE_PRODUCT_ERROR',
     });
   }
 }

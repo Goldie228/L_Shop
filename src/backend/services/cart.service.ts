@@ -47,11 +47,7 @@ export class CartService {
   /**
    * Добавить продукт в корзину
    */
-  async addItem(
-    userId: string,
-    productId: string,
-    quantity: number,
-  ): Promise<CartWithProducts> {
+  async addItem(userId: string, productId: string, quantity: number): Promise<CartWithProducts> {
     const carts = await readJsonFile<Cart>(CARTS_FILE);
     const products = await readJsonFile<Product>(PRODUCTS_FILE);
 
@@ -98,11 +94,7 @@ export class CartService {
   /**
    * Изменить количество продукта в корзине
    */
-  async updateItem(
-    userId: string,
-    productId: string,
-    quantity: number,
-  ): Promise<CartWithProducts> {
+  async updateItem(userId: string, productId: string, quantity: number): Promise<CartWithProducts> {
     const carts = await readJsonFile<Cart>(CARTS_FILE);
     const cart = carts.find((c) => c.userId === userId);
 

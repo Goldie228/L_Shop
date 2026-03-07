@@ -1,11 +1,12 @@
 /**
  * Сервис продуктов - L_Shop
- * Получение и фильтрация списка продуктов
+ * Получение, фильтрация и управление продуктами
  * Вариант 17: поддержка фильтрации по рейтингу
  */
 
-import { readJsonFile } from '../utils/file.utils';
+import { readJsonFile, writeJsonFile } from '../utils/file.utils';
 import { Product } from '../models/product.model';
+import { generateId } from '../utils/id.utils';
 
 const PRODUCTS_FILE = 'products.json';
 
@@ -41,9 +42,7 @@ export class ProductService {
     if (filters.search) {
       const term = filters.search.toLowerCase();
       products = products.filter(
-        (p) =>
-          p.name.toLowerCase().includes(term) ||
-          p.description.toLowerCase().includes(term)
+        (p) => p.name.toLowerCase().includes(term) || p.description.toLowerCase().includes(term),
       );
     }
 
@@ -84,5 +83,81 @@ export class ProductService {
   async getProductById(id: string): Promise<Product | null> {
     const products = await readJsonFile<Product>(PRODUCTS_FILE);
     return products.find((p) => p.id === id) || null;
+  }
+
+  /**
+   * Получить все продукты (без фильтрации)
+   * Используется в админ-панели
+   * @returns Массив всех продуктов
+   */
+  async getAllProducts(): Promise<Product[]> {
+    const products = await readJsonFile<Product>(PRODUCTS_FILE);
+    return products;
+  }
+
+  /**
+   * Создать новый продукт
+   * @param data - Данные продукта (без id, createdAt, updatedAt)
+   * @returns Созданный продукт
+   */
+  async createProduct(data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>): Promise<Product> {
+    const products = await readJsonFile<Product>(PRODUCTS_FILE);
+    const now = new Date().toISOString();
+
+    const newProduct: Product = {
+      ...data,
+      id: generateId(),
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    products.push(newProduct);
+    await writeJsonFile(PRODUCTS_FILE, products);
+
+    return newProduct;
+  }
+
+  /**
+   * Обновить продукт по ID
+   * @param id - ID продукта
+   * @param data - Данные для обновления (частичные)
+   * @returns Обновлённый продукт или null, если не найден
+   */
+  async updateProduct(
+    id: string,
+    data: Partial<Omit<Product, 'id' | 'createdAt'>>,
+  ): Promise<Product | null> {
+    const products = await readJsonFile<Product>(PRODUCTS_FILE);
+    const index = products.findIndex((p) => p.id === id);
+
+    if (index === -1) {
+      return null;
+    }
+
+    products[index] = {
+      ...products[index],
+      ...data,
+      updatedAt: new Date().toISOString(),
+    };
+
+    await writeJsonFile(PRODUCTS_FILE, products);
+    return products[index];
+  }
+
+  /**
+   * Удалить продукт по ID
+   * @param id - ID продукта
+   * @returns true если продукт удален, false если не найден
+   */
+  async deleteProduct(id: string): Promise<boolean> {
+    const products = await readJsonFile<Product>(PRODUCTS_FILE);
+    const filtered = products.filter((p) => p.id !== id);
+
+    if (filtered.length === products.length) {
+      return false; // Продукт не найден
+    }
+
+    await writeJsonFile(PRODUCTS_FILE, filtered);
+    return true;
   }
 }

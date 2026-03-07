@@ -2,29 +2,51 @@
  * Сервис управления сессиями пользователей
  */
 
-import { readJsonFile, writeJsonFile } from '../utils/file.utils';
+import { readJsonFile, modifyJsonFile } from '../utils/file.utils';
 import { Session } from '../models/session.model';
 import { generateId } from '../utils/id.utils';
 import { config } from '../config/constants';
+import { UserService } from './user.service';
+import { createContextLogger } from '../utils/logger';
 
+const logger = createContextLogger('SessionService');
 const SESSIONS_FILE = 'sessions.json';
 
 export class SessionService {
+  private userService: UserService;
+
+  constructor() {
+    this.userService = new UserService();
+  }
+
   /**
    * Создаёт новую сессию для пользователя
+   * Сохраняет роль пользователя для быстрой проверки
    */
   async createSession(userId: string): Promise<string> {
     try {
-      const sessions = await readJsonFile<Session>(SESSIONS_FILE);
       const token = generateId();
       const expiresAt = new Date(Date.now() + config.sessionDurationMs).toISOString();
 
-      sessions.push({ token, userId, expiresAt });
-      await writeJsonFile(SESSIONS_FILE, sessions);
+      // Получаем пользователя для получения его роли
+      const user = await this.userService.getUserById(userId);
+      const role = user?.role ?? 'user'; // По умолчанию 'user' если пользователь не найден
+
+      await modifyJsonFile<Session>(SESSIONS_FILE, (sessions) => {
+        sessions.push({
+          token,
+          userId,
+          role,
+          expiresAt,
+        });
+        return sessions;
+      });
+
+      logger.debug({ userId, role }, 'Сессия создана');
 
       return token;
     } catch (error) {
-      console.error('[SessionService] Ошибка создания сессии:', error);
+      logger.error({ error, userId }, 'Ошибка создания сессии');
       throw new Error('Ошибка создания сессии');
     }
   }
@@ -42,7 +64,25 @@ export class SessionService {
 
       return session?.userId || null;
     } catch (error) {
-      console.error('[SessionService] Ошибка получения сессии:', error);
+      logger.error({ error }, 'Ошибка получения сессии');
+      return null;
+    }
+  }
+
+  /**
+   * Получает роль пользователя по токену сессии
+   * Возвращает null если сессия не найдена или истекла
+   */
+  async getRoleByToken(token: string): Promise<string | null> {
+    try {
+      const sessions = await readJsonFile<Session>(SESSIONS_FILE);
+      const now = new Date();
+
+      const session = sessions.find((s) => s.token === token && new Date(s.expiresAt) > now);
+
+      return session?.role || null;
+    } catch (error) {
+      logger.error({ error }, 'Ошибка получения роли из сессии');
       return null;
     }
   }
@@ -52,12 +92,14 @@ export class SessionService {
    */
   async deleteSession(token: string): Promise<void> {
     try {
-      const sessions = await readJsonFile<Session>(SESSIONS_FILE);
-      const filtered = sessions.filter((s) => s.token !== token);
-      await writeJsonFile(SESSIONS_FILE, filtered);
+      await modifyJsonFile<Session>(SESSIONS_FILE, (sessions) =>
+        sessions.filter((s) => s.token !== token),
+      );
+
+      logger.debug('Сессия удалена');
     } catch (error) {
       // Не выбрасываем ошибку, чтобы не блокировать logout
-      console.error('[SessionService] Ошибка удаления сессии:', error);
+      logger.error({ error }, 'Ошибка удаления сессии');
     }
   }
 
@@ -66,20 +108,22 @@ export class SessionService {
    */
   async cleanExpired(): Promise<number> {
     try {
-      const sessions = await readJsonFile<Session>(SESSIONS_FILE);
-      const now = new Date();
+      let removedCount = 0;
 
-      const valid = sessions.filter((s) => new Date(s.expiresAt) > now);
-      const removedCount = sessions.length - valid.length;
+      await modifyJsonFile<Session>(SESSIONS_FILE, (sessions) => {
+        const now = new Date();
+        const valid = sessions.filter((s) => new Date(s.expiresAt) > now);
+        removedCount = sessions.length - valid.length;
+        return valid;
+      });
 
       if (removedCount > 0) {
-        await writeJsonFile(SESSIONS_FILE, valid);
-        console.warn(`[SessionService] Удалено истёкших сессий: ${removedCount}`);
+        logger.info({ count: removedCount }, 'Удалено истёкших сессий');
       }
 
       return removedCount;
     } catch (error) {
-      console.error('[SessionService] Ошибка очистки сессий:', error);
+      logger.error({ error }, 'Ошибка очистки сессий');
       return 0;
     }
   }
@@ -89,21 +133,25 @@ export class SessionService {
    */
   async extendSession(token: string): Promise<boolean> {
     try {
-      const sessions = await readJsonFile<Session>(SESSIONS_FILE);
-      const sessionIndex = sessions.findIndex((s) => s.token === token);
+      let found = false;
 
-      if (sessionIndex === -1) {
-        return false;
-      }
+      await modifyJsonFile<Session>(SESSIONS_FILE, (sessions) => {
+        const sessionIndex = sessions.findIndex((s) => s.token === token);
 
-      sessions[sessionIndex].expiresAt = new Date(
-        Date.now() + config.sessionDurationMs,
-      ).toISOString();
+        if (sessionIndex !== -1) {
+          // eslint-disable-next-line no-param-reassign
+          sessions[sessionIndex].expiresAt = new Date(
+            Date.now() + config.sessionDurationMs,
+          ).toISOString();
+          found = true;
+        }
 
-      await writeJsonFile(SESSIONS_FILE, sessions);
-      return true;
+        return sessions;
+      });
+
+      return found;
     } catch (error) {
-      console.error('[SessionService] Ошибка продления сессии:', error);
+      logger.error({ error }, 'Ошибка продления сессии');
       return false;
     }
   }

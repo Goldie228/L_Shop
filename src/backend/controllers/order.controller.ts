@@ -6,6 +6,7 @@
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth-request';
 import { OrderService } from '../services/order.service';
+import { Order } from '../models/order.model';
 import { isValidEmail, isValidPhone } from '../utils/validators';
 
 const orderService = new OrderService();
@@ -14,10 +15,7 @@ const orderService = new OrderService();
  * Создать новый заказ
  * Требует авторизации
  */
-export async function createOrder(
-  req: AuthRequest,
-  res: Response,
-): Promise<void> {
+export async function createOrder(req: AuthRequest, res: Response): Promise<void> {
   try {
     const { userId } = req;
 
@@ -29,20 +27,12 @@ export async function createOrder(
       return;
     }
 
-    const {
-      deliveryAddress,
-      phone,
-      email,
-      paymentMethod,
-      deliveryType,
-      comment,
-    } = req.body;
+    const { deliveryAddress, phone, email, paymentMethod, deliveryType, comment } = req.body;
 
     // Валидация обязательных полей
     if (!deliveryAddress || !phone || !email || !paymentMethod) {
       res.status(400).json({
-        message:
-          'Обязательные поля: deliveryAddress, phone, email, paymentMethod',
+        message: 'Обязательные поля: deliveryAddress, phone, email, paymentMethod',
         error: 'MISSING_FIELDS',
       });
       return;
@@ -121,10 +111,7 @@ export async function createOrder(
  * Получить список заказов текущего пользователя
  * Требует авторизации
  */
-export async function getOrders(
-  req: AuthRequest,
-  res: Response,
-): Promise<void> {
+export async function getOrders(req: AuthRequest, res: Response): Promise<void> {
   try {
     const { userId } = req;
 
@@ -151,10 +138,7 @@ export async function getOrders(
  * Получить конкретный заказ по ID
  * Требует авторизации
  */
-export async function getOrderById(
-  req: AuthRequest,
-  res: Response,
-): Promise<void> {
+export async function getOrderById(req: AuthRequest, res: Response): Promise<void> {
   try {
     const { userId } = req;
     const { orderId } = req.params;
@@ -191,6 +175,120 @@ export async function getOrderById(
     res.status(500).json({
       message: 'Ошибка при получении заказа',
       error: 'GET_ORDER_ERROR',
+    });
+  }
+}
+
+/**
+ * Получить все заказы (админ)
+ * GET /api/admin/orders
+ */
+export async function getAllOrdersAdmin(_req: AuthRequest, res: Response): Promise<void> {
+  try {
+    const orders = await orderService.getAllOrders();
+    res.json(orders);
+  } catch (error) {
+    console.error('[OrderController] Ошибка получения всех заказов:', error);
+    res.status(500).json({
+      message: 'Ошибка при получении всех заказов',
+      error: 'GET_ALL_ORDERS_ERROR',
+    });
+  }
+}
+
+/**
+ * Обновить статус заказа (админ)
+ * PUT /api/admin/orders/:id/status
+ */
+export async function updateOrderStatus(req: AuthRequest, res: Response): Promise<void> {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!id) {
+      res.status(400).json({
+        message: 'ID заказа не указан',
+        error: 'MISSING_ORDER_ID',
+      });
+      return;
+    }
+
+    if (!status) {
+      res.status(400).json({
+        message: 'Статус не указан',
+        error: 'MISSING_STATUS',
+      });
+      return;
+    }
+
+    // Валидация статуса
+    const validStatuses: Order['status'][] = [
+      'pending',
+      'processing',
+      'shipped',
+      'delivered',
+      'cancelled',
+    ];
+    if (!validStatuses.includes(status)) {
+      res.status(400).json({
+        message: `Некорректный статус. Допустимые: ${validStatuses.join(', ')}`,
+        error: 'INVALID_STATUS',
+      });
+      return;
+    }
+
+    const order = await orderService.updateOrderStatus(id, status);
+
+    if (!order) {
+      res.status(404).json({
+        message: 'Заказ не найден',
+        error: 'ORDER_NOT_FOUND',
+      });
+      return;
+    }
+
+    res.json(order);
+  } catch (error) {
+    console.error('[OrderController] Ошибка обновления статуса заказа:', error);
+    res.status(500).json({
+      message: 'Ошибка при обновлении статуса заказа',
+      error: 'UPDATE_ORDER_STATUS_ERROR',
+    });
+  }
+}
+
+/**
+ * Удалить заказ (админ)
+ * DELETE /api/admin/orders/:id
+ */
+export async function deleteOrderAdmin(req: AuthRequest, res: Response): Promise<void> {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      res.status(400).json({
+        message: 'ID заказа не указан',
+        error: 'MISSING_ORDER_ID',
+      });
+      return;
+    }
+
+    const deleted = await orderService.deleteOrder(id);
+
+    if (!deleted) {
+      res.status(404).json({
+        message: 'Заказ не найден',
+        error: 'ORDER_NOT_FOUND',
+      });
+      return;
+    }
+
+    res.status(204).send(); // No Content
+  } catch (error) {
+    console.error('[OrderController] Ошибка удаления заказа:', error);
+    res.status(500).json({
+      message: 'Ошибка при удалении заказа',
+      error: 'DELETE_ORDER_ERROR',
     });
   }
 }
