@@ -166,8 +166,9 @@ export abstract class Component<TProps extends ComponentProps = ComponentProps> 
    */
   public update(): void {
     if (this.element) {
+      const oldElement = this.element;
       const newElement = this.render();
-      this.element.replaceWith(newElement);
+      oldElement.replaceWith(newElement);
       this.element = newElement;
     }
   }

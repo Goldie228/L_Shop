@@ -248,9 +248,12 @@ export class ApiClient {
 
 /**
  * Базовый URL для API запросов
- * Использует переменную окружения VITE_API_URL с fallback на localhost
+ * В development режиме используем пустую строку для работы через Vite proxy
+ * В production режиме используем VITE_API_URL или fallback
  */
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const API_BASE_URL = import.meta.env.PROD 
+  ? (import.meta.env.VITE_API_URL || '') 
+  : '';
 
 /**
  * Экземпляр API клиента по умолчанию

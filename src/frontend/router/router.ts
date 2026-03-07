@@ -19,6 +19,8 @@ export interface Route {
   requiresAuth?: boolean;
   /** Путь перенаправления если требуется авторизация */
   authRedirect?: string;
+  /** Параметры маршрута (извлечённые из пути) */
+  params?: Record<string, string>;
 }
 
 /**
@@ -160,18 +162,64 @@ export class Router {
   }
 
   /**
+   * Сопоставить шаблон маршрута с путем и извлечь параметры
+   * @param pattern - шаблон маршрута (например, '/product/:id')
+   * @param path - текущий путь (например, '/product/123')
+   * @returns объект с параметрами или null если не совпадает
+   */
+  private matchPattern(pattern: string, path: string): Record<string, string> | null {
+    const patternParts = pattern.split('/');
+    const pathParts = path.split('/');
+    
+    if (patternParts.length !== pathParts.length) {
+      return null;
+    }
+    
+    const params: Record<string, string> = {};
+    
+    for (let i = 0; i < patternParts.length; i++) {
+      const patternPart = patternParts[i];
+      const pathPart = pathParts[i];
+      
+      if (patternPart.startsWith(':')) {
+        const paramName = patternPart.substring(1);
+        if (!pathPart) {
+          return null;
+        }
+        params[paramName] = pathPart;
+      } else if (patternPart !== pathPart) {
+        return null;
+      }
+    }
+    
+    return params;
+  }
+
+  /**
    * Найти маршрут по пути
    * @param path - Путь для поиска
    * @returns Найденный маршрут или undefined
    */
   private matchRoute(path: string): Route | undefined {
-    // Сначала ищем точное совпадение
+    // Точное совпадение
     const exactRoute = this.routes.get(path);
     if (exactRoute) {
       return exactRoute;
     }
 
-    // Если точного совпадения нет, ищем маршрут 404
+    // Проверить шаблонные маршруты (например, /product/:id)
+    for (const [routePath, route] of this.routes) {
+      if (routePath === '*' || routePath === path) continue;
+      
+      if (routePath.includes(':')) {
+        const params = this.matchPattern(routePath, path);
+        if (params) {
+          return { ...route, params };
+        }
+      }
+    }
+
+    // 404 - страница не найдена
     return this.routes.get('*');
   }
 
@@ -226,10 +274,17 @@ export class Router {
  */
 export const APP_ROUTES: Route[] = [
   { path: '/', component: 'HomePage', title: 'Главная' },
+  { path: '/catalog', component: 'HomePage', title: 'Каталог' }, // Redirect to HomePage (catalog)
+  { path: '/product/:id', component: 'ProductPage', title: 'Товар' },
   { path: '/profile', component: 'ProfilePage', title: 'Профиль', requiresAuth: true, authRedirect: '/' },
-  { path: '/cart', component: 'CartPage', title: 'Корзина', requiresAuth: true, authRedirect: '/' },
-  { path: '/delivery', component: 'DeliveryPage', title: 'Оформление заказа', requiresAuth: true, authRedirect: '/' },
+  { path: '/cart', component: 'CartPage', title: 'Корзина' },
+  { path: '/delivery', component: 'DeliveryPage', title: 'Оформление заказа', requiresAuth: true, authRedirect: '/cart' },
   { path: '/orders', component: 'OrdersPage', title: 'Мои заказы', requiresAuth: true, authRedirect: '/' },
+  { path: '/admin', component: 'AdminPage', title: 'Админ-панель', requiresAuth: true, authRedirect: '/' },
+  { path: '/about', component: 'AboutPage', title: 'О нас' },
+  { path: '/contacts', component: 'ContactsPage', title: 'Контакты' },
+  { path: '/playground', component: 'PlaygroundPage', title: 'Playground' },
+  { path: '/playground/:component', component: 'PlaygroundPage', title: 'Playground' },
   { path: '*', component: 'NotFoundPage', title: 'Страница не найдена' }
 ];
 

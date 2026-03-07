@@ -12,11 +12,25 @@ import { ProfilePage } from './components/pages/ProfilePage.js';
 import { CartPage } from './components/pages/CartPage.js';
 import { DeliveryPage } from './components/pages/DeliveryPage.js';
 import { MainPage } from './components/pages/MainPage.js';
+import { PlaygroundPage } from './components/pages/PlaygroundPage.js';
+import { NotFoundPage } from './components/pages/NotFoundPage.js';
+import { OrdersPage } from './components/pages/OrdersPage.js';
+import { ProductPage } from './components/pages/ProductPage.js';
+import { AboutPage } from './components/pages/AboutPage.js';
+import { ContactsPage } from './components/pages/ContactsPage.js';
+import { AdminPage } from './components/pages/AdminPage.js';
 import { Route } from './router/router.js';
 
 // Импорт стилей страниц
 import './styles/pages/delivery.css';
+import './styles/pages/main-page.css';
+import './styles/pages/profile.css';
 import './styles/components/product-card.css';
+import './styles/pages/product-page.css';
+import './styles/pages/about-page.css';
+import './styles/pages/contacts-page.css';
+import './styles/pages/orders-page.css';
+import './styles/pages/admin-page.css';
 
 // Тема по умолчанию
 const THEME_KEY = 'lshop-theme';
@@ -199,6 +213,26 @@ class App {
         this.renderOrdersPage();
         break;
 
+      case 'ProductPage':
+        this.renderProductPage(route.params?.id);
+        break;
+
+      case 'AboutPage':
+        this.renderAboutPage();
+        break;
+
+      case 'ContactsPage':
+        this.renderContactsPage();
+        break;
+
+      case 'PlaygroundPage':
+        this.renderPlaygroundPage();
+        break;
+
+      case 'AdminPage':
+        this.renderAdminPage();
+        break;
+
       case 'NotFoundPage':
         this.renderNotFoundPage();
         break;
@@ -255,15 +289,9 @@ class App {
     const mainContent = this.layout.getMainContent();
     if (!mainContent) return;
     
-    mainContent.innerHTML = `
-      <div class="page not-found-page">
-        <div class="layout__content text-center">
-          <h1 class="not-found__title">404</h1>
-          <p class="not-found__text">Страница не найдена</p>
-          <a href="/" class="btn btn--primary">На главную</a>
-        </div>
-      </div>
-    `;
+    mainContent.innerHTML = '';
+    const notFoundPage = new NotFoundPage();
+    mainContent.appendChild(notFoundPage.render());
   }
 
   /**
@@ -289,15 +317,100 @@ class App {
     const mainContent = this.layout.getMainContent();
     if (!mainContent) return;
 
-    // Заглушка для страницы заказов
-    mainContent.innerHTML = `
-      <div class="page orders-page">
-        <div class="container">
-          <h1 class="page__title">Мои заказы</h1>
-          <p class="text-secondary">Список ваших заказов будет отображён здесь.</p>
-        </div>
-      </div>
-    `;
+    mainContent.innerHTML = '';
+    const ordersPage = new OrdersPage();
+    mainContent.appendChild(ordersPage.render());
+  }
+
+  /**
+   * Отрендерить страницу корзины
+   */
+  private renderCartPage(): void {
+    if (!this.layout) return;
+
+    const mainContent = this.layout.getMainContent();
+    if (!mainContent) return;
+
+    mainContent.innerHTML = '';
+    const cartPage = new CartPage();
+    mainContent.appendChild(cartPage.render());
+  }
+
+  /**
+   * Отрендерить страницу playground для тестирования компонентов
+   */
+  private renderPlaygroundPage(): void {
+    if (!this.layout) return;
+
+    const mainContent = this.layout.getMainContent();
+    if (!mainContent) return;
+
+    mainContent.innerHTML = '';
+    const playgroundPage = new PlaygroundPage();
+    mainContent.appendChild(playgroundPage.render());
+  }
+
+  /**
+   * Отрендерить страницу товара
+   * @param productId - ID товара (опционально, может быть в route.params)
+   */
+  private renderProductPage(productId?: string): void {
+    if (!this.layout) return;
+
+    const mainContent = this.layout.getMainContent();
+    if (!mainContent) return;
+
+    mainContent.innerHTML = '';
+    const productPage = new ProductPage({ productId });
+    mainContent.appendChild(productPage.render());
+    // Вызвать init для загрузки данных
+    productPage.init().catch(error => {
+      console.error('Ошибка загрузки товара:', error);
+    });
+  }
+
+  /**
+   * Отрендерить страницу "О нас"
+   */
+  private renderAboutPage(): void {
+    if (!this.layout) return;
+
+    const mainContent = this.layout.getMainContent();
+    if (!mainContent) return;
+
+    mainContent.innerHTML = '';
+    const aboutPage = new AboutPage();
+    mainContent.appendChild(aboutPage.render());
+  }
+
+  /**
+   * Отрендерить страницу "Контакты"
+   */
+  private renderContactsPage(): void {
+    if (!this.layout) return;
+
+    const mainContent = this.layout.getMainContent();
+    if (!mainContent) return;
+
+    mainContent.innerHTML = '';
+    const contactsPage = new ContactsPage();
+    mainContent.appendChild(contactsPage.render());
+  }
+
+  /**
+   * Отрендерить страницу админ-панели
+   */
+  private renderAdminPage(): void {
+    if (!this.layout) return;
+
+    const mainContent = this.layout.getMainContent();
+    if (!mainContent) return;
+
+    mainContent.innerHTML = '';
+    const adminPage = new AdminPage();
+    adminPage.mount(mainContent).catch(error => {
+      console.error('Ошибка монтирования админ-панели:', error);
+    });
   }
 
   /**

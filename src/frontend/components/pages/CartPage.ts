@@ -46,30 +46,56 @@ export class CartPage extends Component<CartPageProps> {
       className: 'cart-page',
     });
 
+    // Заголовок
+    const title = this.createElement('h1', {
+      className: 'cart-page__title',
+    }, ['Корзина']);
+    this.element.appendChild(title);
+
     // Проверка авторизации
     if (!store.isAuthenticated()) {
       const authMessage = this.createElement('div', {
         className: 'cart-page__auth-required',
       });
 
-      const title = this.createElement('h1', {}, ['Корзина']);
       const message = this.createElement('p', {}, [
-        'Для просмотра корзины необходимо авторизоваться',
+        'Для оформления заказа необходимо авторизоваться. ',
       ]);
 
-      authMessage.append(title, message);
-      this.element.appendChild(authMessage);
+      const loginLink = this.createElement('a', {
+        href: '#',
+        className: 'cart-page__login-link',
+      }, ['Войти в аккаунт']);
+      
+      this.addEventListener(loginLink, 'click', (e) => {
+        e.preventDefault();
+        // Триггерим открытие модалки авторизации через событие
+        document.dispatchEvent(new CustomEvent('openAuthModal'));
+      });
+      
+      message.appendChild(loginLink);
+      authMessage.appendChild(message);
 
-      // Перенаправление на главную
-      setTimeout(() => router.navigate('/'), 2000);
+      // Показываем пустую корзину с приглашением к авторизации
+      const emptyCart = this.createElement('div', {
+        className: 'cart-empty',
+      });
+      
+      const emptyIcon = this.createElement('div', {
+        className: 'cart-empty__icon',
+      }, ['🛒']);
+      
+      const emptyText = this.createElement('p', {
+        className: 'cart-empty__text',
+      }, ['Войдите в аккаунт, чтобы увидеть вашу корзину']);
+      
+      emptyCart.appendChild(emptyIcon);
+      emptyCart.appendChild(emptyText);
+      authMessage.appendChild(emptyCart);
+      
+      this.element.appendChild(authMessage);
       return this.element;
     }
-
-    // Заголовок
-    const title = this.createElement('h1', {
-      className: 'cart-page__title',
-    }, ['Корзина']);
-    this.element.appendChild(title);
 
     // Контейнер содержимого
     const content = this.createElement('div', {

@@ -42,6 +42,37 @@ interface MeApiResponse {
 }
 
 /**
+ * Ответ API при обновлении профиля
+ */
+interface UpdateProfileResponse {
+  user: User;
+  message: string;
+}
+
+/**
+ * Ответ API при смене пароля
+ */
+interface UpdatePasswordResponse {
+  message: string;
+}
+
+/**
+ * Данные для обновления профиля
+ */
+export interface UpdateProfileData {
+  name?: string;
+  email?: string;
+}
+
+/**
+ * Данные для смены пароля
+ */
+export interface UpdatePasswordData {
+  currentPassword: string;
+  newPassword: string;
+}
+
+/**
  * Сервис аутентификации для обработки операций
  */
 export class AuthService {
@@ -130,6 +161,29 @@ export class AuthService {
     } catch {
       return false;
     }
+  }
+
+  /**
+   * Обновить профиль пользователя
+   * @param data - Данные для обновления профиля
+   * @returns Обновлённый пользователь
+   * @throws ApiError при ошибке
+   */
+  public static async updateProfile(data: UpdateProfileData): Promise<User> {
+    const response = await api.put<UpdateProfileResponse>(
+      AUTH_ENDPOINTS.PROFILE,
+      data
+    );
+    return response.user;
+  }
+
+  /**
+   * Сменить пароль пользователя
+   * @param data - Данные для смены пароля
+   * @throws ApiError при ошибке
+   */
+  public static async updatePassword(data: UpdatePasswordData): Promise<void> {
+    await api.put<UpdatePasswordResponse>(AUTH_ENDPOINTS.PASSWORD, data);
   }
 }
 

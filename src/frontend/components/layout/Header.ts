@@ -204,6 +204,12 @@ export class Header extends Component<HeaderProps> {
     homeItem.appendChild(homeLink);
     list.appendChild(homeItem);
 
+    // Ссылка на каталог
+    const catalogItem = this.createElement('li', { className: 'header__nav-item' });
+    const catalogLink = this.createNavLink('Каталог', '/catalog', false);
+    catalogItem.appendChild(catalogLink);
+    list.appendChild(catalogItem);
+
     nav.appendChild(list);
     return nav;
   }

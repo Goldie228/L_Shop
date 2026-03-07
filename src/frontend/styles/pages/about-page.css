@@ -1,0 +1,355 @@
+/**
+ * Стили страницы "О нас" - L_Shop
+ * Соответствует дизайн-системе: docs/DESIGN_SYSTEM.md
+ */
+
+/* Основной контейнер страницы */
+.about-page {
+  padding: var(--spacing-lg) 0;
+  min-height: calc(100vh - var(--header-height));
+}
+
+.about-page .container {
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding-left: var(--spacing-md);
+  padding-right: var(--spacing-md);
+}
+
+/* Заголовок страницы */
+.about-page .page-title,
+.about-page__title {
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-xl);
+  text-align: center;
+}
+
+/* Секции страницы */
+.about-page__section {
+  margin-bottom: var(--spacing-xl);
+  padding: var(--spacing-xl);
+  background-color: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-2);
+}
+
+.about-page__section:last-child {
+  margin-bottom: 0;
+}
+
+.about-page__section-title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-lg);
+  position: relative;
+}
+
+.about-page__text {
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-relaxed);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-md);
+}
+
+.about-page__text:last-child {
+  margin-bottom: 0;
+}
+
+/* ====== Секция преимуществ ====== */
+.about-page__benefits {
+  background-color: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+
+.about-page__benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-lg);
+}
+
+.about-page__benefit-card {
+  background-color: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  text-align: center;
+  box-shadow: var(--shadow-2);
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+  border: 1px solid var(--color-border);
+}
+
+.about-page__benefit-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-4);
+  border-color: var(--color-primary);
+}
+
+.about-page__benefit-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto var(--spacing-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gradient-primary);
+  border-radius: var(--radius-full);
+  color: var(--color-neutral-0);
+}
+
+.about-page__benefit-icon svg {
+  width: 32px;
+  height: 32px;
+}
+
+.about-page__benefit-title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.about-page__benefit-description {
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-secondary);
+}
+
+/* ====== Секция статистики ====== */
+.about-page__stats {
+  background: var(--gradient-primary);
+  border: none;
+}
+
+.about-page__stats .about-page__section-title {
+  color: var(--color-neutral-0);
+}
+
+.about-page__stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--spacing-xl);
+  margin-top: var(--spacing-lg);
+}
+
+.about-page__stat-item {
+  text-align: center;
+  padding: var(--spacing-lg);
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(4px);
+}
+
+.about-page__stat-value {
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-neutral-0);
+  margin-bottom: var(--spacing-xs);
+}
+
+.about-page__stat-label {
+  font-size: var(--font-size-base);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* ====== Секция команды ====== */
+.about-page__team-intro {
+  margin-bottom: var(--spacing-xl);
+}
+
+.about-page__team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.about-page__team-card {
+  background-color: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  text-align: center;
+  box-shadow: var(--shadow-2);
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+  border: 1px solid var(--color-border);
+}
+
+.about-page__team-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-4);
+  border-color: var(--color-primary);
+}
+
+.about-page__team-avatar {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto var(--spacing-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gradient-primary);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-neutral-0);
+}
+
+.about-page__team-name {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.about-page__team-role {
+  font-size: var(--font-size-sm);
+  color: var(--color-primary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.about-page__team-desc {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+/* Список ценностей */
+.about-page__values-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.about-page__value-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  transition: all var(--transition-fast);
+}
+
+.about-page__value-item:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-2px);
+}
+
+.about-page__value-item::before {
+  content: '✓';
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  background: var(--color-primary);
+  color: white;
+  border-radius: 50%;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+}
+
+/* Карточка контактов (дополнительная) */
+.about-page__contact-card {
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-2);
+  margin-top: var(--spacing-xl);
+}
+
+.about-page__contact-card-title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-lg);
+  text-align: center;
+}
+
+.about-page__contact-card-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.about-page__contact-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.about-page__contact-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.about-page__contact-value {
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .about-page {
+    padding-top: var(--spacing-md);
+    padding-bottom: var(--spacing-md);
+  }
+
+  .about-page .container {
+    padding-left: var(--spacing-sm);
+    padding-right: var(--spacing-sm);
+  }
+
+  .about-page .page-title,
+  .about-page__title {
+    font-size: var(--font-size-3xl);
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .about-page__section {
+    padding: var(--spacing-lg);
+  }
+
+  .about-page__section-title {
+    font-size: var(--font-size-xl);
+  }
+
+  .about-page__benefits-grid,
+  .about-page__team-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .about-page__stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .about-page__stat-value {
+    font-size: var(--font-size-2xl);
+  }
+
+  .about-page__values-list {
+    grid-template-columns: 1fr;
+  }
+
+  .about-page__contact-card-content {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 1024px) {
+  .about-page .page-title,
+  .about-page__title {
+    font-size: var(--font-size-3xl);
+  }
+}

@@ -105,6 +105,11 @@ export class ProductCard extends Component<ProductCardProps> {
         alt: product.name,
         className: 'product-card__img',
       });
+      // Fallback при ошибке загрузки изображения
+      img.onerror = () => {
+        img.src = '/images/placeholder.svg';
+        img.alt = 'Изображение недоступно';
+      };
       imageContainer.appendChild(img);
     } else {
       // Заглушка если нет изображения

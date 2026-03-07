@@ -192,6 +192,22 @@ export const AUTH_ENDPOINTS = {
   LOGOUT: '/api/auth/logout',
   /** Эндпоинт получения текущего пользователя */
   ME: '/api/auth/me',
+  /** Эндпоинт обновления профиля */
+  PROFILE: '/api/auth/profile',
+  /** Эндпоинт смены пароля */
+  PASSWORD: '/api/auth/password',
+} as const;
+
+/**
+ * Эндпоинты API администрирования
+ */
+export const ADMIN_ENDPOINTS = {
+  /** Эндпоинт товаров */
+  PRODUCTS: '/api/admin/products',
+  /** Эндпоинт заказов */
+  ORDERS: '/api/admin/orders',
+  /** Эндпоинт пользователей */
+  USERS: '/api/admin/users',
 } as const;
 
 /**

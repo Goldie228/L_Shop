@@ -6,10 +6,30 @@
 import { User, UserState } from '../types/user.js';
 
 /**
- * Длительность сессии в минутах
- * Должна совпадать с SESSION_DURATION_MINUTES в backend/config/constants.ts
+ * Длительность сессии по умолчанию (fallback)
+ * Реальное значение получается с backend через /api/auth/session-config
  */
-const SESSION_DURATION_MINUTES = 10;
+const DEFAULT_SESSION_DURATION_MINUTES = 10;
+
+/** Хранит длительность сессии в минутах */
+let sessionDurationMinutes = DEFAULT_SESSION_DURATION_MINUTES;
+
+/**
+ * Загрузить конфигурацию сессии с сервера
+ * Следует вызвать при инициализации приложения
+ */
+export async function loadSessionConfig(): Promise<void> {
+  try {
+    const response = await fetch('/api/auth/session-config');
+    if (response.ok) {
+      const data = await response.json();
+      sessionDurationMinutes = data.sessionDurationMinutes || DEFAULT_SESSION_DURATION_MINUTES;
+      console.log(`[Store] Загружена конфигурация сессии: ${sessionDurationMinutes} минут`);
+    }
+  } catch (error) {
+    console.warn('[Store] Не удалось загрузить конфигурацию сессии, используется значение по умолчанию');
+  }
+}
 
 /**
  * Интерфейс состояния приложения
@@ -314,10 +334,10 @@ export class Store {
 
     this.sessionTimer = setTimeout(() => {
       this.handleSessionExpired();
-    }, SESSION_DURATION_MINUTES * 60 * 1000);
+    }, sessionDurationMinutes * 60 * 1000);
 
     console.log(
-      `[Store] Таймер сессии запущен на ${SESSION_DURATION_MINUTES} минут`
+      `[Store] Таймер сессии запущен на ${sessionDurationMinutes} минут`
     );
   }
 
