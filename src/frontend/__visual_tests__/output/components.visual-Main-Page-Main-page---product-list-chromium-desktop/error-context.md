@@ -1,0 +1,109 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - banner [ref=e5]:
+    - generic [ref=e6]:
+      - link "L_Shop" [ref=e7] [cursor=pointer]:
+        - /url: /
+        - img [ref=e9]:
+          - generic [ref=e10]: L
+        - generic [ref=e11]: L_Shop
+      - navigation "Main navigation" [ref=e12]:
+        - list [ref=e13]:
+          - listitem [ref=e14]:
+            - link "Главная" [ref=e15] [cursor=pointer]:
+              - /url: /
+      - generic [ref=e16]:
+        - searchbox "Поиск товаров" [ref=e17]
+        - generic:
+          - img
+      - button "Корзина" [ref=e18] [cursor=pointer]:
+        - img [ref=e19]
+      - button "Войти" [ref=e24] [cursor=pointer]:
+        - generic [ref=e25]: Войти
+  - main [ref=e26]:
+    - generic [ref=e28]:
+      - heading "Component Playground" [level=1] [ref=e29]
+      - generic [ref=e30]:
+        - button "Button" [ref=e31] [cursor=pointer]
+        - button "Input" [ref=e32] [cursor=pointer]
+        - button "Modal" [ref=e33] [cursor=pointer]
+        - button "ProductCard" [active] [ref=e34] [cursor=pointer]
+      - generic [ref=e36]:
+        - heading "ProductCard Component" [level=2] [ref=e37]
+        - heading "Default State" [level=3] [ref=e38]
+        - generic [ref=e40]:
+          - generic [ref=e41]:
+            - img "Смартфон Galaxy S24 Ultra" [ref=e42]
+            - generic [ref=e43]: "-15%"
+          - generic [ref=e44]:
+            - heading "Смартфон Galaxy S24 Ultra" [level=3] [ref=e45]
+            - generic [ref=e46]: Электроника
+            - generic [ref=e47]:
+              - generic [ref=e48]: 114 988,5 ₽
+              - generic [ref=e49]: 99 990 ₽
+          - generic [ref=e50]:
+            - generic [ref=e51]: ★
+            - generic [ref=e52]: "4.8"
+            - generic [ref=e53]: (124 отзывов)
+        - heading "Out of Stock" [level=3] [ref=e54]
+        - generic [ref=e56]:
+          - img "Ноутбук ThinkPad X1" [ref=e58]
+          - generic [ref=e59]:
+            - heading "Ноутбук ThinkPad X1" [level=3] [ref=e60]
+            - generic [ref=e61]: Электроника
+            - generic [ref=e63]: 149 990 ₽
+            - generic [ref=e64]: Нет в наличии
+          - generic [ref=e65]:
+            - generic [ref=e66]: ★
+            - generic [ref=e67]: "4.5"
+            - generic [ref=e68]: (89 отзывов)
+        - heading "With Discount" [level=3] [ref=e69]
+        - generic [ref=e71]:
+          - generic [ref=e72]:
+            - img "Смартфон Galaxy S24 Ultra" [ref=e73]
+            - generic [ref=e74]: "-20%"
+          - generic [ref=e75]:
+            - heading "Смартфон Galaxy S24 Ultra" [level=3] [ref=e76]
+            - generic [ref=e77]: Электроника
+            - generic [ref=e78]:
+              - generic [ref=e79]: 119 988 ₽
+              - generic [ref=e80]: 99 990 ₽
+          - generic [ref=e81]:
+            - generic [ref=e82]: ★
+            - generic [ref=e83]: "4.8"
+            - generic [ref=e84]: (124 отзывов)
+  - contentinfo [ref=e85]:
+    - generic [ref=e86]:
+      - generic [ref=e87]:
+        - generic [ref=e88]:
+          - link "L_Shop" [ref=e89] [cursor=pointer]:
+            - /url: /
+          - paragraph [ref=e90]: Интернет-магазин с широким ассортиментом товаров по выгодным ценам.
+        - generic [ref=e91]:
+          - heading "Навигация" [level=4] [ref=e92]
+          - list [ref=e93]:
+            - listitem [ref=e94]:
+              - link "Главная" [ref=e95] [cursor=pointer]:
+                - /url: /
+            - listitem [ref=e96]:
+              - link "Каталог" [ref=e97] [cursor=pointer]:
+                - /url: /catalog
+            - listitem [ref=e98]:
+              - link "О нас" [ref=e99] [cursor=pointer]:
+                - /url: /about
+            - listitem [ref=e100]:
+              - link "Контакты" [ref=e101] [cursor=pointer]:
+                - /url: /contacts
+        - generic [ref=e102]:
+          - heading "Контакты" [level=4] [ref=e103]
+          - list [ref=e104]:
+            - listitem [ref=e105]:
+              - link "support@lshop.by" [ref=e106] [cursor=pointer]:
+                - /url: mailto:support@lshop.by
+            - listitem [ref=e107]:
+              - link "+375 (29) 123-45-67" [ref=e108] [cursor=pointer]:
+                - /url: tel:375291234567
+      - paragraph [ref=e110]: © 2026 L_Shop. Все права защищены.
+```
