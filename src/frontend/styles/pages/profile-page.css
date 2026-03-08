@@ -1,0 +1,601 @@
+/**
+ * Стили страницы профиля - L_Shop Frontend
+ * Полная поддержка адаптивности и тёмной темы
+ */
+
+ * ОСНОВНОЙ КОНТЕЙНЕР
+
+.profile-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-lg) var(--spacing-md);
+  min-height: calc(100vh - var(--header-height) - var(--spacing-4));
+}
+
+/* Toast-контейнер */
+.profile-page__toast-container {
+  position: fixed;
+  top: calc(var(--header-height) + var(--spacing-md));
+  right: var(--spacing-md);
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  max-width: 400px;
+}
+
+/* Заголовок страницы */
+.profile-page__title {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-xl);
+  text-align: center;
+  animation: fadeInDown 0.4s var(--ease-out);
+}
+
+ * ДВУХКОЛОНОЧНЫЙ LAYOUT
+
+.profile-page__content {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-xl);
+  animation: fadeIn 0.5s var(--ease-out);
+}
+
+/* Десктоп: двухколоночный макет */
+@media (min-width: 1024px) {
+  .profile-page__content {
+    grid-template-columns: 380px 1fr;
+  }
+}
+
+/* Левая колонка */
+.profile-page__left {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+/* Правая колонка */
+.profile-page__right {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+ * КАРТОЧКА ПРОФИЛЯ
+
+.profile-page__card {
+  background: var(--color-bg-primary, var(--color-neutral-0));
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-lg);
+  transition: box-shadow var(--transition-normal);
+}
+
+.profile-page__card:hover {
+  box-shadow: var(--shadow-xl);
+}
+
+/* Аватар */
+.profile-page__avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: var(--radius-full);
+  background: var(--gradient-primary);
+  color: var(--color-text-inverse);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  font-weight: var(--font-weight-bold);
+  box-shadow: var(--shadow-primary);
+  transition: transform var(--transition-normal);
+}
+
+.profile-page__avatar:hover {
+  transform: scale(1.05);
+}
+
+/* Информация о пользователе */
+.profile-page__info {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+/* Поле информации */
+.profile-page__field {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm) 0;
+  border-bottom: 1px solid var(--color-border);
+  transition: border-color var(--transition-fast);
+}
+
+.profile-page__field:last-child {
+  border-bottom: none;
+}
+
+.profile-page__field:hover {
+  border-color: var(--color-primary);
+}
+
+/* Метка поля */
+.profile-page__label {
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
+}
+
+/* Значение поля */
+.profile-page__value {
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-normal);
+  font-size: var(--font-size-base);
+}
+
+/* Роль пользователя */
+.profile-page__role {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  text-transform: capitalize;
+}
+
+.profile-page__role--user {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.profile-page__role--admin {
+  background: linear-gradient(135deg, var(--color-secondary-100) 0%, var(--color-primary-light) 100%);
+  color: var(--color-secondary-700);
+  box-shadow: var(--shadow-primary);
+}
+
+ * ПАНЕЛЬ АДМИНИСТРАТОРА
+
+.profile-page__admin-panel {
+  background: linear-gradient(135deg, var(--color-secondary-50) 0%, var(--color-primary-50) 100%);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+  box-shadow: var(--shadow-lg);
+  border: 2px solid var(--color-secondary-200);
+  animation: slideInUp 0.5s var(--ease-out);
+}
+
+.profile-page__admin-icon {
+  font-size: 2.5rem;
+  animation: spin 8s linear infinite;
+}
+
+.profile-page__admin-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-secondary-700);
+  margin: 0;
+}
+
+.profile-page__admin-button {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background: var(--gradient-secondary);
+  color: var(--color-text-inverse);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  box-shadow: var(--shadow-md);
+}
+
+.profile-page__admin-button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow-accent-dark, var(--shadow-primary));
+}
+
+.profile-page__admin-button:active {
+  transform: translateY(0);
+}
+
+ * СЕКЦИИ (ИСТОРИЯ ЗАКАЗОВ, РЕДАКТИРОВАНИЕ)
+
+.profile-page__section {
+  background: var(--color-bg-primary, var(--color-neutral-0));
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-lg);
+  animation: fadeInUp 0.5s var(--ease-out);
+  animation-fill-mode: both;
+}
+
+.profile-page__section:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.profile-page__section:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+/* Заголовок секции */
+.profile-page__section-title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-lg) 0;
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 2px solid var(--color-primary);
+  display: inline-block;
+}
+
+ * ИСТОРИЯ ЗАКАЗОВ
+
+.profile-page__orders {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+/* Состояние загрузки */
+.profile-page__loading {
+  text-align: center;
+  padding: var(--spacing-xl);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-base);
+}
+
+/* Пустое состояние */
+.profile-page__empty {
+  text-align: center;
+  padding: var(--spacing-xl);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-base);
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+}
+
+/* Карточка заказа */
+.profile-page__order-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  transition: all var(--transition-normal);
+}
+
+.profile-page__order-card:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-md);
+  transform: translateX(4px);
+}
+
+/* Заголовок карточки заказа */
+.profile-page__order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* ID заказа */
+.profile-page__order-id {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+}
+
+/* Дата заказа */
+.profile-page__order-date {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+/* Статус заказа */
+.profile-page__order-status {
+  display: inline-block;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Статусы заказов */
+.profile-page__order-status--pending {
+  background: var(--color-warning-light);
+  color: var(--color-warning);
+}
+
+.profile-page__order-status--confirmed {
+  background: var(--color-info-light);
+  color: var(--color-info);
+}
+
+.profile-page__order-status--shipped {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.profile-page__order-status--delivered {
+  background: var(--color-success-light);
+  color: var(--color-success);
+}
+
+.profile-page__order-status--cancelled {
+  background: var(--color-error-light);
+  color: var(--color-error);
+}
+
+/* Сумма заказа */
+.profile-page__order-total {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  text-align: right;
+}
+
+/* Ссылка на все заказы */
+.profile-page__orders-link {
+  display: inline-block;
+  margin-top: var(--spacing-md);
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-base);
+  transition: all var(--transition-fast);
+}
+
+.profile-page__orders-link:hover {
+  color: var(--color-primary-hover);
+  text-decoration: underline;
+}
+
+ * ФОРМА РЕДАКТИРОВАНИЯ ПРОФИЛЯ
+
+.profile-page__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+/* Метка поля формы */
+.profile-page__form-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-xs);
+  display: block;
+}
+
+/* Разделитель секции пароля */
+.profile-page__form-divider {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  text-align: center;
+  padding: var(--spacing-md) 0;
+  margin: var(--spacing-sm) 0;
+  position: relative;
+}
+
+.profile-page__form-divider::before,
+.profile-page__form-divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 30%;
+  height: 1px;
+  background: var(--color-border);
+}
+
+.profile-page__form-divider::before {
+  left: 0;
+}
+
+.profile-page__form-divider::after {
+  right: 0;
+}
+
+/* Общая ошибка формы */
+.profile-page__form-error {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-error-light);
+  color: var(--color-error);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  text-align: center;
+  animation: shake 0.4s var(--ease-out);
+}
+
+ * КНОПКИ ДЕЙСТВИЙ
+
+.profile-page__actions {
+  display: flex;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-xl);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+ * АДАПТИВНОСТЬ: ПЛАНШЕТ
+
+@media (max-width: 1023px) and (min-width: 768px) {
+  .profile-page {
+    padding: var(--spacing-md);
+  }
+
+  .profile-page__card,
+  .profile-page__section {
+    padding: var(--spacing-lg);
+  }
+
+  .profile-page__order-card {
+    padding: var(--spacing-sm);
+  }
+}
+
+ * АДАПТИВНОСТЬ: МОБИЛЬНЫЙ
+
+@media (max-width: 767px) {
+  .profile-page {
+    padding: var(--spacing-sm);
+  }
+
+  .profile-page__title {
+    font-size: var(--font-size-2xl);
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .profile-page__card,
+  .profile-page__section {
+    padding: var(--spacing-md);
+    border-radius: var(--radius-lg);
+  }
+
+  .profile-page__avatar {
+    width: 80px;
+    height: 80px;
+    font-size: 2rem;
+  }
+
+  .profile-page__field {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+
+  .profile-page__order-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+
+  .profile-page__actions {
+    flex-direction: column;
+  }
+
+  .profile-page__admin-panel {
+    padding: var(--spacing-md);
+  }
+}
+
+ * ТЁМНАЯ ТЕМА
+
+@media (prefers-color-scheme: dark) {
+  :root.auto-theme {
+    /* Карточки в тёмной теме */
+    .profile-page__card,
+    .profile-page__section {
+      background: var(--color-bg-secondary-dark);
+    }
+
+    /* История заказов - фон карточек */
+    .profile-page__order-card {
+      background: var(--color-bg-tertiary-dark);
+      border-color: var(--color-border-primary-dark);
+    }
+
+    .profile-page__order-card:hover {
+      border-color: var(--color-primary);
+    }
+
+    /* Пустое состояние */
+    .profile-page__empty {
+      background: var(--color-bg-tertiary-dark);
+    }
+
+    /* Панель админа */
+    .profile-page__admin-panel {
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.15) 0%, rgba(59, 130, 246, 0.15) 100%);
+      border-color: var(--color-secondary-500);
+    }
+
+    /* Разделитель */
+    .profile-page__form-divider::before,
+    .profile-page__form-divider::after {
+      background: var(--color-border-secondary-dark);
+    }
+  }
+}
+
+ * АНИМАЦИИ
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  20%, 60% {
+    transform: translateX(-8px);
+  }
+  40%, 80% {
+    transform: translateX(8px);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

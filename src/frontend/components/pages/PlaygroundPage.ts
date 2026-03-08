@@ -1,22 +1,14 @@
 /**
  * PlaygroundPage - Страница для изолированного просмотра и тестирования компонентов
- * 
+ *
  * Используется для:
  * - Визуального регрессионного тестирования
  * - Ручной проверки компонентов
  * - Демонстрации состояний компонентов
  */
 
-import { Component } from '../base/Component.js';
-import { Button, ButtonVariant, ButtonSize } from '../ui/Button.js';
-import { Input } from '../ui/Input.js';
-import { Modal } from '../ui/Modal.js';
 import { ProductCard } from '../product/ProductCard.js';
 import type { Product } from '../../types/product.js';
-
-interface PlaygroundPageProps {
-  component?: string;
-}
 
 /**
  * Примеры данных для ProductCard
@@ -32,6 +24,7 @@ const SAMPLE_PRODUCT: Product = {
   rating: 4.8,
   reviewsCount: 124,
   discountPercent: 15,
+  currency: 'BYN',
 };
 
 const SAMPLE_PRODUCT_OUT_OF_STOCK: Product = {
@@ -45,6 +38,7 @@ const SAMPLE_PRODUCT_OUT_OF_STOCK: Product = {
   rating: 4.5,
   reviewsCount: 89,
   discountPercent: 0,
+  currency: 'BYN',
 };
 
 /**
@@ -52,8 +46,7 @@ const SAMPLE_PRODUCT_OUT_OF_STOCK: Product = {
  * Не наследуется от Component, так как это самостоятельная страница
  */
 export class PlaygroundPage {
-  private currentComponent: string = 'button';
-  private container: HTMLElement | null = null;
+  private currentComponent = 'button';
 
   constructor(component?: string) {
     this.currentComponent = component || 'button';
@@ -63,7 +56,6 @@ export class PlaygroundPage {
    * Рендер страницы playground
    */
   public render(): HTMLElement {
-    this.container = document.createElement('div');
     const container = document.createElement('div');
     container.className = 'playground-page';
     container.innerHTML = `
@@ -72,7 +64,8 @@ export class PlaygroundPage {
           Component Playground
         </h1>
         
-        <div style="display: flex; gap: var(--spacing-md); margin-bottom: var(--spacing-xl); flex-wrap: wrap;">
+        <div style="display: flex; gap: var(--spacing-md); margin-bottom: var(--spacing-xl);
+          flex-wrap: wrap;">
           <button class="btn btn--primary" data-component="button">Button</button>
           <button class="btn btn--secondary" data-component="input">Input</button>
           <button class="btn btn--secondary" data-component="modal">Modal</button>
@@ -130,14 +123,16 @@ export class PlaygroundPage {
         <h2 style="margin-bottom: var(--spacing-lg);">Button Component</h2>
         
         <h3 style="margin-bottom: var(--spacing-md);">Sizes</h3>
-        <div style="display: flex; gap: var(--spacing-md); align-items: center; margin-bottom: var(--spacing-xl);">
+        <div style="display: flex; gap: var(--spacing-md); align-items: center;
+          margin-bottom: var(--spacing-xl);">
           <button class="btn btn--primary btn--sm">Small</button>
           <button class="btn btn--primary btn--md">Medium</button>
           <button class="btn btn--primary btn--lg">Large</button>
         </div>
         
         <h3 style="margin-bottom: var(--spacing-md);">Variants</h3>
-        <div style="display: flex; gap: var(--spacing-md); flex-wrap: wrap; margin-bottom: var(--spacing-xl);">
+        <div style="display: flex; gap: var(--spacing-md); flex-wrap: wrap;
+          margin-bottom: var(--spacing-xl);">
           <button class="btn btn--primary">Primary</button>
           <button class="btn btn--secondary">Secondary</button>
           <button class="btn btn--outline">Outline</button>
@@ -145,7 +140,8 @@ export class PlaygroundPage {
         </div>
         
         <h3 style="margin-bottom: var(--spacing-md);">States</h3>
-        <div style="display: flex; gap: var(--spacing-md); flex-wrap: wrap; margin-bottom: var(--spacing-xl);">
+        <div style="display: flex; gap: var(--spacing-md); flex-wrap: wrap;
+          margin-bottom: var(--spacing-xl);">
           <button class="btn btn--primary">Default</button>
           <button class="btn btn--primary" hover>Hover</button>
           <button class="btn btn--primary" focus>Focus</button>
@@ -174,30 +170,38 @@ export class PlaygroundPage {
         <h2 style="margin-bottom: var(--spacing-lg);">Input Component</h2>
         
         <h3 style="margin-bottom: var(--spacing-md);">States</h3>
-        <div style="display: flex; flex-direction: column; gap: var(--spacing-md); max-width: 400px; margin-bottom: var(--spacing-xl);">
+        <div style="display: flex; flex-direction: column; gap: var(--spacing-md);
+          max-width: 400px; margin-bottom: var(--spacing-xl);">
           <div>
-            <label style="display: block; margin-bottom: var(--spacing-1); font-size: var(--font-size-sm);">Default</label>
+            <label style="display: block; margin-bottom: var(--spacing-1);
+              font-size: var(--font-size-sm);">Default</label>
             <input type="text" class="input" placeholder="Enter text..." />
           </div>
           <div>
-            <label style="display: block; margin-bottom: var(--spacing-1); font-size: var(--font-size-sm);">With Value</label>
+            <label style="display: block; margin-bottom: var(--spacing-1);
+              font-size: var(--font-size-sm);">With Value</label>
             <input type="text" class="input" value="Filled value" />
           </div>
           <div>
-            <label style="display: block; margin-bottom: var(--spacing-1); font-size: var(--font-size-sm);">Focus (click to see)</label>
+            <label style="display: block; margin-bottom: var(--spacing-1);
+              font-size: var(--font-size-sm);">Focus (click to see)</label>
             <input type="text" class="input" placeholder="Click me..." />
           </div>
           <div>
-            <label style="display: block; margin-bottom: var(--spacing-1); font-size: var(--font-size-sm);">Error</label>
+            <label style="display: block; margin-bottom: var(--spacing-1);
+              font-size: var(--font-size-sm);">Error</label>
             <input type="text" class="input input--error" value="Invalid input" />
-            <span style="color: var(--color-error); font-size: var(--font-size-xs);">Error message here</span>
+            <span style="color: var(--color-error); font-size: var(--font-size-xs);">
+              Error message here</span>
           </div>
           <div>
-            <label style="display: block; margin-bottom: var(--spacing-1); font-size: var(--font-size-sm);">Success</label>
+            <label style="display: block; margin-bottom: var(--spacing-1);
+              font-size: var(--font-size-sm);">Success</label>
             <input type="text" class="input input--success" value="Valid input" />
           </div>
           <div>
-            <label style="display: block; margin-bottom: var(--spacing-1); font-size: var(--font-size-sm);">Disabled</label>
+            <label style="display: block; margin-bottom: var(--spacing-1);
+              font-size: var(--font-size-sm);">Disabled</label>
             <input type="text" class="input" value="Disabled" disabled />
           </div>
         </div>
@@ -205,15 +209,18 @@ export class PlaygroundPage {
         <h3 style="margin-bottom: var(--spacing-md);">Types</h3>
         <div style="display: flex; flex-direction: column; gap: var(--spacing-md); max-width: 400px;">
           <div>
-            <label style="display: block; margin-bottom: var(--spacing-1); font-size: var(--font-size-sm);">Email</label>
+            <label style="display: block; margin-bottom: var(--spacing-1);
+              font-size: var(--font-size-sm);">Email</label>
             <input type="email" class="input" placeholder="email@example.com" />
           </div>
           <div>
-            <label style="display: block; margin-bottom: var(--spacing-1); font-size: var(--font-size-sm);">Password</label>
+            <label style="display: block; margin-bottom: var(--spacing-1);
+              font-size: var(--font-size-sm);">Password</label>
             <input type="password" class="input" placeholder="••••••••" />
           </div>
           <div>
-            <label style="display: block; margin-bottom: var(--spacing-1); font-size: var(--font-size-sm);">Search</label>
+            <label style="display: block; margin-bottom: var(--spacing-1);
+              font-size: var(--font-size-sm);">Search</label>
             <input type="search" class="input" placeholder="Search..." />
           </div>
         </div>
@@ -233,8 +240,14 @@ export class PlaygroundPage {
           <button class="btn btn--primary" id="open-modal-btn">Open Modal</button>
         </div>
         
-        <div class="modal-backdrop" id="modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000;"></div>
-        <div class="modal" id="sample-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 480px; background: var(--color-bg-primary); border-radius: var(--radius-5); padding: var(--spacing-8); box-shadow: var(--shadow-5); z-index: 1001;">
+        <div class="modal-backdrop" id="modal-backdrop"
+          style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+          z-index: 1000;"></div>
+        <div class="modal" id="sample-modal"
+          style="display: none; position: fixed; top: 50%; left: 50%;
+          transform: translate(-50%, -50%); width: 90%; max-width: 480px;
+          background: var(--color-bg-primary); border-radius: var(--radius-5);
+          padding: var(--spacing-8); box-shadow: var(--shadow-5); z-index: 1001;">
           <h3 style="margin-bottom: var(--spacing-md);">Modal Title</h3>
           <p style="margin-bottom: var(--spacing-lg); color: var(--color-text-secondary);">
             This is a sample modal dialog. It can contain any content you need.
@@ -290,17 +303,23 @@ export class PlaygroundPage {
         <h2 style="margin-bottom: var(--spacing-lg);">ProductCard Component</h2>
         
         <h3 style="margin-bottom: var(--spacing-md);">Default State</h3>
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--spacing-lg); margin-bottom: var(--spacing-xl); max-width: 900px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fill,
+          minmax(280px, 1fr)); gap: var(--spacing-lg);
+          margin-bottom: var(--spacing-xl); max-width: 900px;">
           ${this.renderProductCard(SAMPLE_PRODUCT)}
         </div>
         
         <h3 style="margin-bottom: var(--spacing-md);">Out of Stock</h3>
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--spacing-lg); margin-bottom: var(--spacing-xl); max-width: 900px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fill,
+          minmax(280px, 1fr)); gap: var(--spacing-lg); margin-bottom: var(--spacing-xl);
+          max-width: 900px;">
           ${this.renderProductCard(SAMPLE_PRODUCT_OUT_OF_STOCK)}
         </div>
         
         <h3 style="margin-bottom: var(--spacing-md);">With Discount</h3>
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--spacing-lg); max-width: 900px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fill,
+          minmax(280px, 1fr)); gap: var(--spacing-lg);
+          max-width: 900px;">
           ${this.renderProductCard({ ...SAMPLE_PRODUCT, discountPercent: 20 })}
         </div>
       </div>

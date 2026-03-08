@@ -5,11 +5,7 @@
 
 import { api } from './api.js';
 import { AUTH_ENDPOINTS } from '../types/api.js';
-import {
-  User,
-  LoginUserData,
-  RegisterUserData
-} from '../types/user.js';
+import { User, LoginUserData, RegisterUserData } from '../types/user.js';
 
 /**
  * Ответ API при входе
@@ -32,13 +28,6 @@ interface RegisterApiResponse {
  */
 interface LogoutApiResponse {
   message: string;
-}
-
-/**
- * Ответ API при получении текущего пользователя
- */
-interface MeApiResponse {
-  user: User;
 }
 
 /**
@@ -85,16 +74,16 @@ export class AuthService {
   public static async login(credentials: LoginUserData): Promise<User> {
     console.log('[AuthService] Login attempt:', {
       login: credentials.loginOrEmail,
-      passwordLength: credentials.password?.length
+      passwordLength: credentials.password?.length,
     });
-    
+
     const response = await api.post<LoginApiResponse>(AUTH_ENDPOINTS.LOGIN, {
       login: credentials.loginOrEmail,
-      password: credentials.password
+      password: credentials.password,
     });
-    
+
     console.log('[AuthService] Login response:', response);
-    
+
     // Бэкенд возвращает { message, user }
     return response.user;
   }
@@ -106,18 +95,15 @@ export class AuthService {
    * @throws ApiError при ошибке
    */
   public static async register(userData: RegisterUserData): Promise<User> {
-    const response = await api.post<RegisterApiResponse>(
-      AUTH_ENDPOINTS.REGISTER,
-      {
-        name: userData.name,
-        login: userData.login,
-        email: userData.email,
-        phone: userData.phone,
-        password: userData.password,
-        confirmPassword: userData.confirmPassword
-      }
-    );
-    
+    const response = await api.post<RegisterApiResponse>(AUTH_ENDPOINTS.REGISTER, {
+      name: userData.name,
+      login: userData.login,
+      email: userData.email,
+      phone: userData.phone,
+      password: userData.password,
+      confirmPassword: userData.confirmPassword,
+    });
+
     return response.user;
   }
 
@@ -170,10 +156,7 @@ export class AuthService {
    * @throws ApiError при ошибке
    */
   public static async updateProfile(data: UpdateProfileData): Promise<User> {
-    const response = await api.put<UpdateProfileResponse>(
-      AUTH_ENDPOINTS.PROFILE,
-      data
-    );
+    const response = await api.put<UpdateProfileResponse>(AUTH_ENDPOINTS.PROFILE, data);
     return response.user;
   }
 
@@ -210,7 +193,7 @@ export class AuthEventEmitter {
    */
   public static subscribe(listener: AuthEventListener): () => void {
     this.listeners.add(listener);
-    
+
     return () => {
       this.listeners.delete(listener);
     };
@@ -222,7 +205,7 @@ export class AuthEventEmitter {
    * @param user - Данные пользователя (опционально)
    */
   public static emit(event: AuthEventType, user?: User): void {
-    this.listeners.forEach(listener => {
+    this.listeners.forEach((listener) => {
       try {
         listener(event, user);
       } catch (error) {

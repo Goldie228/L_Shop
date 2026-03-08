@@ -15,7 +15,7 @@ import {
 } from '../controllers/product.controller';
 import {
   getAllOrdersAdmin,
-  updateOrderStatus,
+  updateOrderStatusAdmin,
   deleteOrderAdmin,
 } from '../controllers/order.controller';
 import { getAllUsers, updateUserRole, toggleUserBlock } from '../controllers/user.controller';
@@ -58,7 +58,7 @@ router.get('/orders', authMiddleware, requireAdmin, getAllOrdersAdmin);
  * PUT /api/admin/orders/:id/status
  * Обновить статус заказа
  */
-router.put('/orders/:id/status', authMiddleware, requireAdmin, updateOrderStatus);
+router.put('/orders/:id/status', authMiddleware, requireAdmin, updateOrderStatusAdmin);
 
 /**
  * DELETE /api/admin/orders/:id

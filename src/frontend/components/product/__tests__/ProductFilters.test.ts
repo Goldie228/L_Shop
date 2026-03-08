@@ -268,7 +268,9 @@ describe('ProductFilters', () => {
 
       filters.mount(container);
 
-      const resetButton = container.querySelector('.product-filters__reset-button') as HTMLButtonElement;
+      const resetButton = container.querySelector(
+        '.product-filters__reset-button',
+      ) as HTMLButtonElement;
       resetButton?.click();
 
       expect(onFilterChange).toHaveBeenCalledWith({});

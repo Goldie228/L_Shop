@@ -3,7 +3,6 @@
  * Базовые стили, сброс, типографика, утилиты
  */
 
-/* ====== Сброс CSS ====== */
 *,
 *::before,
 *::after {
@@ -12,7 +11,6 @@
   padding: 0;
 }
 
-/* ====== Документ и секции ====== */
 html {
   font-size: 16px;
   scroll-behavior: smooth;
@@ -31,7 +29,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ====== Типографика ====== */
 h1, h2, h3, h4, h5, h6 {
   font-weight: var(--font-weight-semibold);
   line-height: var(--line-height-tight);
@@ -74,7 +71,6 @@ a:focus-visible {
   border-radius: var(--radius-sm);
 }
 
-/* ====== Forms ====== */
 button,
 input,
 select,
@@ -95,7 +91,6 @@ button:disabled {
   opacity: 0.6;
 }
 
-/* ====== Images ====== */
 img,
 picture,
 video,
@@ -106,19 +101,16 @@ svg {
   height: auto;
 }
 
-/* ====== Lists ====== */
 ul,
 ol {
   list-style: none;
 }
 
-/* ====== Tables ====== */
 table {
   border-collapse: collapse;
   border-spacing: 0;
 }
 
-/* ====== Focus Visible ====== */
 :focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
@@ -128,13 +120,11 @@ table {
   outline: none;
 }
 
-/* ====== Selection ====== */
 ::selection {
   background-color: var(--color-primary-light);
   color: var(--color-text-primary);
 }
 
-/* ====== Scrollbar ====== */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -154,7 +144,6 @@ table {
   background: var(--color-text-muted);
 }
 
-/* ====== Layout Utilities ====== */
 .container {
   width: 100%;
   max-width: var(--container-max-width);
@@ -187,7 +176,6 @@ table {
 .gap-md { gap: var(--spacing-md); }
 .gap-lg { gap: var(--spacing-lg); }
 
-/* ====== Text Utilities ====== */
 .text-center { text-align: center; }
 .text-left { text-align: left; }
 .text-right { text-align: right; }
@@ -202,7 +190,6 @@ table {
 .font-semibold { font-weight: var(--font-weight-semibold); }
 .font-bold { font-weight: var(--font-weight-bold); }
 
-/* ====== Spacing Utilities ====== */
 .mt-sm { margin-top: var(--spacing-sm); }
 .mt-md { margin-top: var(--spacing-md); }
 .mt-lg { margin-top: var(--spacing-lg); }
@@ -214,12 +201,10 @@ table {
 .p-md { padding: var(--spacing-md); }
 .p-lg { padding: var(--spacing-lg); }
 
-/* ====== Display Utilities ====== */
 .hidden { display: none; }
 .block { display: block; }
 .inline-block { display: inline-block; }
 
-/* ====== Visually Hidden (Accessibility) ====== */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -232,7 +217,6 @@ table {
   border: 0;
 }
 
-/* ====== Animation Utilities ====== */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -278,7 +262,6 @@ table {
   animation: slideInUp var(--transition-normal) ease-out;
 }
 
-/* ====== Main App Container ====== */
 #app {
   min-height: 100vh;
   display: flex;
@@ -290,7 +273,6 @@ table {
   padding: var(--spacing-lg) 0;
 }
 
-/* ====== Page Styles ====== */
 .page {
   animation: fadeIn var(--transition-fast) ease-out;
 }
@@ -299,7 +281,6 @@ table {
   margin-bottom: var(--spacing-lg);
 }
 
-/* ====== Card Component ====== */
 .card {
   background-color: var(--color-bg-primary);
   border: 1px solid var(--color-border);
@@ -312,7 +293,6 @@ table {
   box-shadow: var(--shadow-md);
 }
 
-/* ====== Divider ====== */
 .divider {
   height: 1px;
   background-color: var(--color-border);
@@ -325,7 +305,6 @@ table {
   margin: 0 var(--spacing-md);
 }
 
-/* ====== Loading Spinner ====== */
 .spinner {
   width: 20px;
   height: 20px;
@@ -346,7 +325,6 @@ table {
   border-width: 3px;
 }
 
-/* ====== Alert Messages ====== */
 .alert {
   padding: var(--spacing-sm) var(--spacing-md);
   border-radius: var(--radius-md);
@@ -356,7 +334,6 @@ table {
   gap: var(--spacing-sm);
 }
 
-/* ====== Notification Toast ====== */
 .notification {
   position: fixed;
   bottom: var(--spacing-lg);
@@ -380,17 +357,17 @@ table {
 
 .notification--success {
   background-color: var(--color-success);
-  color: #ffffff;
+  color: var(--color-text-inverse);
 }
 
 .notification--error {
   background-color: var(--color-error);
-  color: #ffffff;
+  color: var(--color-text-inverse);
 }
 
 .notification--info {
   background-color: var(--color-primary);
-  color: #ffffff;
+  color: var(--color-text-inverse);
 }
 
 /* Dark theme notifications */
@@ -433,7 +410,6 @@ table {
   border: 1px solid var(--color-warning);
 }
 
-/* ====== Адаптивные точки останова ====== */
 /* Мобильные: по умолчанию (320px+) */
 /* Планшеты: 768px+ */
 /* Десктоп: 1024px+ */
@@ -459,7 +435,6 @@ table {
   }
 }
 
-/* ====== Reduced Motion ====== */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -471,7 +446,6 @@ table {
   }
 }
 
-/* ====== Dark Theme Base ====== */
 :root.dark-theme {
   background-color: var(--color-bg-base);
 }

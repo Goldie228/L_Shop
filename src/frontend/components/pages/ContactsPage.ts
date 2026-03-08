@@ -11,9 +11,7 @@ import { Modal } from '../ui/Modal';
 /**
  * Пропсы страницы "Контакты"
  */
-export interface ContactsPageProps extends ComponentProps {
-  // Пока нет пропсов
-}
+export type ContactsPageProps = ComponentProps;
 
 /**
  * Интерфейс ошибок валидации формы
@@ -29,12 +27,54 @@ interface FormErrors {
  * SVG Иконки для карточек контактов
  */
 const ICONS = {
-  address: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>`,
-  phone: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>`,
-  email: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>`,
-  clock: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>`,
-  map: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>`,
-  check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`,
+  address: [
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"',
+    '  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">',
+    '  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z">',
+    '  </path>',
+    '  <circle cx="12" cy="10" r="3"></circle>',
+    '</svg>',
+  ].join('\n'),
+  phone: [
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"',
+    '  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">',
+    '  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07',
+    '    19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2',
+    '    0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16',
+    '    0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1',
+    '    22 16.92z"></path>',
+    '</svg>',
+  ].join('\n'),
+  email: [
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"',
+    '  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">',
+    '  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z">',
+    '  </path>',
+    '  <polyline points="22,6 12,13 2,6"></polyline>',
+    '</svg>',
+  ].join('\n'),
+  clock: [
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"',
+    '  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">',
+    '  <circle cx="12" cy="12" r="10"></circle>',
+    '  <polyline points="12 6 12 12 16 14"></polyline>',
+    '</svg>',
+  ].join('\n'),
+  map: [
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"',
+    '  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">',
+    '  <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6">',
+    '  </polygon>',
+    '  <line x1="8" y1="2" x2="8" y2="18"></line>',
+    '  <line x1="16" y1="6" x2="16" y2="22"></line>',
+    '</svg>',
+  ].join('\n'),
+  check: [
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"',
+    '  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">',
+    '  <polyline points="20 6 9 17 4 12"></polyline>',
+    '</svg>',
+  ].join('\n'),
 };
 
 /**
@@ -52,20 +92,13 @@ const COMPANY_INFO = {
  * Страница "Контакты"
  */
 export class ContactsPage extends Component<ContactsPageProps> {
-  private formData = {
-    name: '',
-    email: '',
-    subject: '',
-    message: '',
-  };
-
   private formErrors: FormErrors = {};
+
   private modal: Modal | null = null;
+
   private inputInstances: Map<string, Input> = new Map();
 
-  constructor(props: ContactsPageProps = {}) {
-    super(props);
-  }
+  // Конструктор не требуется - используется getDefaultProps()
 
   protected getDefaultProps(): ContactsPageProps {
     return {
@@ -84,9 +117,13 @@ export class ContactsPage extends Component<ContactsPageProps> {
     });
 
     // Заголовок
-    const title = this.createElement('h1', {
-      className: 'page-title',
-    }, ['Контакты']);
+    const title = this.createElement(
+      'h1',
+      {
+        className: 'page-title',
+      },
+      ['Контакты'],
+    );
     innerContainer.appendChild(title);
 
     // Контактная информация
@@ -114,9 +151,13 @@ export class ContactsPage extends Component<ContactsPageProps> {
       className: 'contacts-page__section',
     });
 
-    const sectionTitle = this.createElement('h2', {
-      className: 'contacts-page__section-title',
-    }, ['Свяжитесь с нами']);
+    const sectionTitle = this.createElement(
+      'h2',
+      {
+        className: 'contacts-page__section-title',
+      },
+      ['Свяжитесь с нами'],
+    );
     section.appendChild(sectionTitle);
 
     const contactsGrid = this.createElement('div', {
@@ -124,35 +165,22 @@ export class ContactsPage extends Component<ContactsPageProps> {
     });
 
     // Адрес
-    const addressCard = this.createContactCard(
-      ICONS.address,
-      'Адрес',
-      [COMPANY_INFO.address]
-    );
+    const addressCard = this.createContactCard(ICONS.address, 'Адрес', [COMPANY_INFO.address]);
     contactsGrid.appendChild(addressCard);
 
     // Телефон
-    const phoneCard = this.createContactCard(
-      ICONS.phone,
-      'Телефон',
-      [COMPANY_INFO.phone]
-    );
+    const phoneCard = this.createContactCard(ICONS.phone, 'Телефон', [COMPANY_INFO.phone]);
     contactsGrid.appendChild(phoneCard);
 
     // Email
-    const emailCard = this.createContactCard(
-      ICONS.email,
-      'Email',
-      [COMPANY_INFO.email]
-    );
+    const emailCard = this.createContactCard(ICONS.email, 'Email', [COMPANY_INFO.email]);
     contactsGrid.appendChild(emailCard);
 
     // Время работы
-    const hoursCard = this.createContactCard(
-      ICONS.clock,
-      'Время работы',
-      [COMPANY_INFO.hoursWeekday, COMPANY_INFO.hoursWeekend]
-    );
+    const hoursCard = this.createContactCard(ICONS.clock, 'Время работы', [
+      COMPANY_INFO.hoursWeekday,
+      COMPANY_INFO.hoursWeekend,
+    ]);
     contactsGrid.appendChild(hoursCard);
 
     section.appendChild(contactsGrid);
@@ -167,9 +195,13 @@ export class ContactsPage extends Component<ContactsPageProps> {
       className: 'contacts-page__section contacts-page__map-section',
     });
 
-    const sectionTitle = this.createElement('h2', {
-      className: 'contacts-page__section-title',
-    }, ['Мы на карте']);
+    const sectionTitle = this.createElement(
+      'h2',
+      {
+        className: 'contacts-page__section-title',
+      },
+      ['Мы на карте'],
+    );
     section.appendChild(sectionTitle);
 
     const mapContainer = this.createElement('div', {
@@ -187,9 +219,13 @@ export class ContactsPage extends Component<ContactsPageProps> {
     mapIcon.innerHTML = ICONS.map;
     mapPlaceholder.appendChild(mapIcon);
 
-    const mapText = this.createElement('p', {
-      className: 'contacts-page__map-placeholder-text',
-    }, ['г. Минск, ул. Примерная, д. 123']);
+    const mapText = this.createElement(
+      'p',
+      {
+        className: 'contacts-page__map-placeholder-text',
+      },
+      ['г. Минск, ул. Примерная, д. 123'],
+    );
     mapPlaceholder.appendChild(mapText);
 
     mapContainer.appendChild(mapPlaceholder);
@@ -206,16 +242,22 @@ export class ContactsPage extends Component<ContactsPageProps> {
       className: 'contacts-page__section',
     });
 
-    const sectionTitle = this.createElement('h2', {
-      className: 'contacts-page__section-title',
-    }, ['Обратная связь']);
+    const sectionTitle = this.createElement(
+      'h2',
+      {
+        className: 'contacts-page__section-title',
+      },
+      ['Обратная связь'],
+    );
     section.appendChild(sectionTitle);
 
-    const feedbackText = this.createElement('p', {
-      className: 'contacts-page__text',
-    }, [
-      'Есть вопросы или предложения? Напишите нам! Мы ответим в течение 24 часов.'
-    ]);
+    const feedbackText = this.createElement(
+      'p',
+      {
+        className: 'contacts-page__text',
+      },
+      ['Есть вопросы или предложения? Напишите нам! Мы ответим в течение 24 часов.'],
+    );
     section.appendChild(feedbackText);
 
     const form = this.renderForm();
@@ -224,9 +266,9 @@ export class ContactsPage extends Component<ContactsPageProps> {
     // Создаём модальное окно для подтверждения
     this.modal = new Modal({
       title: 'Сообщение отправлено',
-      size: 'sm',
+      size: 'small',
       animation: 'scale',
-      closeOnBackdrop: true,
+      closeOnOverlayClick: true,
       closeOnEscape: true,
     });
     section.appendChild(this.modal.render());
@@ -250,9 +292,13 @@ export class ContactsPage extends Component<ContactsPageProps> {
     card.appendChild(iconDiv);
 
     // Заголовок
-    const titleEl = this.createElement('h3', {
-      className: 'contacts-page__card-title',
-    }, [title]);
+    const titleEl = this.createElement(
+      'h3',
+      {
+        className: 'contacts-page__card-title',
+      },
+      [title],
+    );
     card.appendChild(titleEl);
 
     // Текст (может быть несколько строк)
@@ -279,9 +325,13 @@ export class ContactsPage extends Component<ContactsPageProps> {
       className: 'contacts-page__form',
     });
 
-    const formTitle = this.createElement('h3', {
-      className: 'contacts-page__form-title',
-    }, ['Напишите нам']);
+    const formTitle = this.createElement(
+      'h3',
+      {
+        className: 'contacts-page__form-title',
+      },
+      ['Напишите нам'],
+    );
     form.appendChild(formTitle);
 
     const formGrid = this.createElement('div', {
@@ -370,7 +420,7 @@ export class ContactsPage extends Component<ContactsPageProps> {
     // Обработчики событий
     this.addEventListener(form, 'submit', (e) => {
       e.preventDefault();
-      this.handleSubmit(form);
+      this.handleSubmit();
     });
 
     this.addEventListener(form, 'reset', () => {
@@ -434,6 +484,10 @@ export class ContactsPage extends Component<ContactsPageProps> {
           error = 'Сообщение должно содержать минимум 10 символов';
         }
         break;
+
+      default:
+        // Неизвестное поле - игнорируем
+        break;
     }
 
     this.formErrors[fieldName as keyof FormErrors] = error;
@@ -442,7 +496,7 @@ export class ContactsPage extends Component<ContactsPageProps> {
     const input = this.inputInstances.get(fieldName);
     if (input) {
       input.setProps({
-        error: error || undefined,
+        error: error ?? undefined,
       });
     }
 
@@ -463,20 +517,23 @@ export class ContactsPage extends Component<ContactsPageProps> {
   private validateForm(): boolean {
     let isValid = true;
 
-    const fields = ['name', 'email', 'subject', 'message'];
+    const fields: Array<'name' | 'email' | 'subject' | 'message'> = ['name', 'email', 'subject', 'message'];
 
-    for (const field of fields) {
+    fields.forEach((field) => {
       const input = this.inputInstances.get(field);
       if (input) {
         const inputElement = input.render().querySelector('input, textarea');
         if (inputElement) {
-          const fieldValid = this.validateField(field, (inputElement as HTMLInputElement | HTMLTextAreaElement).value);
+          const fieldValid = this.validateField(
+            field,
+            (inputElement as HTMLInputElement | HTMLTextAreaElement).value,
+          );
           if (!fieldValid) {
             isValid = false;
           }
         }
       }
-    }
+    });
 
     return isValid;
   }
@@ -484,21 +541,13 @@ export class ContactsPage extends Component<ContactsPageProps> {
   /**
    * Обработать отправку формы
    */
-  private handleSubmit(form: HTMLFormElement): void {
+  private handleSubmit(): void {
     // Валидируем форму
     if (!this.validateForm()) {
       return;
     }
 
-    const formData = new FormData(form);
-    const data = {
-      name: formData.get('name') as string,
-      email: formData.get('email') as string,
-      subject: formData.get('subject') as string,
-      message: formData.get('message') as string,
-    };
-
-    console.log('[ContactsPage] Форма отправлена:', data);
+    // TODO: Отправить данные на сервер
 
     // Показываем модальное окно с подтверждением
     this.showSuccessModal();
@@ -520,14 +569,22 @@ export class ContactsPage extends Component<ContactsPageProps> {
     successIcon.innerHTML = ICONS.check;
     successContent.appendChild(successIcon);
 
-    const successTitle = this.createElement('h3', {
-      className: 'contacts-page__form-success-title',
-    }, ['Спасибо за сообщение!']);
+    const successTitle = this.createElement(
+      'h3',
+      {
+        className: 'contacts-page__form-success-title',
+      },
+      ['Спасибо за сообщение!'],
+    );
     successContent.appendChild(successTitle);
 
-    const successText = this.createElement('p', {
-      className: 'contacts-page__form-success-text',
-    }, ['Мы получили ваше сообщение и ответим в течение 24 часов.']);
+    const successText = this.createElement(
+      'p',
+      {
+        className: 'contacts-page__form-success-text',
+      },
+      ['Мы получили ваше сообщение и ответим в течение 24 часов.'],
+    );
     successContent.appendChild(successText);
 
     this.modal.setContent(successContent);
@@ -540,10 +597,9 @@ export class ContactsPage extends Component<ContactsPageProps> {
   private handleReset(form: HTMLFormElement): void {
     // Очищаем ошибки
     this.formErrors = {};
-    this.formData = { name: '', email: '', subject: '', message: '' };
 
     // Сбрасываем инпуты
-    this.inputInstances.forEach(input => {
+    this.inputInstances.forEach((input) => {
       input.setProps({ error: undefined });
     });
 

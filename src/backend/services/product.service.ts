@@ -35,7 +35,7 @@ export class ProductService {
    * @param filters - Параметры фильтрации
    * @returns Отфильтрованный массив продуктов
    */
-  async getProducts(filters: ProductFilters = {}): Promise<Product[]> {
+  static async getProducts(filters: ProductFilters = {}): Promise<Product[]> {
     let products = await readJsonFile<Product>(PRODUCTS_FILE);
 
     // Поиск по названию и описанию (без учёта регистра)
@@ -80,7 +80,7 @@ export class ProductService {
    * @param id - Уникальный идентификатор продукта
    * @returns Продукт или null, если не найден
    */
-  async getProductById(id: string): Promise<Product | null> {
+  static async getProductById(id: string): Promise<Product | null> {
     const products = await readJsonFile<Product>(PRODUCTS_FILE);
     return products.find((p) => p.id === id) || null;
   }
@@ -90,7 +90,7 @@ export class ProductService {
    * Используется в админ-панели
    * @returns Массив всех продуктов
    */
-  async getAllProducts(): Promise<Product[]> {
+  static async getAllProducts(): Promise<Product[]> {
     const products = await readJsonFile<Product>(PRODUCTS_FILE);
     return products;
   }
@@ -100,7 +100,7 @@ export class ProductService {
    * @param data - Данные продукта (без id, createdAt, updatedAt)
    * @returns Созданный продукт
    */
-  async createProduct(data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>): Promise<Product> {
+  static async createProduct(data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>): Promise<Product> {
     const products = await readJsonFile<Product>(PRODUCTS_FILE);
     const now = new Date().toISOString();
 
@@ -123,7 +123,7 @@ export class ProductService {
    * @param data - Данные для обновления (частичные)
    * @returns Обновлённый продукт или null, если не найден
    */
-  async updateProduct(
+  static async updateProduct(
     id: string,
     data: Partial<Omit<Product, 'id' | 'createdAt'>>,
   ): Promise<Product | null> {
@@ -149,7 +149,7 @@ export class ProductService {
    * @param id - ID продукта
    * @returns true если продукт удален, false если не найден
    */
-  async deleteProduct(id: string): Promise<boolean> {
+  static async deleteProduct(id: string): Promise<boolean> {
     const products = await readJsonFile<Product>(PRODUCTS_FILE);
     const filtered = products.filter((p) => p.id !== id);
 

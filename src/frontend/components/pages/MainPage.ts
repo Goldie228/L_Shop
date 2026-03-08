@@ -24,10 +24,13 @@ export interface MainPageProps extends ComponentProps {
 export class MainPage extends Component<MainPageProps> {
   /** Компонент фильтров */
   private filtersComponent: ProductFilters | null = null;
+
   /** Компонент списка продуктов */
   private productListComponent: ProductList | null = null;
+
   /** Текущие фильтры */
   private currentFilters: ProductFiltersType = {};
+
   /** Загруженные продукты */
   private products: Product[] = [];
 
@@ -152,11 +155,10 @@ export class MainPage extends Component<MainPageProps> {
    */
   private async loadProducts(): Promise<void> {
     if (!this.productListComponent) {
-      console.log('[MainPage] productListComponent is null, skipping loadProducts');
+      // productListComponent не готов - пропускаем загрузку
       return;
     }
 
-    console.log('[MainPage] Starting loadProducts...');
     this.productListComponent.setLoading(true);
     this.productListComponent.setError(null);
 
@@ -179,23 +181,25 @@ export class MainPage extends Component<MainPageProps> {
         params.minRating = String(this.currentFilters.minRating);
       }
 
-      console.log('[MainPage] Fetching products from /api/products...');
       this.products = await api.get<Product[]>('/api/products', params);
-      console.log('[MainPage] Products loaded:', this.products.length, 'items');
       // Устанавливаем продукты И сбрасываем загрузку одновременно
       this.productListComponent.setProps({ products: this.products, loading: false });
       this.productListComponent.update();
     } catch (error) {
-      console.error('[MainPage] Ошибка загрузки продуктов:', error);
-      
+      // Ошибка загрузки продуктов (обрабатывается в catch)
+
       // Определяем тип ошибки для более информативного сообщения
       let errorMessage = 'Не удалось загрузить товары. Попробуйте позже.';
       if (error instanceof Error) {
-        if (error.message.includes('network') || error.message.includes('Network') || error.name === 'TypeError') {
+        if (
+          error.message.includes('network')
+          || error.message.includes('Network')
+          || error.name === 'TypeError'
+        ) {
           errorMessage = 'Сервер недоступен. Проверьте подключение или перезагрузите страницу.';
         }
       }
-      
+
       this.productListComponent.setProps({ error: errorMessage, loading: false });
       this.productListComponent.update();
     }
@@ -216,15 +220,15 @@ export class MainPage extends Component<MainPageProps> {
     try {
       // Добавить товар в корзину через API
       await api.post('/api/cart/items', { productId, quantity: 1 });
-      
+
       // Показать уведомление об успехе
       this.showNotification('Товар добавлен в корзину', 'success');
-      
+
       // Вызвать внешний callback если есть
       this.props.onAddToCart?.(productId);
     } catch (error) {
       console.error('[MainPage] Ошибка добавления в корзину:', error);
-      
+
       // Показать уведомление об ошибке
       const message = error instanceof Error ? error.message : 'Не удалось добавить товар';
       this.showNotification(message, 'error');
@@ -241,15 +245,15 @@ export class MainPage extends Component<MainPageProps> {
       role: 'alert',
     });
     notification.textContent = message;
-    
+
     // Добавить на страницу
     document.body.appendChild(notification);
-    
+
     // Анимация появления
     requestAnimationFrame(() => {
       notification.classList.add('notification--visible');
     });
-    
+
     // Удалить через 3 секунды
     setTimeout(() => {
       notification.classList.remove('notification--visible');

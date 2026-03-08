@@ -1,0 +1,163 @@
+/**
+ * Стили Toast - L_Shop Frontend
+ * Использует CSS-переменные из design-tokens.css
+ *
+ * @see src/frontend/styles/design-tokens.css
+ * @see docs/DESIGN_SYSTEM.md
+ */
+
+/* Контейнер для тостов */
+.toast-container {
+  position: fixed;
+  top: var(--spacing-lg);
+  right: var(--spacing-lg);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  max-width: 400px;
+  width: 100%;
+}
+
+/* Базовый стиль тоста */
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  transform: translateX(100%);
+  transition: all var(--transition-normal) var(--ease-out);
+  min-height: 80px;
+}
+
+/* Анимация появления */
+.toast--visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Анимация исчезновения */
+.toast--closing {
+  opacity: 0;
+  transform: translateX(100%);
+}
+
+/* Иконка тоста */
+.toast__icon {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2px;
+}
+
+.toast__icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Типы тостов - цвета иконок */
+.toast[data-type="success"] .toast__icon {
+  color: var(--color-success);
+}
+
+.toast[data-type="error"] .toast__icon {
+  color: var(--color-error);
+}
+
+.toast[data-type="warning"] .toast__icon {
+  color: var(--color-warning);
+}
+
+.toast[data-type="info"] .toast__icon {
+  color: var(--color-info);
+}
+
+/* Контент тоста */
+.toast__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.toast__title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-xs);
+  line-height: var(--line-height-tight);
+}
+
+.toast__message {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-normal);
+}
+
+/* Кнопка закрытия */
+.toast__close {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast) var(--ease-out);
+}
+
+.toast__close:hover {
+  background: var(--color-hover);
+  color: var(--color-text-primary);
+}
+
+.toast__close:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.toast__close svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 480px) {
+  .toast-container {
+    top: var(--spacing-sm);
+    right: var(--spacing-sm);
+    left: var(--spacing-sm);
+    max-width: none;
+  }
+
+  .toast {
+    padding: var(--spacing-sm);
+    min-height: 72px;
+  }
+
+  .toast__title {
+    font-size: var(--font-size-xs);
+  }
+
+  .toast__message {
+    font-size: var(--font-size-xs);
+  }
+}
+
+/* Адаптивность для планшетов */
+@media (max-width: 768px) {
+  .toast-container {
+    max-width: 350px;
+  }
+}

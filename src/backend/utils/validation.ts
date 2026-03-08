@@ -53,6 +53,27 @@ const phoneSchema = z
   .transform((val) => val.trim());
 
 /**
+ * Схема для белорусского телефона
+ * Формат: +375 + ровно 9 цифр (например, +375291234567)
+ */
+const belarusPhoneSchema = z
+  .string()
+  .min(12, 'Белорусский телефон должен содержать 12 символов (+375 + 9 цифр)')
+  .max(12, 'Белорусский телефон должен содержать ровно 12 символов')
+  .regex(/^\+375\d{9}$/, 'Некорректный формат белорусского телефона. Ожидается: +375291234567')
+  .transform((val) => val.trim());
+
+/**
+ * Схема для цены
+ * Положительное число с двумя знаками после запятой
+ */
+const priceSchema = z
+  .number()
+  .min(0.01, 'Цена не может быть меньше 0.01')
+  .max(999999.99, 'Цена не может превышать 999999.99')
+  .transform((val) => Math.round(val * 100) / 100); // Округление до 2 знаков
+
+/**
  * Схема регистрации пользователя
  */
 export const registerSchema = z.object({
@@ -92,6 +113,20 @@ export const changePasswordSchema = z.object({
 });
 
 /**
+ * Схема для ID пользователя
+ */
+export const userIdSchema = z.string().min(1, 'ID пользователя обязателен');
+
+/**
+ * Схема для обновления роли пользователя
+ */
+export const updateUserRoleSchema = z.object({
+  role: z.enum(['user', 'admin'], {
+    message: 'Некорректная роль. Допустимые значения: user, admin',
+  }),
+});
+
+/**
  * Схема для ID продукта
  */
 export const productIdSchema = z.string().min(1, 'ID продукта обязателен');
@@ -123,27 +158,173 @@ export const updateCartQuantitySchema = z.object({
  * Схема для оформления заказа
  */
 export const createOrderSchema = z.object({
+  firstName: nameSchema,
   deliveryAddress: z
     .string()
     .min(10, 'Адрес доставки должен содержать минимум 10 символов')
     .max(500, 'Адрес доставки слишком длинный')
     .transform((val) => val.trim()),
+  phone: phoneSchema,
+  email: emailSchema,
+  paymentMethod: z.enum(['cash', 'card', 'online'], {
+    message: 'Некорректный способ оплаты. Допустимые: cash, card, online',
+  }),
+  deliveryType: z.enum(['courier', 'pickup']).optional(),
   comment: z
     .string()
     .max(1000, 'Комментарий слишком длинный')
     .transform((val) => val?.trim() || '')
     .optional(),
-  phone: phoneSchema.optional(),
 });
 
 /**
  * Схема для обновления статуса заказа (админ)
  */
 export const updateOrderStatusSchema = z.object({
-  status: z.enum(['new', 'processing', 'shipped', 'delivered', 'cancelled'], {
+  status: z.enum(['pending', 'processing', 'shipped', 'delivered', 'cancelled'], {
     message: 'Некорректный статус заказа',
   }),
 });
+
+/**
+ * Схема для создания продукта
+ */
+export const createProductSchema = z.object({
+  name: z
+    .string()
+    .min(1, 'Название продукта обязательно')
+    .max(200, 'Название слишком длинное')
+    .transform((val) => val.trim()),
+  description: z
+    .string()
+    .min(10, 'Описание должно содержать минимум 10 символов')
+    .max(2000, 'Описание слишком длинное')
+    .transform((val) => val.trim()),
+  price: z.number().min(0, 'Цена не может быть отрицательной').max(1000000, 'Цена слишком большая'),
+  category: z
+    .string()
+    .min(1, 'Категория обязательна')
+    .max(100, 'Категория слишком длинная')
+    .transform((val) => val.trim()),
+  inStock: z.boolean(),
+  imageUrl: z
+    .string()
+    .url('Некорректный URL изображения')
+    .max(500, 'URL изображения слишком длинный')
+    .transform((val) => val.trim())
+    .optional(),
+  discountPercent: z
+    .number()
+    .min(0, 'Скидка не может быть отрицательной')
+    .max(100, 'Скидка не может превышать 100%')
+    .optional(),
+  rating: z
+    .number()
+    .min(1, 'Рейтинг должен быть от 1 до 5')
+    .max(5, 'Рейтинг должен быть от 1 до 5')
+    .optional(),
+  reviewsCount: z
+    .number()
+    .int('Количество отзывов должно быть целым числом')
+    .min(0, 'Количество отзывов не может быть отрицательным')
+    .optional(),
+  brand: z
+    .string()
+    .min(1, 'Бренд обязателен')
+    .max(100, 'Бренд слишком длинный')
+    .transform((val) => val.trim()),
+  warranty: z
+    .string()
+    .min(1, 'Гарантия обязательна')
+    .max(50, 'Гарантия слишком длинная')
+    .transform((val) => val.trim()),
+   specifications: z.record(z.string(), z.unknown()).optional().default({}),
+   currency: z.string().default('BYN'),
+});
+
+/**
+ * Схема для обновления продукта (частичное обновление)
+ */
+export const updateProductSchema = z.object({
+  name: z
+    .string()
+    .min(1, 'Название продукта обязательно')
+    .max(200, 'Название слишком длинное')
+    .transform((val) => val.trim())
+    .optional(),
+  description: z
+    .string()
+    .min(10, 'Описание должно содержать минимум 10 символов')
+    .max(2000, 'Описание слишком длинное')
+    .transform((val) => val.trim())
+    .optional(),
+  price: z
+    .number()
+    .min(0, 'Цена не может быть отрицательной')
+    .max(1000000, 'Цена слишком большая')
+    .optional(),
+  category: z
+    .string()
+    .min(1, 'Категория обязательна')
+    .max(100, 'Категория слишком длинная')
+    .transform((val) => val.trim())
+    .optional(),
+  inStock: z.boolean().optional(),
+  imageUrl: z
+    .string()
+    .url('Некорректный URL изображения')
+    .max(500, 'URL изображения слишком длинный')
+    .transform((val) => val.trim())
+    .optional(),
+  discountPercent: z
+    .number()
+    .min(0, 'Скидка не может быть отрицательной')
+    .max(100, 'Скидка не может превышать 100%')
+    .optional(),
+  rating: z
+    .number()
+    .min(1, 'Рейтинг должен быть от 1 до 5')
+    .max(5, 'Рейтинг должен быть от 1 до 5')
+    .optional(),
+  reviewsCount: z
+    .number()
+    .int('Количество отзывов должно быть целым числом')
+    .min(0, 'Количество отзывов не может быть отрицательным')
+    .optional(),
+  brand: z
+    .string()
+    .min(1, 'Бренд обязателен')
+    .max(100, 'Бренд слишком длинный')
+    .transform((val) => val.trim())
+    .optional(),
+  warranty: z
+    .string()
+    .min(1, 'Гарантия обязательна')
+    .max(50, 'Гарантия слишком длинная')
+    .transform((val) => val.trim())
+    .optional(),
+  specifications: z.record(z.string(), z.unknown()).optional(),
+});
+
+/**
+ * Схема для фильтрации продуктов (query параметры)
+ */
+export const productFiltersSchema = z.object({
+  search: z.string().optional(),
+  sort: z.enum(['price_asc', 'price_desc']).optional(),
+  category: z.string().optional(),
+  inStock: z.enum(['true', 'false']).optional(),
+  minRating: z
+    .string()
+    .regex(/^\d+(\.\d+)?$/, 'minRating должно быть числом')
+    .refine((val) => {
+      const num = Number(val);
+      return num >= 1 && num <= 5;
+    }, { message: 'minRating должно быть от 1 до 5' })
+    .optional(),
+});
+
+export type ProductFiltersInput = z.infer<typeof productFiltersSchema>;
 
 /**
  * Типы, выведенные из схем
@@ -152,10 +333,14 @@ export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginRequestSchema>;
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
+export type UserIdInput = z.infer<typeof userIdSchema>;
+export type UpdateUserRoleInput = z.infer<typeof updateUserRoleSchema>;
 export type AddToCartInput = z.infer<typeof addToCartSchema>;
 export type UpdateCartQuantityInput = z.infer<typeof updateCartQuantitySchema>;
 export type CreateOrderInput = z.infer<typeof createOrderSchema>;
 export type UpdateOrderStatusInput = z.infer<typeof updateOrderStatusSchema>;
+export type CreateProductInput = z.infer<typeof createProductSchema>;
+export type UpdateProductInput = z.infer<typeof updateProductSchema>;
 
 /**
  * Результат валидации
@@ -206,7 +391,7 @@ export function validateBody<T>(
 ): { error: string; field?: string } | null {
   const result = validate(schema, body);
   if (!result.success) {
-    return { error: result.error!, field: result.field };
+    return { error: result.error ?? 'Ошибка валидации', field: result.field };
   }
   return null;
 }
@@ -236,5 +421,30 @@ export const isValidPhone = (phone: string): boolean => {
  */
 export const isValidLogin = (login: string): boolean => {
   const result = loginSchema.safeParse(login);
+  return result.success;
+};
+
+/**
+ * Проверка белорусского телефона
+ */
+export const isValidBelarusPhone = (phone: string): boolean => {
+  const result = belarusPhoneSchema.safeParse(phone);
+  return result.success;
+};
+
+/**
+ * Проверка цены
+ */
+export const isValidPrice = (price: unknown): boolean => {
+  // Для priceSchema используем safeParse, который принимает number
+  // Если передана строка, пытаемся преобразовать в число
+  if (price === null || price === undefined) return false;
+  let value = price;
+  if (typeof price === 'string') {
+    const num = parseFloat(price);
+    if (Number.isNaN(num)) return false;
+    value = num;
+  }
+  const result = priceSchema.safeParse(value);
   return result.success;
 };

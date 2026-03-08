@@ -6,6 +6,7 @@
  */
 
 import { Component, ComponentProps } from '../base/Component';
+import { Button } from '../ui/Button';
 import { CartItem } from './CartItem';
 import { CartItemWithProduct } from '../../types/cart';
 
@@ -19,6 +20,8 @@ export interface CartListProps extends ComponentProps {
   onQuantityChange?: (productId: string, quantity: number) => void;
   /** Обработчик удаления */
   onRemove?: (productId: string) => void;
+  /** Обработчик перехода в каталог */
+  onGoToCatalog?: () => void;
 }
 
 /**
@@ -29,7 +32,8 @@ export interface CartListProps extends ComponentProps {
  * const cartList = new CartList({
  *   items: cartItems,
  *   onQuantityChange: (id, qty) => updateQuantity(id, qty),
- *   onRemove: (id) => removeItem(id)
+ *   onRemove: (id) => removeItem(id),
+ *   onGoToCatalog: () => router.navigate('/catalog')
  * });
  * container.appendChild(cartList.render());
  * ```
@@ -52,7 +56,7 @@ export class CartList extends Component<CartListProps> {
    * Отрендерить список корзины
    */
   public render(): HTMLElement {
-    const { items } = this.props;
+    const { items, onGoToCatalog } = this.props;
 
     this.element = this.createElement('div', {
       className: 'cart-list',
@@ -63,10 +67,30 @@ export class CartList extends Component<CartListProps> {
     this.cartItems = [];
 
     if (items.length === 0) {
-      const emptyMessage = this.createElement('p', {
-        className: 'cart-list__empty',
-      }, ['Корзина пуста']);
-      this.element.appendChild(emptyMessage);
+      const emptyContainer = this.createElement('div', {
+        className: 'cart-list__empty-container',
+      });
+
+      const emptyMessage = this.createElement(
+        'p',
+        {
+          className: 'cart-list__empty',
+        },
+        ['Корзина пуста'],
+      );
+      emptyContainer.appendChild(emptyMessage);
+
+      if (onGoToCatalog) {
+        const catalogButton = new Button({
+          text: 'Перейти в каталог',
+          variant: 'primary',
+          size: 'md',
+          onClick: () => onGoToCatalog(),
+        });
+        catalogButton.mount(emptyContainer);
+      }
+
+      this.element.appendChild(emptyContainer);
       return this.element;
     }
 
@@ -77,7 +101,9 @@ export class CartList extends Component<CartListProps> {
         onQuantityChange: this.props.onQuantityChange,
         onRemove: this.props.onRemove,
       });
-      cartItem.mount(this.element!);
+      if (this.element) {
+        cartItem.mount(this.element);
+      }
       this.cartItems.push(cartItem);
     });
 

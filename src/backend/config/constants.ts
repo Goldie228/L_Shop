@@ -11,12 +11,13 @@ dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 export const config = {
   port: parseInt(process.env.PORT || '3001', 10),
   nodeEnv: process.env.NODE_ENV || 'development',
-  frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
+  frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3002',
 
   // Длительность сессии в минутах (по умолчанию 10 минут)
   sessionDurationMinutes: parseInt(process.env.SESSION_DURATION_MINUTES || '10', 10),
 
   dataDir: process.env.DATA_DIR || path.join(__dirname, '../data'),
+  logsDir: process.env.LOGS_DIR || path.join(__dirname, '../../../logs'),
 
   // Вычисляемые значения
   get sessionDurationMs(): number {

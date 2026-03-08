@@ -1,195 +1,120 @@
-/**
- * Контроллер корзины
- * Обрабатывает операции с корзиной пользователя
- */
-
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth-request';
 import { CartService } from '../services/cart.service';
+import { addToCartSchema, updateCartQuantitySchema, validate } from '../utils/validation';
+import { ValidationError, AuthenticationError } from '../errors';
 
 const cartService = new CartService();
 
 /**
  * Получить корзину текущего пользователя
  * Требует авторизации
+ * @param req - AuthRequest с userId
+ * @param res - Ответ Express
+ * @throws {AuthenticationError} Если не авторизован
+ * @throws {NotFoundError} Если корзина не найдена
+ * @throws {CartError} При ошибках получения корзины
+ * @returns 200 с данными корзины
  */
-export async function getCart(req: AuthRequest, res: Response): Promise<void> {
-  try {
-    const { userId } = req;
+export async function getCart(req: AuthRequest, res: Response): Promise<undefined> {
+  const { userId } = req;
 
-    if (!userId) {
-      res.status(401).json({
-        message: 'Не авторизован',
-        error: 'UNAUTHORIZED',
-      });
-      return;
-    }
-
-    const cart = await cartService.getCart(userId);
-    res.json(cart);
-  } catch (error) {
-    console.error('[CartController] Ошибка получения корзины:', error);
-    res.status(500).json({
-      message: 'Ошибка при получении корзины',
-      error: 'GET_CART_ERROR',
-    });
+  if (!userId) {
+    throw new AuthenticationError('Не авторизован');
   }
+
+  const cart = await cartService.getCart(userId);
+  res.json(cart);
 }
 
 /**
  * Добавить продукт в корзину
  * Требует авторизации
+ * @param req - AuthRequest с userId и телом { productId, quantity }
+ * @param res - Ответ Express
+ * @throws {AuthenticationError} Если не авторизован
+ * @throws {ValidationError} При невалидных данных
+ * @throws {NotFoundError} Если продукт не найден
+ * @throws {CartError} При ошибках добавления
+ * @returns 200 с обновлённой корзиной
  */
-export async function addItem(req: AuthRequest, res: Response): Promise<void> {
-  try {
-    const { userId } = req;
-    const { productId, quantity } = req.body;
+export async function addItem(req: AuthRequest, res: Response): Promise<undefined> {
+  const { userId } = req;
 
-    if (!userId) {
-      res.status(401).json({
-        message: 'Не авторизован',
-        error: 'UNAUTHORIZED',
-      });
-      return;
-    }
-
-    if (!productId || !quantity || quantity < 1) {
-      res.status(400).json({
-        message: 'productId и quantity (положительное число) обязательны',
-        error: 'INVALID_REQUEST',
-      });
-      return;
-    }
-
-    const cart = await cartService.addItem(userId, productId, quantity);
-    res.json(cart);
-  } catch (error) {
-    console.error('[CartController] Ошибка добавления в корзину:', error);
-
-    const message = error instanceof Error ? error.message : 'Ошибка при добавлении в корзину';
-
-    if (message === 'Product not found') {
-      res.status(404).json({
-        message: 'Продукт не найден',
-        error: 'PRODUCT_NOT_FOUND',
-      });
-      return;
-    }
-
-    if (message === 'Product is out of stock') {
-      res.status(400).json({
-        message: 'Продукт отсутствует на складе',
-        error: 'OUT_OF_STOCK',
-      });
-      return;
-    }
-
-    res.status(500).json({
-      message: 'Ошибка при добавлении в корзину',
-      error: 'ADD_ITEM_ERROR',
-    });
+  if (!userId) {
+    throw new AuthenticationError('Не авторизован');
   }
+
+  // Валидация тела запроса через Zod
+  const validation = validate(addToCartSchema, req.body);
+  if (!validation.success || !validation.data) {
+    throw new ValidationError(validation.error || 'Ошибка валидации', { field: validation.field });
+  }
+
+  const { productId, quantity } = validation.data;
+
+  const cart = await cartService.addItem(userId, productId, quantity);
+  res.json(cart);
 }
 
 /**
  * Изменить количество продукта в корзине
  * Требует авторизации
+ * @param req - AuthRequest с userId, params { productId }, body { quantity }
+ * @param res - Ответ Express
+ * @throws {AuthenticationError} Если не авторизован
+ * @throws {ValidationError} При невалидных данных
+ * @throws {NotFoundError} Если продукт или корзина не найдены
+ * @throws {CartError} При ошибках обновления
+ * @returns 200 с обновлённой корзиной
  */
-export async function updateItem(req: AuthRequest, res: Response): Promise<void> {
-  try {
-    const { userId } = req;
-    const { productId } = req.params;
-    const { quantity } = req.body;
+export async function updateItem(req: AuthRequest, res: Response): Promise<undefined> {
+  const { userId } = req;
+  const { productId } = req.params;
 
-    if (!userId) {
-      res.status(401).json({
-        message: 'Не авторизован',
-        error: 'UNAUTHORIZED',
-      });
-      return;
-    }
-
-    if (!productId || quantity === undefined || quantity < 0) {
-      res.status(400).json({
-        message: 'productId и quantity (неотрицательное число) обязательны',
-        error: 'INVALID_REQUEST',
-      });
-      return;
-    }
-
-    const cart = await cartService.updateItem(userId, productId, quantity);
-    res.json(cart);
-  } catch (error) {
-    console.error('[CartController] Ошибка обновления корзины:', error);
-
-    const message = error instanceof Error ? error.message : 'Ошибка при обновлении корзины';
-
-    if (message === 'Cart not found') {
-      res.status(404).json({
-        message: 'Корзина не найдена',
-        error: 'CART_NOT_FOUND',
-      });
-      return;
-    }
-
-    if (message === 'Item not found in cart') {
-      res.status(404).json({
-        message: 'Товар не найден в корзине',
-        error: 'ITEM_NOT_FOUND',
-      });
-      return;
-    }
-
-    res.status(500).json({
-      message: 'Ошибка при обновлении корзины',
-      error: 'UPDATE_ITEM_ERROR',
-    });
+  if (!userId) {
+    throw new AuthenticationError('Не авторизован');
   }
+
+  if (!productId) {
+    throw new ValidationError('productId обязателен', { field: 'productId' });
+  }
+
+  // Валидация quantity через Zod
+  const validation = validate(updateCartQuantitySchema, req.body);
+  if (!validation.success || !validation.data) {
+    throw new ValidationError(validation.error || 'Ошибка валидации', { field: validation.field });
+  }
+
+  const { quantity } = validation.data;
+
+  const cart = await cartService.updateItem(userId, productId, quantity);
+  res.json(cart);
 }
 
 /**
  * Удалить продукт из корзины
  * Требует авторизации
+ * @param req - AuthRequest с userId, params { productId }
+ * @param res - Ответ Express
+ * @throws {AuthenticationError} Если не авторизован
+ * @throws {ValidationError} При отсутствии productId
+ * @throws {NotFoundError} Если продукт или корзина не найдены
+ * @throws {CartError} При ошибках удаления
+ * @returns 200 с обновлённой корзиной
  */
-export async function removeItem(req: AuthRequest, res: Response): Promise<void> {
-  try {
-    const { userId } = req;
-    const { productId } = req.params;
+export async function removeItem(req: AuthRequest, res: Response): Promise<undefined> {
+  const { userId } = req;
+  const { productId } = req.params;
 
-    if (!userId) {
-      res.status(401).json({
-        message: 'Не авторизован',
-        error: 'UNAUTHORIZED',
-      });
-      return;
-    }
-
-    if (!productId) {
-      res.status(400).json({
-        message: 'productId обязателен',
-        error: 'INVALID_REQUEST',
-      });
-      return;
-    }
-
-    const cart = await cartService.removeItem(userId, productId);
-    res.json(cart);
-  } catch (error) {
-    console.error('[CartController] Ошибка удаления из корзины:', error);
-
-    const message = error instanceof Error ? error.message : 'Ошибка при удалении из корзины';
-
-    if (message === 'Cart not found') {
-      res.status(404).json({
-        message: 'Корзина не найдена',
-        error: 'CART_NOT_FOUND',
-      });
-      return;
-    }
-
-    res.status(500).json({
-      message: 'Ошибка при удалении из корзины',
-      error: 'REMOVE_ITEM_ERROR',
-    });
+  if (!userId) {
+    throw new AuthenticationError('Не авторизован');
   }
+
+  if (!productId) {
+    throw new ValidationError('productId обязателен', { field: 'productId' });
+  }
+
+  const cart = await cartService.removeItem(userId, productId);
+  res.json(cart);
 }

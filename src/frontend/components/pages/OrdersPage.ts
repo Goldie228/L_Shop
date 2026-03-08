@@ -34,7 +34,7 @@ export interface OrdersPageState {
  */
 const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   pending: 'Ожидает подтверждения',
-  confirmed: 'Подтверждён',
+  processing: 'В обработке',
   shipped: 'В доставке',
   delivered: 'Доставлен',
   cancelled: 'Отменён',
@@ -45,7 +45,7 @@ const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
  */
 const ORDER_STATUS_COLORS: Record<OrderStatus, string> = {
   pending: 'var(--color-warning)',
-  confirmed: 'var(--color-info)',
+  processing: 'var(--color-warning)',
   shipped: 'var(--color-primary)',
   delivered: 'var(--color-success)',
   cancelled: 'var(--color-error)',
@@ -147,14 +147,22 @@ export class OrdersPage extends Component<OrdersPageProps> {
       className: 'orders-page__header',
     });
 
-    const title = this.createElement('h1', {
-      className: 'page-title',
-    }, ['Мои заказы']);
+    const title = this.createElement(
+      'h1',
+      {
+        className: 'page-title',
+      },
+      ['Мои заказы'],
+    );
     header.appendChild(title);
 
-    const subtitle = this.createElement('p', {
-      className: 'orders-page__subtitle',
-    }, ['Просмотр истории ваших заказов']);
+    const subtitle = this.createElement(
+      'p',
+      {
+        className: 'orders-page__subtitle',
+      },
+      ['Просмотр истории ваших заказов'],
+    );
     header.appendChild(subtitle);
 
     return header;
@@ -182,20 +190,32 @@ export class OrdersPage extends Component<OrdersPageProps> {
       className: 'orders-page__error',
     });
 
-    const title = this.createElement('h3', {
-      className: 'orders-page__error-title',
-    }, ['Ошибка загрузки']);
+    const title = this.createElement(
+      'h3',
+      {
+        className: 'orders-page__error-title',
+      },
+      ['Ошибка загрузки'],
+    );
     error.appendChild(title);
 
-    const message = this.createElement('p', {
-      className: 'orders-page__error-message',
-    }, [this.state.error || 'Неизвестная ошибка']);
+    const message = this.createElement(
+      'p',
+      {
+        className: 'orders-page__error-message',
+      },
+      [this.state.error || 'Неизвестная ошибка'],
+    );
     error.appendChild(message);
 
-    const retryButton = this.createElement('button', {
-      className: 'btn btn--primary',
-      type: 'button',
-    }, ['Попробовать снова']);
+    const retryButton = this.createElement(
+      'button',
+      {
+        className: 'btn btn--primary',
+        type: 'button',
+      },
+      ['Попробовать снова'],
+    );
     this.addEventListener(retryButton, 'click', () => this.loadOrders());
     error.appendChild(retryButton);
 
@@ -210,7 +230,7 @@ export class OrdersPage extends Component<OrdersPageProps> {
       className: 'orders-page__list',
     });
 
-    this.state.orders.forEach(order => {
+    this.state.orders.forEach((order) => {
       const orderCard = this.renderOrderCard(order);
       list.appendChild(orderCard);
     });
@@ -235,22 +255,34 @@ export class OrdersPage extends Component<OrdersPageProps> {
       className: 'order-card__info',
     });
 
-    const orderNumber = this.createElement('h3', {
-      className: 'order-card__number',
-    }, [`Заказ №${order.id}`]);
+    const orderNumber = this.createElement(
+      'h3',
+      {
+        className: 'order-card__number',
+      },
+      [`Заказ №${order.id}`],
+    );
     orderInfo.appendChild(orderNumber);
 
-    const orderDate = this.createElement('p', {
-      className: 'order-card__date',
-    }, [new Date(order.createdAt).toLocaleDateString('ru-RU')]);
+    const orderDate = this.createElement(
+      'p',
+      {
+        className: 'order-card__date',
+      },
+      [new Date(order.createdAt).toLocaleDateString('ru-RU')],
+    );
     orderInfo.appendChild(orderDate);
 
     header.appendChild(orderInfo);
 
-    const status = this.createElement('span', {
-      className: 'order-card__status',
-      style: `color: ${ORDER_STATUS_COLORS[order.status]}`,
-    }, [ORDER_STATUS_LABELS[order.status]]);
+    const status = this.createElement(
+      'span',
+      {
+        className: 'order-card__status',
+        style: `color: ${ORDER_STATUS_COLORS[order.status]}`,
+      },
+      [ORDER_STATUS_LABELS[order.status]],
+    );
     header.appendChild(status);
 
     card.appendChild(header);
@@ -264,7 +296,7 @@ export class OrdersPage extends Component<OrdersPageProps> {
       className: 'order-card__items',
     });
 
-    order.items.forEach(item => {
+    order.items.forEach((item) => {
       const itemEl = this.createElement('li', {
         className: 'order-card__item',
       });
@@ -273,21 +305,33 @@ export class OrdersPage extends Component<OrdersPageProps> {
         className: 'order-card__item-info',
       });
 
-      const name = this.createElement('span', {
-        className: 'order-card__item-name',
-      }, [item.name]);
+      const name = this.createElement(
+        'span',
+        {
+          className: 'order-card__item-name',
+        },
+        [item.name],
+      );
       itemInfo.appendChild(name);
 
-      const quantity = this.createElement('span', {
-        className: 'order-card__item-quantity',
-      }, [`× ${item.quantity}`]);
+      const quantity = this.createElement(
+        'span',
+        {
+          className: 'order-card__item-quantity',
+        },
+        [`× ${item.quantity}`],
+      );
       itemInfo.appendChild(quantity);
 
       itemEl.appendChild(itemInfo);
 
-      const price = this.createElement('span', {
-        className: 'order-card__item-price',
-      }, [`${item.price * item.quantity} ₽`]);
+      const price = this.createElement(
+        'span',
+        {
+          className: 'order-card__item-price',
+        },
+        [`${item.price * item.quantity} ₽`],
+      );
       itemEl.appendChild(price);
 
       itemsList.appendChild(itemEl);
@@ -301,14 +345,22 @@ export class OrdersPage extends Component<OrdersPageProps> {
       className: 'order-card__footer',
     });
 
-    const totalLabel = this.createElement('span', {
-      className: 'order-card__total-label',
-    }, ['Итого:']);
+    const totalLabel = this.createElement(
+      'span',
+      {
+        className: 'order-card__total-label',
+      },
+      ['Итого:'],
+    );
     footer.appendChild(totalLabel);
 
-    const total = this.createElement('span', {
-      className: 'order-card__total',
-    }, [`${order.totalSum} ₽`]);
+    const total = this.createElement(
+      'span',
+      {
+        className: 'order-card__total',
+      },
+      [`${order.totalSum} ₽`],
+    );
     footer.appendChild(total);
 
     card.appendChild(footer);
@@ -324,25 +376,41 @@ export class OrdersPage extends Component<OrdersPageProps> {
       className: 'orders-page__empty',
     });
 
-    const icon = this.createElement('div', {
-      className: 'orders-page__empty-icon',
-    }, ['📦']);
+    const icon = this.createElement(
+      'div',
+      {
+        className: 'orders-page__empty-icon',
+      },
+      ['📦'],
+    );
     empty.appendChild(icon);
 
-    const title = this.createElement('h3', {
-      className: 'orders-page__empty-title',
-    }, ['У вас пока нет заказов']);
+    const title = this.createElement(
+      'h3',
+      {
+        className: 'orders-page__empty-title',
+      },
+      ['У вас пока нет заказов'],
+    );
     empty.appendChild(title);
 
-    const message = this.createElement('p', {
-      className: 'orders-page__empty-message',
-    }, ['Начните делать покупки, и ваши заказы появятся здесь']);
+    const message = this.createElement(
+      'p',
+      {
+        className: 'orders-page__empty-message',
+      },
+      ['Начните делать покупки, и ваши заказы появятся здесь'],
+    );
     empty.appendChild(message);
 
-    const shopButton = this.createElement('button', {
-      className: 'btn btn--primary',
-      type: 'button',
-    }, ['Перейти в каталог']);
+    const shopButton = this.createElement(
+      'button',
+      {
+        className: 'btn btn--primary',
+        type: 'button',
+      },
+      ['Перейти в каталог'],
+    );
     this.addEventListener(shopButton, 'click', () => {
       router.navigate('/');
     });
@@ -359,20 +427,32 @@ export class OrdersPage extends Component<OrdersPageProps> {
       className: 'orders-page__auth-required',
     });
 
-    const title = this.createElement('h2', {
-      className: 'orders-page__auth-title',
-    }, ['Требуется авторизация']);
+    const title = this.createElement(
+      'h2',
+      {
+        className: 'orders-page__auth-title',
+      },
+      ['Требуется авторизация'],
+    );
     container.appendChild(title);
 
-    const message = this.createElement('p', {
-      className: 'orders-page__auth-message',
-    }, ['Для просмотра заказов необходимо войти в систему']);
+    const message = this.createElement(
+      'p',
+      {
+        className: 'orders-page__auth-message',
+      },
+      ['Для просмотра заказов необходимо войти в систему'],
+    );
     container.appendChild(message);
 
-    const loginButton = this.createElement('button', {
-      className: 'btn btn--primary',
-      type: 'button',
-    }, ['Войти']);
+    const loginButton = this.createElement(
+      'button',
+      {
+        className: 'btn btn--primary',
+        type: 'button',
+      },
+      ['Войти'],
+    );
     this.addEventListener(loginButton, 'click', () => {
       store.openModal('auth');
     });

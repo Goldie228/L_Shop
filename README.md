@@ -2,7 +2,7 @@
 
 ## Описание проекта
 
-L_Shop - это прототип интернет-магазина, разработанный на Express + TypeScript (backend) и SPA на чистом TypeScript (frontend). Проект использует файловое хранение данных (JSON).
+L_Shop - это прототип интернет-магазина, разработанный на Express + TypeScript (backend) и SPA на чистом TypeScript (frontend). Проект использует JSON-файловое хранилище данных.
 
 ## Команда разработчиков
 
@@ -40,13 +40,15 @@ L_Shop/
 │   │   ├── app.ts         # Точка входа
 │   │   ├── config/        # Конфигурация
 │   │   ├── controllers/   # Контроллеры
+│   │   ├── errors/        # Классы ошибок
 │   │   ├── middleware/    # Middleware
 │   │   ├── models/        # Модели данных
 │   │   ├── routes/        # Маршруты
 │   │   ├── services/      # Бизнес-логика
+│   │   ├── types/         # TypeScript типы
 │   │   ├── utils/         # Вспомогательные функции
 │   │   ├── data/          # JSON-файлы с данными
-│   ├── frontend/          # SPA frontend (будет добавлено)
+│   ├── frontend/          # SPA frontend
 ├── docs/                  # Документация
 ├── package.json
 ├── tsconfig.json
@@ -115,6 +117,21 @@ npm run build
 ```bash
 npm start
 ```
+
+### Миграции и начальные данные
+
+Для обновления структуры данных и заполнения базы тестовыми данными:
+
+```bash
+# Заполнение базы тестовыми данными (продукты, пользователи)
+npm run seed
+
+# Применение миграций
+npx ts-node src/backend/scripts/migrate-add-currency.ts
+npx ts-node src/backend/scripts/migrate-add-firstName.ts
+```
+
+**Важно:** Запускайте миграции в указанном порядке, затем seed для заполнения данных.
 
 ### Проверка кода
 ```bash
@@ -190,33 +207,51 @@ npm run test:e2e
 
 ## API Endpoints
 
+> **Важно:** Все цены указаны в белорусских рублях (BYN).
+
 ### Авторизация
-| Метод | Endpoint | Описание |
-|-------|----------|----------|
-| POST | /api/auth/register | Регистрация пользователя |
-| POST | /api/auth/login | Вход в систему |
-| POST | /api/auth/logout | Выход из системы |
-| GET | /api/auth/me | Текущий пользователь |
+
+- `POST /api/auth/register` - Регистрация нового пользователя
+- `POST /api/auth/login` - Вход в систему
+- `POST /api/auth/logout` - Выход из системы
+- `GET /api/auth/me` - Получение информации о текущем пользователе
+- `GET /api/auth/session-config` - Получение конфигурации сессии (публичная)
+- `PUT /api/auth/profile` - Обновление профиля пользователя (имя и email)
+- `PUT /api/auth/password` - Изменение пароля пользователя
 
 ### Продукты
-| Метод | Endpoint | Описание |
-|-------|----------|----------|
-| GET | /api/products | Список товаров |
-| GET | /api/products/:id | Детали товара |
 
-### Корзина (будет добавлено)
-| Метод | Endpoint | Описание |
-|-------|----------|----------|
-| GET | /api/cart | Корзина пользователя |
-| POST | /api/cart/items | Добавить товар |
-| PUT | /api/cart/items/:productId | Изменить количество |
-| DELETE | /api/cart/items/:productId | Удалить товар |
+- `GET /api/products` - Получение списка продуктов с фильтрацией и сортировкой
+- `GET /api/products/:id` - Получение продукта по ID
 
-### Заказы (будет добавлено)
-| Метод | Endpoint | Описание |
-|-------|----------|----------|
-| POST | /api/orders | Создание заказа |
-| GET | /api/orders | Список заказов |
+### Корзина
+
+> Все эндпоинты требуют авторизации
+
+- `GET /api/cart` - Получить корзину текущего пользователя
+- `POST /api/cart/items` - Добавить товар в корзину
+- `PUT /api/cart/items/:productId` - Обновить количество товара в корзине
+- `DELETE /api/cart/items/:productId` - Удалить товар из корзины
+
+### Заказы
+
+> Все эндпоинты требуют авторизации
+
+- `POST /api/orders` - Создать новый заказ на основе корзины
+- `GET /api/orders` - Получить список заказов текущего пользователя
+- `GET /api/orders/:id` - Получить заказ по ID
+- `PUT /api/orders/:id/cancel` - Отменить заказ
+
+### Админские эндпоинты
+
+> Все эндпоинты требуют роль admin
+
+- `GET /api/admin/products` - Получить список всех продуктов (с фильтрацией и пагинацией)
+- `GET /api/admin/products/:id` - Получить продукт по ID
+- `POST /api/admin/products` - Создать новый продукт
+- `PUT /api/admin/products/:id` - Обновить продукт
+- `GET /api/admin/orders` - Получить список всех заказов (с фильтрацией и пагинацией)
+- `GET /api/admin/users` - Получить список пользователей (с фильтрацией и пагинацией)
 
 ## Модели данных
 
@@ -230,6 +265,7 @@ interface User {
   phone: string;
   password: string;
   createdAt: string;
+  updatedAt: string;
 }
 ```
 
@@ -240,9 +276,18 @@ interface Product {
   name: string;
   description: string;
   price: number;
+  currency: 'BYN';
   category: string;
   inStock: boolean;
   imageUrl?: string;
+  discountPercent?: number;
+  rating?: number;
+  reviewsCount?: number;
+  brand: string;
+  warranty: string;
+  specifications: Record<string, unknown>;
+  createdAt: string;
+  updatedAt?: string;
 }
 ```
 
@@ -252,6 +297,7 @@ interface Cart {
   userId: string;
   items: CartItem[];
   updatedAt: string;
+  currency: 'BYN';
 }
 ```
 
@@ -260,22 +306,30 @@ interface Cart {
 interface Order {
   id: string;
   userId: string;
-  items: CartItem[];
+  firstName: string;
+  items: OrderItem[];
   deliveryAddress: string;
   phone: string;
   email: string;
   paymentMethod: 'cash' | 'card' | 'online';
-  status: 'pending' | 'completed';
+  deliveryType?: 'courier' | 'pickup';
+  comment?: string;
+  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  currency: 'BYN';
+  totalSum: number;
   createdAt: string;
+  updatedAt?: string;
 }
 ```
 
 ## Авторизация
 
-Проект использует сессии на основе httpOnly cookie:
-- Кука `sessionToken` с временем жизни 10 минут
-- После истечения - автоматический выход
-- Доступ к защищённым ресурсам только для авторизованных
+Проект использует **session-based аутентификацию**:
+- При успешном входе сервер создаёт сессию и устанавливает httpOnly cookie `sessionToken`
+- Кука `sessionToken` имеет время жизни 10 минут (настраивается через `SESSION_DURATION_MINUTES`)
+- После истечения сессии происходит автоматический выход
+- Доступ к защищённым эндпоинтам (корзина, заказы) проверяется через middleware аутентификации
+- Для админских эндпоинтов требуется дополнительная проверка роли `admin`
 
 ## Git workflow
 

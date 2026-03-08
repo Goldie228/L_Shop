@@ -1,7 +1,7 @@
 /**
  * Компонент Input - L_Shop Frontend
  * Переиспользуемое поле ввода с состояниями валидации и размерами
- * 
+ *
  * @see src/frontend/styles/components/input.css - стили ввода
  * @see docs/DESIGN_SYSTEM.md - документация дизайн-системы
  */
@@ -107,7 +107,7 @@ const ERROR_ICON = `
 
 /**
  * Класс компонента ввода
- * 
+ *
  * @example
  * ```typescript
  * // Создание обычного ввода
@@ -118,7 +118,7 @@ const ERROR_ICON = `
  *   placeholder: 'Введите email',
  *   required: true
  * });
- * 
+ *
  * // Ввод с валидацией
  * const passwordInput = new Input({
  *   name: 'password',
@@ -132,10 +132,10 @@ const ERROR_ICON = `
 export class Input extends Component<InputProps> {
   /** Ссылка на элемент ввода */
   private inputElement: HTMLInputElement | null = null;
-  
+
   /** Ссылка на кнопку переключения пароля */
   private passwordToggle: HTMLButtonElement | null = null;
-  
+
   /** Состояние видимости пароля */
   private passwordVisible = false;
 
@@ -158,68 +158,61 @@ export class Input extends Component<InputProps> {
    * @returns Элемент контейнера
    */
   public render(): HTMLDivElement {
-    const { 
-      label, 
-      inputState, 
-      error, 
-      helperText,
-      size,
-      className,
-      testId,
-      name
+    const {
+      label, inputState, error, helperText, size, className, testId, name,
     } = this.props;
-    
+
     // Построить классы контейнера
     const containerClasses = ['form-field'];
     containerClasses.push(`form-field--${size}`);
-    
+
     if (inputState !== 'default') {
       containerClasses.push(`form-field--${inputState}`);
     }
-    
+
     if (this.props.type === 'password') {
       containerClasses.push('form-field--password');
     }
-    
+
     if (className) {
       containerClasses.push(className);
     }
-    
+
     // Создать контейнер
     const container = this.createElement('div', {
       className: containerClasses.join(' '),
       'data-testid': testId ?? `input-${name}`,
     });
-    
+
     // Добавить лейбл если передан
     if (label) {
       const labelElement = this.createLabel();
       container.appendChild(labelElement);
     }
-    
+
     // Создать обёртку ввода
     const inputWrapper = this.createElement('div', {
-      className: 'form-field__input-wrapper'
+      className: 'form-field__input-wrapper',
     });
-    
+
     // Создать ввод
     this.inputElement = this.createInput();
     inputWrapper.appendChild(this.inputElement);
-    
+
     // Добавить иконку успеха
     if (inputState === 'success') {
       const successIcon = this.createSuccessIcon();
       inputWrapper.appendChild(successIcon);
     }
-    
+
     // Добавить переключатель пароля для типа password
     if (this.props.type === 'password') {
       this.passwordToggle = this.createPasswordToggle();
       inputWrapper.appendChild(this.passwordToggle);
     }
-    
+
     container.appendChild(inputWrapper);
-    
+
     // Добавить вспомогательный текст или ошибку
     if (error && inputState === 'error') {
       const errorElement = this.createErrorElement();
@@ -228,7 +221,7 @@ export class Input extends Component<InputProps> {
       const helperElement = this.createHelperElement();
       container.appendChild(helperElement);
     }
-    
+
     this.element = container;
     return container;
   }
@@ -239,19 +232,19 @@ export class Input extends Component<InputProps> {
    */
   private createLabel(): HTMLLabelElement {
     const { name, label, required } = this.props;
-    
+
     const labelClasses = ['form-field__label'];
     if (required) {
       labelClasses.push('form-field__label--required');
     }
-    
+
     return this.createElement(
       'label',
       {
         for: name,
-        className: labelClasses.join(' ')
+        className: labelClasses.join(' '),
       },
-      [label!]
+      [label!],
     );
   }
 
@@ -273,16 +266,16 @@ export class Input extends Component<InputProps> {
       minLength,
       maxLength,
       disabled,
-      inputState
+      inputState,
     } = this.props;
-    
+
     // Классы ввода
     const inputClasses = ['form-field__input', `form-field__input--${size}`];
-    
+
     if (inputState !== 'default') {
       inputClasses.push(`form-field__input--${inputState}`);
     }
-    
+
     // Создать базовые атрибуты ввода
     const inputAttributes: Record<string, string | boolean> = {
       type: type || 'text',
@@ -297,18 +290,15 @@ export class Input extends Component<InputProps> {
       autocomplete: autocomplete || 'off',
       'aria-invalid': inputState === 'error' ? 'true' : 'false',
     };
-    
+
     // Добавить aria-describedby если есть
     const describedBy = this.getAriaDescribedBy();
     if (describedBy) {
       inputAttributes['aria-describedby'] = describedBy;
     }
-    
-    const input = this.createElement(
-      'input',
-      inputAttributes
-    ) as HTMLInputElement;
-    
+
+    const input = this.createElement('input', inputAttributes) as HTMLInputElement;
+
     // Добавить дополнительные атрибуты
     if (pattern) input.setAttribute('pattern', pattern);
     if (minLength !== undefined) {
@@ -317,12 +307,12 @@ export class Input extends Component<InputProps> {
     if (maxLength !== undefined) {
       input.setAttribute('maxlength', String(maxLength));
     }
-    
+
     // Добавить слушатели событий
     this.addEventListener(input, 'input', this.handleInput);
     this.addEventListener(input, 'blur', this.handleBlur);
     this.addEventListener(input, 'focus', this.handleFocus);
-    
+
     return input;
   }
 
@@ -331,16 +321,18 @@ export class Input extends Component<InputProps> {
    * @returns ID элемента описания или undefined
    */
   private getAriaDescribedBy(): string | undefined {
-    const { name, error, helperText, inputState } = this.props;
-    
+    const {
+      name, error, helperText, inputState,
+    } = this.props;
+
     if (error && inputState === 'error') {
       return `${name}-error`;
     }
-    
+
     if (helperText) {
       return `${name}-helper`;
     }
-    
+
     return undefined;
   }
 
@@ -351,9 +343,15 @@ export class Input extends Component<InputProps> {
   private createSuccessIcon(): HTMLSpanElement {
     const icon = this.createElement('span', {
       className: 'form-field__success-icon',
-      'aria-hidden': 'true'
+      'aria-hidden': 'true',
     });
-    icon.innerHTML = CHECK_ICON;
+
+    // Безопасно создаём SVG из строки
+    const svg = this.createSVGFromString(CHECK_ICON);
+    if (svg) {
+      icon.appendChild(svg);
+    }
+
     return icon;
   }
 
@@ -362,21 +360,21 @@ export class Input extends Component<InputProps> {
    * @returns Элемент кнопки переключения
    */
   private createPasswordToggle(): HTMLButtonElement {
-    const button = this.createElement(
-      'button',
-      {
-        type: 'button',
-        className: 'form-field__toggle-password',
-        'aria-label': 'Показать пароль',
-        'data-testid': 'password-toggle'
-      }
-    );
-    
-    // Добавить иконку глаза
-    button.innerHTML = EYE_ICON;
-    
+    const button = this.createElement('button', {
+      type: 'button',
+      className: 'form-field__toggle-password',
+      'aria-label': 'Показать пароль',
+      'data-testid': 'password-toggle',
+    });
+
+    // Безопасно добавляем иконку глаза
+    const eyeSvg = this.createSVGFromString(EYE_ICON);
+    if (eyeSvg) {
+      button.appendChild(eyeSvg);
+    }
+
     this.addEventListener(button, 'click', this.togglePasswordVisibility);
-    
+
     return button;
   }
 
@@ -386,33 +384,42 @@ export class Input extends Component<InputProps> {
    */
   private createErrorElement(): HTMLDivElement {
     const { error, name } = this.props;
-    
+
     const errorElement = this.createElement(
       'div',
-      { 
+      {
         className: 'form-field__error',
         id: `${name}-error`,
         role: 'alert',
-        'aria-live': 'polite'
+        'aria-live': 'polite',
       },
-      []
+      [],
     );
-    
+
     // Добавить иконку ошибки
     const iconSpan = this.createElement('span', {
       className: 'form-field__error-icon',
-      'aria-hidden': 'true'
+      'aria-hidden': 'true',
     });
-    iconSpan.innerHTML = ERROR_ICON;
-    
+
+    // Безопасно создаём SVG иконки ошибки
+    const errorSvg = this.createSVGFromString(ERROR_ICON);
+    if (errorSvg) {
+      iconSpan.appendChild(errorSvg);
+    }
+
     // Добавить текст ошибки
-    const textSpan = this.createElement('span', {
-      className: 'form-field__error-text'
-    }, [error!]);
-    
+    const textSpan = this.createElement(
+      'span',
+      {
+        className: 'form-field__error-text',
+      },
+      [error!],
+    );
+
     errorElement.appendChild(iconSpan);
     errorElement.appendChild(textSpan);
-    
+
     return errorElement;
   }
 
@@ -422,14 +429,14 @@ export class Input extends Component<InputProps> {
    */
   private createHelperElement(): HTMLDivElement {
     const { helperText, name } = this.props;
-    
+
     return this.createElement(
       'div',
-      { 
+      {
         className: 'form-field__helper',
-        id: `${name}-helper`
+        id: `${name}-helper`,
       },
-      [helperText!]
+      [helperText!],
     );
   }
 
@@ -438,9 +445,9 @@ export class Input extends Component<InputProps> {
    * @param event - Событие ввода
    */
   private handleInput = (event: Event): void => {
-    const value = (event.target as HTMLInputElement).value;
+    const { value } = (event.target as HTMLInputElement);
     this.props.value = value;
-    
+
     if (this.props.onChange) {
       this.props.onChange(value);
     }
@@ -451,8 +458,8 @@ export class Input extends Component<InputProps> {
    * @param event - Событие focus
    */
   private handleBlur = (event: Event): void => {
-    const value = (event.target as HTMLInputElement).value;
-    
+    const { value } = (event.target as HTMLInputElement);
+
     if (this.props.onBlur) {
       this.props.onBlur(value);
     }
@@ -474,12 +481,17 @@ export class Input extends Component<InputProps> {
     if (this.inputElement && this.passwordToggle) {
       this.passwordVisible = !this.passwordVisible;
       this.inputElement.type = this.passwordVisible ? 'text' : 'password';
-      
-      // Обновить иконку и aria-label
-      this.passwordToggle.innerHTML = this.passwordVisible ? EYE_OFF_ICON : EYE_ICON;
+
+      // Безопасно обновить иконку
+      this.passwordToggle.innerHTML = ''; // Очищаем
+      const newIcon = this.createSVGFromString(this.passwordVisible ? EYE_OFF_ICON : EYE_ICON);
+      if (newIcon) {
+        this.passwordToggle.appendChild(newIcon);
+      }
+
       this.passwordToggle.setAttribute(
         'aria-label',
-        this.passwordVisible ? 'Скрыть пароль' : 'Показать пароль'
+        this.passwordVisible ? 'Скрыть пароль' : 'Показать пароль',
       );
     }
   };
@@ -501,6 +513,14 @@ export class Input extends Component<InputProps> {
       this.inputElement.value = value;
       this.props.value = value;
     }
+  }
+
+  /**
+   * Получить элемент ввода (HTMLInputElement)
+   * @returns Элемент ввода или null если элемент ещё не создан
+   */
+  public getInputElement(): HTMLInputElement | null {
+    return this.inputElement;
   }
 
   /**
@@ -542,15 +562,15 @@ export class Input extends Component<InputProps> {
   private rebuild(): void {
     // Просто обновляем классы контейнера без перерисовки
     if (!this.element) return;
-    
+
     const { inputState, error } = this.props;
-    
+
     // Обновить классы
     this.element.classList.remove('form-field--error', 'form-field--success');
     if (inputState !== 'default') {
       this.element.classList.add(`form-field--${inputState}`);
     }
-    
+
     // Обновить или добавить сообщение об ошибке
     const existingError = this.element.querySelector('.form-field__error');
     if (inputState === 'error' && error) {
@@ -571,7 +591,7 @@ export class Input extends Component<InputProps> {
     } else if (existingError) {
       existingError.remove();
     }
-    
+
     // Обновить aria-invalid
     if (this.inputElement) {
       this.inputElement.setAttribute('aria-invalid', inputState === 'error' ? 'true' : 'false');
@@ -591,15 +611,15 @@ export class Input extends Component<InputProps> {
    */
   public validate(): boolean {
     if (!this.inputElement) return false;
-    
+
     const isValid = this.inputElement.checkValidity();
-    
+
     if (!isValid) {
       this.setError(this.inputElement.validationMessage);
     } else {
       this.clearError();
     }
-    
+
     return isValid;
   }
 

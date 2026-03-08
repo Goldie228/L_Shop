@@ -22,6 +22,8 @@ export interface Cart {
   items: CartItem[];
   /** Дата обновления */
   updatedAt: string;
+  /** Валюта (BYN) */
+  currency: 'BYN';
 }
 
 /**
@@ -36,6 +38,8 @@ export interface CartItemWithProduct extends CartItem {
   discountPercent?: number;
   /** Итоговая сумма */
   total: number;
+  /** URL изображения продукта */
+  imageUrl?: string;
 }
 
 /**

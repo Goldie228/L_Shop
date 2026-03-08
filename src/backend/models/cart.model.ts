@@ -22,6 +22,8 @@ export interface Cart {
   items: CartItem[];
   /** Дата обновления */
   updatedAt: string;
+  /** Валюта (BYN) */
+  currency: 'BYN';
 }
 
 /**
@@ -30,12 +32,16 @@ export interface Cart {
 export interface CartItemWithProduct extends CartItem {
   /** Название продукта */
   name: string;
-  /** Цена продукта */
+  /** Цена продукта (BYN) */
   price: number;
   /** Процент скидки (Вариант 21) */
   discountPercent?: number;
-  /** Итоговая сумма */
+  /** Итоговая сумма (BYN) */
   total: number;
+  /** Валюта (BYN) */
+  currency: 'BYN';
+  /** URL изображения продукта */
+  imageUrl?: string;
 }
 
 /**
@@ -44,6 +50,6 @@ export interface CartItemWithProduct extends CartItem {
 export interface CartWithProducts extends Cart {
   /** Элементы с данными продуктов */
   items: CartItemWithProduct[];
-  /** Общая сумма */
+  /** Общая сумма (BYN) */
   totalSum: number;
 }

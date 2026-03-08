@@ -12,15 +12,33 @@ const logger = createContextLogger('UserService');
 const USERS_FILE = 'users.json';
 
 export class UserService {
+  /**
+   * Получить всех пользователей из файловой базы
+   * @returns Массив всех пользователей
+   * @throws {Error} При ошибке чтения файла
+   */
   async getAllUsers(): Promise<User[]> {
     return readJsonFile<User>(USERS_FILE);
   }
 
+  /**
+   * Найти пользователя по ID
+   * @param id - ID пользователя
+   * @returns Пользователь или null если не найден
+   * @throws {Error} При ошибке чтения файла
+   */
   async getUserById(id: string): Promise<User | null> {
     const users = await this.getAllUsers();
     return users.find((u) => u.id === id) || null;
   }
 
+  /**
+   * Найти пользователя по email или логину (для проверки уникальности)
+   * @param email - Email для поиска
+   * @param login - Логин для поиска
+   * @returns Пользователь или null если не найден
+   * @throws {Error} При ошибке чтения файла
+   */
   async findByEmailOrLogin(email: string, login: string): Promise<User | null> {
     const users = await this.getAllUsers();
     return users.find((u) => u.email === email || u.login === login) || null;
@@ -28,18 +46,28 @@ export class UserService {
 
   /**
    * Поиск пользователя по логину или email для аутентификации
+   * @param loginOrEmail - Логин или email пользователя
+   * @returns Пользователь или null если не найден
    */
   async findByLoginOrEmail(loginOrEmail: string): Promise<User | null> {
     const users = await this.getAllUsers();
     return users.find((u) => u.login === loginOrEmail || u.email === loginOrEmail) || null;
   }
 
+  /**
+   * Создать нового пользователя
+   * @param data - Данные пользователя (имя, email, логин, телефон, пароль, опционально firstName, role)
+   * @returns Созданный пользователь с хешированным паролем
+   * @throws {Error} При ошибке записи файла или если email/login уже существуют
+   */
   async createUser(data: {
     name: string;
     email: string;
     login: string;
     phone: string;
     password: string;
+    /** Имя (отдельное поле) */
+    firstName?: string; // Опционально, по умолчанию берётся из name
     role?: string; // Опционально, по умолчанию 'user'
   }): Promise<User> {
     const now = new Date().toISOString();
@@ -50,6 +78,8 @@ export class UserService {
     const newUser: User = {
       id: generateId(),
       name: data.name.trim(),
+      /** Имя (отдельное поле) */
+      firstName: data.firstName?.trim() ?? data.name.trim(),
       email: data.email.toLowerCase().trim(),
       login: data.login.trim(),
       phone: data.phone.trim(),
@@ -69,6 +99,13 @@ export class UserService {
     return newUser;
   }
 
+  /**
+   * Обновить данные пользователя (кроме пароля)
+   * @param id - ID пользователя
+   * @param data - Частичные данные пользователя (имя, email, логин, телефон, роль)
+   * @returns Обновлённый пользователь или null если не найден
+   * @throws {Error} При ошибке записи файла
+   */
   async updateUser(
     id: string,
     data: Partial<Omit<User, 'id' | 'createdAt'>>,
@@ -107,8 +144,9 @@ export class UserService {
   /**
    * Обновить роль пользователя (только для администраторов)
    * @param userId - ID пользователя
-   * @param role - Новая роль
-   * @returns Обновлённый пользователь или null
+   * @param role - Новая роль ('user' или 'admin')
+   * @returns Обновлённый пользователь или null если не найден
+   * @throws {Error} При ошибке записи файла
    */
   async updateUserRole(userId: string, role: string): Promise<User | null> {
     let updatedUser: User | null = null;
@@ -142,7 +180,8 @@ export class UserService {
   /**
    * Переключить статус блокировки пользователя
    * @param userId - ID пользователя
-   * @returns Обновлённый пользователь или null
+   * @returns Обновлённый пользователь или null если не найден
+   * @throws {Error} При ошибке записи файла
    */
   async toggleUserBlock(userId: string): Promise<User | null> {
     let updatedUser: User | null = null;
@@ -181,7 +220,8 @@ export class UserService {
    * @param userId - ID пользователя
    * @param name - Новое имя
    * @param email - Новый email
-   * @returns Обновлённый пользователь или null
+   * @returns Обновлённый пользователь или null если не найден
+   * @throws {Error} Если email уже используется другим пользователем
    */
   async updateProfile(userId: string, name: string, email: string): Promise<User | null> {
     let updatedUser: User | null = null;
@@ -228,7 +268,8 @@ export class UserService {
    * Обновить пароль пользователя
    * @param userId - ID пользователя
    * @param newPassword - Новый пароль (уже хешированный)
-   * @returns Обновлённый пользователь или null
+   * @returns Обновлённый пользователь или null если не найден
+   * @throws {Error} При ошибке записи файла
    */
   async updatePassword(userId: string, newPassword: string): Promise<User | null> {
     let updatedUser: User | null = null;

@@ -6,7 +6,7 @@
  * @see docs/DESIGN_SYSTEM.md - документация дизайн-системы
  */
 
-/* ====== Базовая кнопка ====== */
+/* Базовая кнопка */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -48,7 +48,7 @@
   pointer-events: none;
 }
 
-/* ====== Button Variants ====== */
+/* Button Variants */
 
 /* Основная кнопка */
 .btn--primary {
@@ -158,7 +158,7 @@
   box-shadow: var(--shadow-focus);
 }
 
-/* ====== Button Sizes ====== */
+/* Button Sizes */
 
 /* Маленькая */
 .btn--sm {
@@ -180,7 +180,7 @@
   border-radius: var(--radius-lg);
 }
 
-/* ====== Button States ====== */
+/* Button States */
 
 /* Состояние загрузки */
 .btn--loading {
@@ -230,7 +230,7 @@
   padding: var(--spacing-4);
 }
 
-/* ====== Button Groups ====== */
+/* Button Groups */
 .btn-group {
   display: inline-flex;
   gap: var(--spacing-2);
@@ -248,7 +248,7 @@
   flex: 1;
 }
 
-/* ====== Responsive ====== */
+/* Responsive */
 @media (max-width: 480px) {
   .btn {
     min-height: 44px; /* Размер области касания */
@@ -268,7 +268,7 @@
   }
 }
 
-/* ====== Dark Theme ====== */
+/* Dark Theme */
 :root.dark-theme .btn {
   box-shadow: var(--shadow-dark-2);
 }
@@ -362,4 +362,62 @@
 :root.dark-theme .btn--primary.btn--loading::after {
   border-color: var(--color-text-inverse);
   border-top-color: transparent;
+}
+
+/* Button Content Elements */
+
+/* Текст кнопки */
+.btn__text {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Иконки */
+.btn__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1em;
+  height: 1em;
+}
+
+.btn__icon--left {
+  margin-right: var(--spacing-1);
+}
+
+.btn__icon--right {
+  margin-left: var(--spacing-1);
+}
+
+/* Обёртка спиннера загрузки */
+.btn__spinner-wrapper {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn__spinner {
+  width: 1em;
+  height: 1em;
+}
+
+/* Accessibility: Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .btn {
+    transition: none;
+  }
+
+  .btn:hover:not(:disabled) {
+    transform: none;
+  }
+
+  .btn:active:not(:disabled) {
+    transform: none;
+  }
+
+  .btn--loading::after {
+    animation: none;
+  }
 }

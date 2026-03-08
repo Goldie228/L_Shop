@@ -1,7 +1,7 @@
 /**
  * Компонент Modal - L_Shop Frontend
  * Переиспользуемое модальное окно с анимациями и accessibility
- * 
+ *
  * @see src/frontend/styles/components/modal.css - стили модального окна
  * @see docs/DESIGN_SYSTEM.md - документация дизайн-системы
  */
@@ -11,7 +11,12 @@ import { Component, ComponentProps } from '../base/Component.js';
 /**
  * Типы размеров модального окна
  */
-export type ModalSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
+export type ModalSize = 'small' | 'medium' | 'large' | 'fullscreen';
+
+/**
+ * Типы состояний модального окна
+ */
+export type ModalState = 'open' | 'closing' | 'closed';
 
 /**
  * Типы анимаций модального окна
@@ -24,16 +29,16 @@ export type ModalAnimation = 'scale' | 'slide-up' | 'fade' | 'none';
 export interface ModalProps extends ComponentProps {
   /** Заголовок модального окна */
   title?: string;
+  /** SVG иконка для заголовка (inline SVG строка) */
+  icon?: string;
   /** Размер модального окна */
   size?: ModalSize;
   /** Тип анимации */
   animation?: ModalAnimation;
-  /** Открыто ли модальное окно */
-  isOpen?: boolean;
+  /** Закрыть по клику на overlay */
+  closeOnOverlayClick?: boolean;
   /** Показать кнопку закрытия */
-  showClose?: boolean;
-  /** Закрыть по клику на фон */
-  closeOnBackdrop?: boolean;
+  showCloseButton?: boolean;
   /** Закрыть по клавише Escape */
   closeOnEscape?: boolean;
   /** Кастомный класс модального окна */
@@ -47,10 +52,12 @@ export interface ModalProps extends ComponentProps {
 }
 
 /**
- * SVG иконка закрытия
+ * SVG иконка закрытия по умолчанию
  */
-const CLOSE_ICON = `
-  <svg class="modal__close-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+const DEFAULT_CLOSE_ICON = `
+  <svg class="modal__close-icon" viewBox="0 0 24 24"
+       fill="none" stroke="currentColor" stroke-width="2"
+       stroke-linecap="round" stroke-linejoin="round">
     <line x1="18" y1="6" x2="6" y2="18"></line>
     <line x1="6" y1="6" x2="18" y2="18"></line>
   </svg>
@@ -58,45 +65,56 @@ const CLOSE_ICON = `
 
 /**
  * Класс компонента модального окна
- * 
+ *
+ * Поддерживает:
+ * - Различные размеры (small, medium, large, fullscreen)
+ * - Анимации появления (scale, slide-up, fade, none)
+ * - Focus trap и доступность (a11y)
+ * - Закрытие по Escape и клику на overlay
+ * - Блокировку скролла body
+ * - Вложенные модалки (stacking context)
+ *
  * @example
  * ```typescript
  * // Создание модального окна
  * const modal = new Modal({
  *   title: 'Подтверждение',
- *   size: 'md',
+ *   size: 'medium',
  *   animation: 'scale',
  *   onClose: () => console.log('Modal closed')
  * });
- * 
+ *
  * // Добавление содержимого
- * modal.setContent('<p>Вы уверены?</p>');
- * 
+ * modal.setContent(document.createElement('div'));
+ *
  * // Открытие
  * modal.open();
  * ```
  */
 export class Modal extends Component<ModalProps> {
-  /** Элемент фона */
+  /** Элемент фона (overlay) */
   private backdrop: HTMLDivElement | null = null;
-  
+
   /** Элемент содержимого модального окна */
   private modalElement: HTMLDivElement | null = null;
-  
-  /** Ранее сфокусированный элемент */
-  private previousFocus: HTMLElement | null = null;
-  
+
+  /** Элемент, который открыл модалку (для возврата фокуса) */
+  private triggerElement: HTMLElement | null = null;
+
   /** Элементы для focus trap */
   private focusableElements: HTMLElement[] = [];
-  
+
   /** Первый фокусируемый элемент */
   private firstFocusable: HTMLElement | null = null;
-  
+
   /** Последний фокусируемый элемент */
   private lastFocusable: HTMLElement | null = null;
-  
+
   /** Уникальный ID для aria-labelledby */
   private titleId: string;
+
+  /** Текущее состояние модалки */
+  private state: ModalState = 'closed';
 
   /**
    * Получить пропсы по умолчанию
@@ -104,51 +122,50 @@ export class Modal extends Component<ModalProps> {
   protected getDefaultProps(): ModalProps {
     return {
       ...super.getDefaultProps(),
-      size: 'md',
+      size: 'medium',
       animation: 'scale',
-      isOpen: false,
-      showClose: true,
-      closeOnBackdrop: true,
+      closeOnOverlayClick: true,
+      showCloseButton: true,
       closeOnEscape: true,
     };
   }
 
   /**
    * Создать экземпляр модального окна
+   * @param props - Пропсы компонента
    */
-  constructor(props: ModalProps) {
+  constructor(props: Partial<ModalProps>) {
     super(props);
-    // Генерируем уникальный ID для заголовка
     this.titleId = `modal-title-${Math.random().toString(36).substr(2, 9)}`;
   }
 
   /**
    * Отрендерить модальное окно
-   * @returns Элемент фона
+   * @returns Элемент фона (overlay)
    */
   public render(): HTMLDivElement {
-    const { testId, isOpen } = this.props;
-    
-    // Создать фон
+    const { testId } = this.props;
+
+    // Создать overlay
     this.backdrop = this.createElement('div', {
-      className: `modal-backdrop${isOpen ? ' modal-backdrop--visible' : ''}`,
-      'aria-hidden': !isOpen,
+      className: 'modal-backdrop',
+      'aria-hidden': 'true',
       'data-testid': testId ? `${testId}-backdrop` : 'modal-backdrop',
     });
-    
+
     // Создать модальное окно
     this.modalElement = this.createModal();
     this.backdrop.appendChild(this.modalElement);
-    
+
     // Добавить слушатели событий
-    if (this.props.closeOnBackdrop) {
+    if (this.props.closeOnOverlayClick) {
       this.addEventListener(this.backdrop, 'click', this.handleBackdropClick);
     }
-    
+
     if (this.props.closeOnEscape) {
       document.addEventListener('keydown', this.handleKeyDown);
     }
-    
+
     this.element = this.backdrop;
     return this.backdrop;
   }
@@ -158,56 +175,56 @@ export class Modal extends Component<ModalProps> {
    * @returns Элемент модального окна
    */
   private createModal(): HTMLDivElement {
-    const { size, modalClass, isOpen, title, animation, testId } = this.props;
-    
-    // Построить классы модального окна
+    const {
+      size, modalClass, title, animation, testId, showCloseButton,
+    } = this.props;
+    // Построить классы
     const classes = ['modal', `modal--${size}`];
-    
+
     // Добавить класс анимации
     if (animation !== 'none') {
       classes.push(`modal--animate-${animation}`);
     }
-    
+
     if (modalClass) classes.push(modalClass);
-    if (isOpen) classes.push('modal--visible');
-    
-    // Создать атрибуты
+
     const attrs: Record<string, string | boolean> = {
       className: classes.join(' '),
       role: 'dialog',
       'aria-modal': 'true',
       'data-testid': testId ?? 'modal',
     };
-    
+
+    // Добавить aria-labelledby только если есть заголовок
     if (title) {
       attrs['aria-labelledby'] = this.titleId;
     }
-    
+
     const modal = this.createElement('div', attrs);
-    
+
     // Предотвратить всплытие клика
     this.addEventListener(modal, 'click', (e) => e.stopPropagation());
-    
+
     // Добавить заголовок
-    if (title || this.props.showClose) {
+    if (title || showCloseButton) {
       const header = this.createHeader();
       modal.appendChild(header);
     }
-    
+
     // Добавить слот для тела
-    const body = this.createElement('div', { 
+    const body = this.createElement('div', {
       className: 'modal__body',
       'data-testid': 'modal-body',
     });
     modal.appendChild(body);
-    
+
     // Добавить слот для футера (опционально)
-    const footer = this.createElement('div', { 
+    const footer = this.createElement('div', {
       className: 'modal__footer',
       'data-testid': 'modal-footer',
     });
     modal.appendChild(footer);
-    
+
     return modal;
   }
 
@@ -216,13 +233,33 @@ export class Modal extends Component<ModalProps> {
    * @returns Элемент заголовка
    */
   private createHeader(): HTMLDivElement {
-    const { title, showClose } = this.props;
-    
-    const header = this.createElement('div', { 
+    const { title, showCloseButton, icon } = this.props;
+
+    const header = this.createElement('div', {
       className: 'modal__header',
       'data-testid': 'modal-header',
     });
-    
+
+    // Контейнер для иконки и заголовка
+    const titleContainer = this.createElement('div', {
+      className: 'modal__title-container',
+    });
+
+    // Добавить иконку безопасным способом
+    if (icon) {
+      const iconElement = this.createElement('div', {
+        className: 'modal__icon',
+      });
+
+      // Парсим и sanitizуем SVG строку
+      const svg = this.createSVGFromString(icon);
+      if (svg) {
+        iconElement.appendChild(svg);
+      }
+
+      titleContainer.appendChild(iconElement);
+    }
+
     // Добавить заголовок
     if (title) {
       const titleElement = this.createElement(
@@ -231,17 +268,19 @@ export class Modal extends Component<ModalProps> {
           className: 'modal__title',
           id: this.titleId,
         },
-        [title]
+        [title],
       );
-      header.appendChild(titleElement);
+      titleContainer.appendChild(titleElement);
     }
-    
+
+    header.appendChild(titleContainer);
+
     // Добавить кнопку закрытия
-    if (showClose) {
+    if (showCloseButton) {
       const closeButton = this.createCloseButton();
       header.appendChild(closeButton);
     }
-    
+
     return header;
   }
 
@@ -250,73 +289,74 @@ export class Modal extends Component<ModalProps> {
    * @returns Элемент кнопки закрытия
    */
   private createCloseButton(): HTMLButtonElement {
-    const button = this.createElement(
-      'button',
-      {
-        type: 'button',
-        className: 'modal__close',
-        'aria-label': 'Закрыть модальное окно',
-        'data-testid': 'modal-close',
-      }
-    );
-    
-    // Добавить иконку закрытия
-    button.innerHTML = CLOSE_ICON;
-    
-    this.addEventListener(button, 'click', this.close);
-    
+    const button = this.createElement('button', {
+      className: 'modal__close',
+      type: 'button',
+      'aria-label': 'Закрыть модальное окно',
+    }) as HTMLButtonElement;
+
+    // Безопасно вставить SVG иконку
+    const iconSvg = this.props.icon || DEFAULT_CLOSE_ICON;
+    const svg = this.createSVGFromString(iconSvg);
+    if (svg) {
+      button.appendChild(svg);
+    }
+
+    this.addEventListener(button, 'click', this.handleClose);
     return button;
   }
 
   /**
-   * Обработать клик на фон
-   * @param event - Событие клика
+   * Обработчик клика по backdrop
    */
-  private handleBackdropClick = (event: MouseEvent): void => {
-    if (event.target === this.backdrop) {
+  private handleBackdropClick = (): void => {
+    if (this.props.closeOnOverlayClick && this.state === 'open') {
       this.close();
     }
   };
 
   /**
-   * Обработать нажатие клавиши
-   * @param event - Событие клавиатуры
+   * Обработчик закрытия (по клику на кнопку)
+   */
+  private handleClose = (): void => {
+    this.close();
+  };
+
+  /**
+   * Обработчик нажатия клавиш
    */
   private handleKeyDown = (event: KeyboardEvent): void => {
-    if (event.key === 'Escape' && this.props.isOpen) {
+    if (this.state !== 'open') return;
+
+    if (event.key === 'Escape' && this.props.closeOnEscape) {
       this.close();
     }
-    
-    // Focus trap - Tab
-    if (event.key === 'Tab' && this.props.isOpen) {
+
+    // Focus trap
+    if (event.key === 'Tab' && this.modalElement) {
       this.handleTabKey(event);
     }
   };
 
   /**
-   * Обработать клавишу Tab для focus trap
-   * @param event - Событие клавиатуры
+   * Обработчик клавиши Tab для focus trap
    */
   private handleTabKey(event: KeyboardEvent): void {
     if (!this.modalElement) return;
-    
-    // Обновляем список фокусируемых элементов
+
+    // Найти все фокусируемые элементы
     this.updateFocusableElements();
-    
+
     if (this.focusableElements.length === 0) return;
-    
-    if (event.shiftKey) {
-      // Shift + Tab
-      if (document.activeElement === this.firstFocusable) {
-        event.preventDefault();
-        this.lastFocusable?.focus();
-      }
-    } else {
-      // Tab
-      if (document.activeElement === this.lastFocusable) {
-        event.preventDefault();
-        this.firstFocusable?.focus();
-      }
+
+    const isShiftPressed = event.shiftKey;
+
+    if (isShiftPressed && document.activeElement === this.firstFocusable) {
+      event.preventDefault();
+      this.lastFocusable?.focus();
+    } else if (!isShiftPressed && document.activeElement === this.lastFocusable) {
+      event.preventDefault();
+      this.firstFocusable?.focus();
     }
   }
 
@@ -325,208 +365,189 @@ export class Modal extends Component<ModalProps> {
    */
   private updateFocusableElements(): void {
     if (!this.modalElement) return;
-    
+
+    const focusableSelectors = [
+      'button:not([disabled])',
+      'input:not([disabled])',
+      'select:not([disabled])',
+      'textarea:not([disabled])',
+      'a[href]',
+      '[tabindex]:not([tabindex="-1"])',
+    ];
+
     this.focusableElements = Array.from(
-      this.modalElement.querySelectorAll<HTMLElement>(
-        'button:not([disabled]), [href], input:not([disabled]), ' +
-        'select:not([disabled]), textarea:not([disabled]), ' +
-        '[tabindex]:not([tabindex="-1"]):not([disabled])'
-      )
-    );
-    
-    this.firstFocusable = this.focusableElements[0] || null;
-    this.lastFocusable = this.focusableElements[this.focusableElements.length - 1] || null;
+      this.modalElement.querySelectorAll<HTMLElement>(focusableSelectors.join(', ')),
+    ).filter((el) => {
+      const style = window.getComputedStyle(el);
+      return style.display !== 'none' && style.visibility !== 'hidden';
+    });
+
+    if (this.focusableElements.length > 0) {
+      const [first, ...rest] = this.focusableElements;
+      this.firstFocusable = first;
+      this.lastFocusable = rest.length > 0 ? rest[rest.length - 1] : first;
+    }
   }
 
   /**
    * Открыть модальное окно
    */
   public open(): void {
-    if (this.backdrop && this.modalElement) {
-      // Сохранить текущий фокус
-      this.previousFocus = document.activeElement as HTMLElement;
-      
-      // Показать модальное окно с анимацией
-      // Сначала показываем backdrop
-      this.backdrop.classList.add('modal-backdrop--visible');
-      
-      // Затем с небольшой задержкой показываем модальное окно
-      // Это создаёт плавную анимацию
-      requestAnimationFrame(() => {
-        this.modalElement?.classList.add('modal--visible');
-      });
-      
-      this.backdrop.setAttribute('aria-hidden', 'false');
-      
-      // Заблокировать прокрутку страницы
-      document.body.classList.add('modal-open');
-      
-      // Сфокусировать первый фокусируемый элемент после анимации
-      setTimeout(() => {
-        this.updateFocusableElements();
-        this.focusFirst();
-      }, 150);
-      
-      this.props.isOpen = true;
-      
-      // Вызвать обработчик открытия
-      if (this.props.onOpen) {
-        this.props.onOpen();
-      }
+    if (this.state === 'open') return;
+
+    // Сохранить элемент, который открыл модалку
+    this.triggerElement = document.activeElement as HTMLElement;
+
+    // Монтировать если ещё не смонтировано
+    if (!this.element || !this.modalElement) {
+      this.render();
     }
+
+    // Добавить в DOM если не добавлен
+    if (this.element && !this.element.parentNode) {
+      document.body.appendChild(this.element);
+    }
+
+    // Заблокировать скролл body
+    document.body.classList.add('modal-open');
+
+    // Показать overlay
+    if (this.backdrop) {
+      this.backdrop.setAttribute('aria-hidden', 'false');
+    }
+
+    // Показать модалку с анимацией
+    this.state = 'open';
+    if (this.modalElement) {
+      this.modalElement.classList.add('modal--visible');
+    }
+
+    // Вызвать onOpen колбэк
+    this.props.onOpen?.();
+
+    // Установить фокус на первый элемент
+    setTimeout(() => {
+      this.updateFocusableElements();
+      this.firstFocusable?.focus();
+    }, 50);
   }
 
   /**
    * Закрыть модальное окно
    */
-  public close = (): void => {
-    if (this.backdrop && this.modalElement) {
-      // Сначала скрываем модальное окно
+  public close(): void {
+    if (this.state !== 'open') return;
+
+    this.state = 'closing';
+
+    // Убрать класс видимости для запуска анимации
+    if (this.modalElement) {
       this.modalElement.classList.remove('modal--visible');
-      
-      // Затем с задержкой скрываем backdrop
-      setTimeout(() => {
-        this.backdrop?.classList.remove('modal-backdrop--visible');
-        this.backdrop?.setAttribute('aria-hidden', 'true');
-      }, 150);
-      
-      // Разблокировать прокрутку страницы
-      document.body.classList.remove('modal-open');
-      
-      // Восстановить фокус
-      if (this.previousFocus) {
-        this.previousFocus.focus();
-      }
-      
-      this.props.isOpen = false;
-      
-      // Вызвать обработчик закрытия
-      if (this.props.onClose) {
-        this.props.onClose();
-      }
     }
-  };
+
+    // Ждём завершения анимации (300ms)
+    setTimeout(() => {
+      this.finishClose();
+    }, 300);
+  }
 
   /**
-   * Сфокусировать первый фокусируемый элемент
+   * Завершить закрытие и очистить DOM
    */
-  private focusFirst(): void {
-    if (this.firstFocusable) {
-      this.firstFocusable.focus();
-    } else if (this.modalElement) {
-      // Если нет фокусируемых элементов, фокусируем само модальное окно
-      this.modalElement.setAttribute('tabindex', '-1');
-      this.modalElement.focus();
+  private finishClose(): void {
+    // Удалить из DOM
+    if (this.element && this.element.parentNode) {
+      this.element.parentNode.removeChild(this.element);
     }
+
+    // Разблокировать скролл
+    document.body.classList.remove('modal-open');
+
+    // Удалить обработчик клавиатуры
+    document.removeEventListener('keydown', this.handleKeyDown);
+
+    // Сбросить состояние
+    this.state = 'closed';
+    this.backdrop = null;
+    this.modalElement = null;
+
+    // Вернуть фокус к триггеру
+    if (this.triggerElement) {
+      this.triggerElement.focus();
+      this.triggerElement = null;
+    }
+
+    // Вызвать onClose колбэк
+    this.props.onClose?.();
+  }
+
+  /**
+   * Полная очистка компонента
+   */
+  public destroy(): void {
+    // Убрать слушатели событий
+    if (this.props.closeOnEscape) {
+      document.removeEventListener('keydown', this.handleKeyDown);
+    }
+
+    // Завершить закрытие если открыто
+    if (this.state === 'open' || this.state === 'closing') {
+      this.state = 'closed';
+      if (this.element && this.element.parentNode) {
+        this.element.parentNode.removeChild(this.element);
+      }
+      document.body.classList.remove('modal-open');
+    }
+
+    // Вызвать unmount базового класса
+    super.unmount();
   }
 
   /**
    * Установить содержимое модального окна
-   * @param content - Элемент содержимого или строка
+   * @param content - HTMLElement для вставки в body модалки
    */
-  public setContent(content: Element | string): void {
-    if (!this.modalElement) return;
-    
+  public setContent(content: HTMLElement): void {
+    if (!this.modalElement) {
+      throw new Error('Modal не смонтирован. Сначала вызовите render() или open()');
+    }
+
+    // Найти body контейнер
     const body = this.modalElement.querySelector('.modal__body');
     if (body) {
-      body.innerHTML = '';
-      
-      if (typeof content === 'string') {
-        body.innerHTML = content;
-      } else {
-        body.appendChild(content);
+      // Очистить предыдущее содержимое безопасным способом
+      while (body.firstChild) {
+        body.removeChild(body.firstChild);
       }
-      
-      // Обновляем список фокусируемых элементов
-      this.updateFocusableElements();
+      body.appendChild(content);
     }
   }
 
   /**
-   * Установить футер модального окна
-   * @param content - Содержимое футера
+   * Получить текущее состояние
+   * @returns Текущее состояние модалки
    */
-  public setFooter(content: Element | string): void {
-    if (!this.modalElement) return;
-    
-    const footer = this.modalElement.querySelector('.modal__footer');
-    if (footer) {
-      footer.innerHTML = '';
-      
-      if (typeof content === 'string') {
-        footer.innerHTML = content;
-      } else {
-        footer.appendChild(content);
-      }
-      
-      // Обновляем список фокусируемых элементов
-      this.updateFocusableElements();
-    }
+  public getState(): ModalState {
+    return this.state;
   }
 
   /**
-   * Получить элемент тела модального окна
-   * @returns Элемент тела
+   * Проверить, открыта ли модалка
+   * @returns true если модалка открыта
    */
-  public getBody(): HTMLDivElement | null {
-    return this.modalElement?.querySelector('.modal__body') || null;
+  public isOpen(): boolean {
+    return this.state === 'open';
   }
 
   /**
-   * Получить элемент футера модального окна
-   * @returns Элемент футера
-   */
-  public getFooter(): HTMLDivElement | null {
-    return this.modalElement?.querySelector('.modal__footer') || null;
-  }
-
-  /**
-   * Переключить видимость модального окна
+   * Переключить состояние модального окна
+   * Если открыто - закрывает, если закрыто - открывает
    */
   public toggle(): void {
-    if (this.props.isOpen) {
+    if (this.state === 'open') {
       this.close();
     } else {
       this.open();
     }
   }
-
-  /**
-   * Проверить, открыто ли модальное окно
-   * @returns Открыто ли модальное окно
-   */
-  public isOpen(): boolean {
-    return this.props.isOpen || false;
-  }
-
-  /**
-   * Установить заголовок модального окна
-   * @param title - Новый заголовок
-   */
-  public setTitle(title: string): void {
-    if (!this.modalElement) return;
-    
-    const titleElement = this.modalElement.querySelector('.modal__title');
-    if (titleElement) {
-      titleElement.textContent = title;
-    }
-  }
-
-  /**
-   * Очистка при отмонтировании
-   */
-  protected onUnmount(): void {
-    document.removeEventListener('keydown', this.handleKeyDown);
-    document.body.classList.remove('modal-open');
-  }
-}
-
-/**
- * Фабрика создания элемента модального окна
- * @param props - Пропсы модального окна
- * @returns Элемент фона модального окна
- */
-export function createModal(props: ModalProps): HTMLDivElement {
-  const modal = new Modal(props);
-  return modal.render();
 }

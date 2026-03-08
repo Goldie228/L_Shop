@@ -1,7 +1,7 @@
 /**
  * Компонент модального окна аутентификации - Фронтенд L_Shop
  * Модальное окно с формами входа/регистрации и анимированным переключением вкладок
- * 
+ *
  * @see src/frontend/styles/components/modal.css - стили модального окна
  * @see src/frontend/styles/components/forms.css - стили форм
  * @see docs/DESIGN_SYSTEM.md - документация дизайн-системы
@@ -31,17 +31,17 @@ export interface AuthModalProps extends ComponentProps {
 /**
  * Компонент модального окна аутентификации
  * Содержит формы входа и регистрации с анимированным переключением вкладок
- * 
+ *
  * @example
  * ```typescript
  * const authModal = new AuthModal({
  *   initialMode: 'login',
  *   onAuth: () => console.log('Пользователь аутентифицирован')
  * });
- * 
+ *
  * // Открыть модальное окно
  * authModal.open();
- * 
+ *
  * // Переключиться на регистрацию
  * authModal.setMode('register');
  * ```
@@ -49,24 +49,24 @@ export interface AuthModalProps extends ComponentProps {
 export class AuthModal extends Component<AuthModalProps> {
   /** Экземпляр модального окна */
   private modal: Modal | null = null;
-  
+
   /** Текущий режим */
   private mode: AuthMode;
-  
+
   /** Форма входа */
   private loginForm: LoginForm | null = null;
-  
+
   /** Форма регистрации */
   private registerForm: RegisterForm | null = null;
-  
+
   /** Кнопки вкладок */
   private tabButtons: Map<string, HTMLButtonElement> = new Map();
-  
+
   /** Элемент-контейнер формы */
   private formContainer: HTMLDivElement | null = null;
-  
+
   /** Идёт ли анимация в данный момент */
-  private isAnimating: boolean = false;
+  private isAnimating = false;
 
   /**
    * Создать модальное окно аутентификации
@@ -93,21 +93,21 @@ export class AuthModal extends Component<AuthModalProps> {
   public render(): HTMLDivElement {
     // Создать модальное окно
     this.modal = new Modal({
-      size: 'sm',
+      size: 'small',
       modalClass: 'modal--auth',
-      showClose: true,
-      closeOnBackdrop: true,
+      showCloseButton: true,
+      closeOnOverlayClick: true,
       closeOnEscape: true,
       testId: 'auth-modal',
       onClose: () => this.handleClose(),
     });
-    
+
     const modalElement = this.modal.render();
-    
+
     // Создать контент
     const content = this.createContent();
     this.modal.setContent(content);
-    
+
     this.element = modalElement;
     return modalElement;
   }
@@ -120,37 +120,37 @@ export class AuthModal extends Component<AuthModalProps> {
     const container = this.createElement('div', {
       className: 'auth-modal',
     });
-    
+
     // Создать вкладки
     const tabs = this.createTabs();
     container.appendChild(tabs);
-    
+
     // Создать контейнер формы с анимационной обёрткой
     this.formContainer = this.createElement('div', {
       className: 'auth-modal__form-container',
       'data-testid': 'auth-form-container',
     });
-    
+
     // Создать формы
     this.loginForm = new LoginForm({
       onSuccess: () => this.handleAuthSuccess(),
       onSwitchToRegister: () => this.switchToRegister(),
     });
-    
+
     this.registerForm = new RegisterForm({
       onSuccess: () => this.handleAuthSuccess(),
       onSwitchToLogin: () => this.switchToLogin(),
     });
-    
+
     // Показать начальную форму
     if (this.mode === 'login') {
       this.formContainer.appendChild(this.loginForm.render());
     } else {
       this.formContainer.appendChild(this.registerForm.render());
     }
-    
+
     container.appendChild(this.formContainer);
-    
+
     return container;
   }
 
@@ -164,7 +164,7 @@ export class AuthModal extends Component<AuthModalProps> {
       role: 'tablist',
       'aria-label': 'Выбор формы авторизации',
     });
-    
+
     // Вкладка входа
     const loginTab = this.createElement(
       'button',
@@ -176,12 +176,12 @@ export class AuthModal extends Component<AuthModalProps> {
         'aria-controls': 'login-panel',
         'data-testid': 'tab-login',
       },
-      ['Вход']
+      ['Вход'],
     );
     this.addEventListener(loginTab, 'click', () => this.switchToLogin());
     this.tabButtons.set('login', loginTab);
     tabs.appendChild(loginTab);
-    
+
     // Вкладка регистрации
     const registerTab = this.createElement(
       'button',
@@ -193,23 +193,23 @@ export class AuthModal extends Component<AuthModalProps> {
         'aria-controls': 'register-panel',
         'data-testid': 'tab-register',
       },
-      ['Регистрация']
+      ['Регистрация'],
     );
     this.addEventListener(registerTab, 'click', () => this.switchToRegister());
     this.tabButtons.set('register', registerTab);
     tabs.appendChild(registerTab);
-    
+
     // Индикатор вкладки (анимированное подчёркивание)
     const indicator = this.createElement('div', {
       className: 'auth-form__tab-indicator',
     });
     tabs.appendChild(indicator);
-    
+
     // Установить начальную позицию индикатора
     requestAnimationFrame(() => {
       this.updateTabIndicator(false);
     });
-    
+
     return tabs;
   }
 
@@ -217,21 +217,23 @@ export class AuthModal extends Component<AuthModalProps> {
    * Обновить позицию индикатора вкладки
    * @param animate - Нужно ли анимировать переход
    */
-  private updateTabIndicator(animate: boolean = true): void {
-    const indicator = this.element?.querySelector('.auth-form__tab-indicator') as HTMLElement | null;
+  private updateTabIndicator(animate = true): void {
+    const indicator = this.element?.querySelector(
+      '.auth-form__tab-indicator',
+    ) as HTMLElement | null;
     const activeTab = this.tabButtons.get(this.mode);
-    
+
     if (indicator && activeTab) {
       const tabRect = activeTab.getBoundingClientRect();
       const tabsRect = activeTab.parentElement?.getBoundingClientRect();
-      
+
       if (tabsRect) {
         const left = activeTab.offsetLeft;
-        const width = tabRect.width;
-        
+        const { width } = tabRect;
+
         indicator.style.setProperty('--indicator-left', `${left}px`);
         indicator.style.setProperty('--indicator-width', `${width}px`);
-        
+
         if (!animate) {
           indicator.classList.add('auth-form__tab-indicator--no-transition');
           requestAnimationFrame(() => {
@@ -247,7 +249,7 @@ export class AuthModal extends Component<AuthModalProps> {
    */
   private switchToLogin(): void {
     if (this.mode === 'login' || this.isAnimating) return;
-    
+
     this.mode = 'login';
     this.updateTabs();
     this.animateFormSwitch('login');
@@ -258,7 +260,7 @@ export class AuthModal extends Component<AuthModalProps> {
    */
   private switchToRegister(): void {
     if (this.mode === 'register' || this.isAnimating) return;
-    
+
     this.mode = 'register';
     this.updateTabs();
     this.animateFormSwitch('register');
@@ -273,7 +275,7 @@ export class AuthModal extends Component<AuthModalProps> {
       button.classList.toggle('auth-form__tab--active', isActive);
       button.setAttribute('aria-selected', String(isActive));
     });
-    
+
     // Обновить позицию индикатора
     this.updateTabIndicator();
   }
@@ -285,21 +287,21 @@ export class AuthModal extends Component<AuthModalProps> {
   private animateFormSwitch(newMode: AuthMode): void {
     const container = this.formContainer;
     if (!container) return;
-    
+
     this.isAnimating = true;
-    
+
     // Добавить класс анимации выхода
     container.classList.add('auth-modal__form-container--exit');
-    
+
     // Ждать завершения анимации выхода
     setTimeout(() => {
       // Очистить контейнер
       container.innerHTML = '';
-      
+
       // Добавить класс анимации входа
       container.classList.remove('auth-modal__form-container--exit');
       container.classList.add('auth-modal__form-container--enter');
-      
+
       // Добавить соответствующую форму
       if (newMode === 'login' && this.loginForm) {
         const formElement = this.loginForm.getElement() || this.loginForm.render();
@@ -314,7 +316,7 @@ export class AuthModal extends Component<AuthModalProps> {
         formElement.setAttribute('aria-labelledby', 'tab-register');
         container.appendChild(formElement);
       }
-      
+
       // Удалить класс анимации входа после завершения анимации
       setTimeout(() => {
         container.classList.remove('auth-modal__form-container--enter');
@@ -328,10 +330,10 @@ export class AuthModal extends Component<AuthModalProps> {
    */
   private updateForm(): void {
     if (!this.formContainer) return;
-    
+
     // Очистить контейнер
     this.formContainer.innerHTML = '';
-    
+
     // Добавить соответствующую форму
     if (this.mode === 'login' && this.loginForm) {
       this.formContainer.appendChild(this.loginForm.getElement() || this.loginForm.render());
@@ -346,7 +348,7 @@ export class AuthModal extends Component<AuthModalProps> {
   private handleAuthSuccess(): void {
     // Закрыть модальное окно
     this.close();
-    
+
     // Вызвать callback
     if (this.props.onAuth) {
       this.props.onAuth();
@@ -364,7 +366,7 @@ export class AuthModal extends Component<AuthModalProps> {
     if (this.registerForm) {
       this.registerForm.reset();
     }
-    
+
     // Закрыть модальное окно в store
     store.closeModal();
   }
@@ -379,7 +381,7 @@ export class AuthModal extends Component<AuthModalProps> {
       this.updateTabs();
       this.updateForm();
     }
-    
+
     if (this.modal) {
       this.modal.open();
     }

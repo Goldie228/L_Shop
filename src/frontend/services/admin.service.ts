@@ -110,14 +110,11 @@ export class AdminService {
    * @param status - Новый статус
    * @returns Обновлённый заказ
    */
-  public static async updateOrderStatus(
-    id: string,
-    status: OrderStatus
-  ): Promise<Order> {
+  public static async updateOrderStatus(id: string, status: OrderStatus): Promise<Order> {
     console.log('[AdminService] Обновление статуса заказа:', id, status);
     const response = await api.put<UpdateOrderStatusResponse>(
       `${ADMIN_ENDPOINTS.ORDERS}/${id}/status`,
-      { status }
+      { status },
     );
     return response.order;
   }
@@ -150,10 +147,9 @@ export class AdminService {
    */
   public static async updateUserRole(id: string, role: UserRole): Promise<User> {
     console.log('[AdminService] Обновление роли пользователя:', id, role);
-    const response = await api.put<UpdateUserRoleResponse>(
-      `${ADMIN_ENDPOINTS.USERS}/${id}/role`,
-      { role }
-    );
+    const response = await api.put<UpdateUserRoleResponse>(`${ADMIN_ENDPOINTS.USERS}/${id}/role`, {
+      role,
+    });
     return response.user;
   }
 
@@ -166,7 +162,7 @@ export class AdminService {
     console.log('[AdminService] Переключение блокировки пользователя:', id);
     const response = await api.put<ToggleUserBlockResponse>(
       `${ADMIN_ENDPOINTS.USERS}/${id}/block`,
-      {}
+      {},
     );
     return response.user;
   }

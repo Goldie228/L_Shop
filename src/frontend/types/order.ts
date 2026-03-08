@@ -13,6 +13,8 @@ export interface OrderItem {
   name: string;
   /** Цена на момент заказа */
   price: number;
+  /** Валюта (BYN) */
+  currency: 'BYN';
   /** Количество */
   quantity: number;
   /** Скидка в процентах (опционально) */
@@ -24,7 +26,7 @@ export interface OrderItem {
  */
 export type OrderStatus =
   | 'pending'
-  | 'confirmed'
+  | 'processing'
   | 'shipped'
   | 'delivered'
   | 'cancelled';
@@ -43,6 +45,8 @@ export type DeliveryType = 'courier' | 'pickup';
  * Данные для создания заказа
  */
 export interface CreateOrderData {
+  /** Имя получателя */
+  firstName: string;
   /** Адрес доставки */
   deliveryAddress: string;
   /** Телефон */
@@ -65,6 +69,8 @@ export interface Order {
   id: string;
   /** ID пользователя */
   userId: string;
+  /** Имя получателя */
+  firstName: string;
   /** Элементы заказа */
   items: OrderItem[];
   /** Адрес доставки */
@@ -81,6 +87,8 @@ export interface Order {
   comment?: string;
   /** Статус заказа */
   status: OrderStatus;
+  /** Валюта (BYN) */
+  currency: 'BYN';
   /** Общая сумма */
   totalSum: number;
   /** Дата создания */

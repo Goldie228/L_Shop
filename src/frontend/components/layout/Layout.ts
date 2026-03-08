@@ -85,7 +85,7 @@ export class Layout extends Component<LayoutProps> {
     layout.appendChild(main);
 
     // Footer
-    this.footer = new Footer();
+    this.footer = new Footer({ year: new Date().getFullYear() });
     layout.appendChild(this.footer.render());
 
     this.element = layout;

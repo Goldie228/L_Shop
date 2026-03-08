@@ -10,6 +10,7 @@ import cors from 'cors';
 
 // Импортируем маршруты
 import authRoutes from '../routes/auth.routes';
+import { errorHandler } from '../middleware/error.middleware';
 
 // Создаём тестовое приложение
 function createTestApp(): Express {
@@ -17,6 +18,7 @@ function createTestApp(): Express {
 
   app.use(cors({ origin: true, credentials: true }));
   app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
   app.use(cookieParser());
 
   // Проверка работоспособности
@@ -26,6 +28,9 @@ function createTestApp(): Express {
 
   // API маршруты
   app.use('/api/auth', authRoutes);
+
+  // Middleware для обработки ошибок - должен быть последним
+  app.use(errorHandler);
 
   return app;
 }

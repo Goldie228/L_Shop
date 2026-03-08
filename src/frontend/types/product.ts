@@ -1,6 +1,6 @@
 /**
  * Типы продукта - L_Shop Frontend
- * Вариант 17: добавлены поля rating и reviewsCount
+ * Вариант 17: добавлены поля rating, reviewsCount, currency, brand, warranty, specifications
  */
 
 /**
@@ -27,6 +27,14 @@ export interface Product {
   rating?: number;
   /** Количество отзывов - Вариант 17 */
   reviewsCount?: number;
+  /** Валюта (BYN) */
+  currency: 'BYN';
+  /** Бренд продукта */
+  brand?: string;
+  /** Гарантия (например "24 месяца") */
+  warranty?: string;
+  /** Технические характеристики */
+  specifications?: Record<string, unknown>;
   /** Дата создания */
   createdAt?: string;
   /** Дата обновления */

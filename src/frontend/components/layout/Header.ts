@@ -26,44 +26,44 @@ export interface HeaderProps extends ComponentProps {
 /**
  * SVG иконки
  */
-const MENU_ICON = `
-  <svg class="header__menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <line class="header__menu-line header__menu-line--top" x1="3" y1="6" x2="21" y2="6"></line>
-    <line class="header__menu-line header__menu-line--middle" x1="3" y1="12" x2="21" y2="12"></line>
-    <line class="header__menu-line header__menu-line--bottom" x1="3" y1="18" x2="21" y2="18"></line>
-  </svg>
-`;
+const MENU_ICON = [
+  '  <svg class="header__menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">',
+  '    <line class="header__menu-line header__menu-line--top" x1="3" y1="6" x2="21" y2="6"></line>',
+  '    <line class="header__menu-line header__menu-line--middle" x1="3" y1="12" x2="21" y2="12"></line>',
+  '    <line class="header__menu-line header__menu-line--bottom" x1="3" y1="18" x2="21" y2="18"></line>',
+  '  </svg>',
+].join('\n');
 
-const CHEVRON_DOWN_ICON = `
-  <svg class="header__dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <polyline points="6 9 12 15 18 9"></polyline>
-  </svg>
-`;
+const CHEVRON_DOWN_ICON = [
+  '  <svg class="header__dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">',
+  '    <polyline points="6 9 12 15 18 9"></polyline>',
+  '  </svg>',
+].join('\n');
 
-const SEARCH_ICON = `
-  <svg class="header__search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <circle cx="11" cy="11" r="8"></circle>
-    <path d="M21 21l-4.35-4.35"></path>
-  </svg>
-`;
+const SEARCH_ICON = [
+  '  <svg class="header__search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">',
+  '    <circle cx="11" cy="11" r="8"></circle>',
+  '    <path d="M21 21l-4.35-4.35"></path>',
+  '  </svg>',
+].join('\n');
 
-const CART_ICON = `
-  <svg class="header__cart-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <circle cx="9" cy="21" r="1"></circle>
-    <circle cx="20" cy="21" r="1"></circle>
-    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-  </svg>
-`;
+const CART_ICON = [
+  '  <svg class="header__cart-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">',
+  '    <circle cx="9" cy="21" r="1"></circle>',
+  '    <circle cx="20" cy="21" r="1"></circle>',
+  '    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>',
+  '  </svg>',
+].join('\n');
 
 /**
  * SVG логотип L_Shop
  * Масштабируемый векторный логотип с буквой L
  */
-const LOGO_ICON_SVG = `
-  <svg class="header__logo-svg" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-    <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 20px; font-weight: 700;" fill="currentColor">L</text>
-  </svg>
-`;
+const LOGO_ICON_SVG = [
+  '  <svg class="header__logo-svg" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">',
+  '    <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" style="font-family: \'Inter\', -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif; font-size: 20px; font-weight: 700;" fill="currentColor">L</text>',
+  '  </svg>',
+].join('\n');
 
 /**
  * Header component class
@@ -94,7 +94,7 @@ export class Header extends Component<HeaderProps> {
   private userDropdown: HTMLElement | null = null;
 
   /** Открыто ли выпадающее меню */
-  private isDropdownOpen: boolean = false;
+  private isDropdownOpen = false;
 
   /**
    * Получить пропсы по умолчанию
@@ -232,8 +232,8 @@ export class Header extends Component<HeaderProps> {
       'data-testid': 'search-input',
     });
 
-     // Обработка нажатия Enter для поиска
-     this.addEventListener(input, 'keydown', (e) => {
+    // Обработка нажатия Enter для поиска
+    this.addEventListener(input, 'keydown', (e) => {
       if (e instanceof KeyboardEvent && e.key === 'Enter') {
         e.preventDefault();
         const query = input.value.trim();
@@ -257,7 +257,7 @@ export class Header extends Component<HeaderProps> {
    * @param query - Поисковый запрос
    */
   private handleSearch(query: string): void {
-    console.log('[Header] Search query:', query);
+    // Логирование удалено (только для отладки)
   }
 
   /**
@@ -288,7 +288,7 @@ export class Header extends Component<HeaderProps> {
    * @param isActive - Активна ли ссылка
    * @returns Элемент ссылки
    */
-  private createNavLink(text: string, href: string, isActive: boolean = false): HTMLAnchorElement {
+  private createNavLink(text: string, href: string, isActive = false): HTMLAnchorElement {
     const link = this.createElement(
       'a',
       {
@@ -431,8 +431,8 @@ export class Header extends Component<HeaderProps> {
 
     dropdown.appendChild(this.userDropdown);
 
-     // Закрыть выпадающее меню при клике вне его
-     document.addEventListener('click', (e) => {
+    // Закрыть выпадающее меню при клике вне его
+    document.addEventListener('click', (e) => {
       if (this.isDropdownOpen && !dropdown.contains(e.target as Node)) {
         this.closeDropdown();
       }
@@ -517,7 +517,7 @@ export class Header extends Component<HeaderProps> {
       'data-testid': 'mobile-menu',
     });
 
-     // Ссылки навигации
+    // Ссылки навигации
     const navList = this.createElement('ul', {
       className: 'header__mobile-nav-list',
     });

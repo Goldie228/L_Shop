@@ -3,7 +3,9 @@
  */
 
 import { Router } from 'express';
-import { getCart, addItem, updateItem, removeItem } from '../controllers/cart.controller';
+import {
+  getCart, addItem, updateItem, removeItem,
+} from '../controllers/cart.controller';
 import { authMiddleware } from '../middleware/auth.middleware';
 
 const router = Router();

@@ -6,11 +6,8 @@
 import { Component, ComponentProps } from '../base/Component';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
-import {
-  CreateOrderData,
-  PaymentMethod,
-  DeliveryType,
-} from '../../types/order';
+import { Toast } from '../ui/Toast';
+import { CreateOrderData, PaymentMethod, DeliveryType } from '../../types/order';
 
 /**
  * Пропсы формы доставки
@@ -46,18 +43,22 @@ export class DeliveryForm extends Component<DeliveryFormProps> {
     generalError: null,
   };
 
-  // Ссылки на поля формы
-  private addressInput!: Input;
-  private phoneInput!: Input;
-  private emailInput!: Input;
-  private commentInput!: Input;
-  private paymentSelect!: HTMLSelectElement;
-  private deliveryTypeSelect!: HTMLSelectElement;
-  private submitButton!: Button;
+  // Ссылки на поля формы (optional, инициализируются в render)
+  private firstNameInput?: Input;
 
-  constructor(props: DeliveryFormProps) {
-    super(props);
-  }
+  private addressInput?: Input;
+
+  private phoneInput?: Input;
+
+  private emailInput?: Input;
+
+  private commentInput?: Input;
+
+  private paymentSelect?: HTMLSelectElement;
+
+  private deliveryTypeSelect?: HTMLSelectElement;
+
+  private submitButton?: Button;
 
   protected getDefaultProps(): DeliveryFormProps {
     return {
@@ -73,10 +74,30 @@ export class DeliveryForm extends Component<DeliveryFormProps> {
     });
 
     // Заголовок
-    const title = this.createElement('h2', {
-      className: 'delivery-form__title',
-    }, ['Данные для доставки']);
+    const title = this.createElement(
+      'h2',
+      {
+        className: 'delivery-form__title',
+      },
+      ['Данные для доставки'],
+    );
     form.appendChild(title);
+
+    // Поле имени
+    this.firstNameInput = new Input({
+      className: 'delivery-form__input',
+      id: 'delivery-firstName',
+      placeholder: 'Имя получателя *',
+      type: 'text',
+      required: true,
+      disabled: this.props.disabled,
+    });
+    const firstNameGroup = this.createFormGroup(
+      'delivery-firstName',
+      'Имя',
+      this.firstNameInput.render(),
+    );
+    form.appendChild(firstNameGroup);
 
     // Поле адреса
     this.addressInput = new Input({
@@ -98,7 +119,7 @@ export class DeliveryForm extends Component<DeliveryFormProps> {
     this.phoneInput = new Input({
       className: 'delivery-form__input',
       id: 'delivery-phone',
-      placeholder: '+375 XX XXX-XX-XX',
+      placeholder: '+375 (29) XXX-XX-XX',
       type: 'tel',
       required: true,
       disabled: this.props.disabled,
@@ -109,6 +130,9 @@ export class DeliveryForm extends Component<DeliveryFormProps> {
       this.phoneInput.render(),
     );
     form.appendChild(phoneGroup);
+
+    // Добавляем обработчик маски телефона
+    this.setupPhoneMask();
 
     // Поле email
     this.emailInput = new Input({
@@ -173,19 +197,19 @@ export class DeliveryForm extends Component<DeliveryFormProps> {
   /**
    * Создать группу поля формы
    */
-  private createFormGroup(
-    id: string,
-    label: string,
-    input: HTMLElement,
-  ): HTMLElement {
+  private createFormGroup(id: string, label: string, input: HTMLElement): HTMLElement {
     const group = this.createElement('div', {
       className: 'delivery-form__group',
     });
 
-    const labelEl = this.createElement('label', {
-      className: 'delivery-form__label',
-      for: id,
-    }, [label]);
+    const labelEl = this.createElement(
+      'label',
+      {
+        className: 'delivery-form__label',
+        for: id,
+      },
+      [label],
+    );
     group.appendChild(labelEl);
     group.appendChild(input);
 
@@ -207,10 +231,14 @@ export class DeliveryForm extends Component<DeliveryFormProps> {
       className: 'delivery-form__group',
     });
 
-    const label = this.createElement('label', {
-      className: 'delivery-form__label',
-      for: 'delivery-type',
-    }, ['Тип доставки']);
+    const label = this.createElement(
+      'label',
+      {
+        className: 'delivery-form__label',
+        for: 'delivery-type',
+      },
+      ['Тип доставки'],
+    );
     group.appendChild(label);
 
     this.deliveryTypeSelect = this.createElement('select', {
@@ -226,10 +254,14 @@ export class DeliveryForm extends Component<DeliveryFormProps> {
     ];
 
     options.forEach((opt) => {
-      const option = this.createElement('option', {
-        value: opt.value,
-      }, [opt.label]) as HTMLOptionElement;
-      this.deliveryTypeSelect.appendChild(option);
+      const option = this.createElement(
+        'option',
+        {
+          value: opt.value,
+        },
+        [opt.label],
+      ) as HTMLOptionElement;
+      this.deliveryTypeSelect?.appendChild(option);
     });
 
     group.appendChild(this.deliveryTypeSelect);
@@ -244,10 +276,14 @@ export class DeliveryForm extends Component<DeliveryFormProps> {
       className: 'delivery-form__group',
     });
 
-    const label = this.createElement('label', {
-      className: 'delivery-form__label',
-      for: 'payment-method',
-    }, ['Способ оплаты']);
+    const label = this.createElement(
+      'label',
+      {
+        className: 'delivery-form__label',
+        for: 'payment-method',
+      },
+      ['Способ оплаты'],
+    );
     group.appendChild(label);
 
     this.paymentSelect = this.createElement('select', {
@@ -265,10 +301,14 @@ export class DeliveryForm extends Component<DeliveryFormProps> {
     ];
 
     options.forEach((opt) => {
-      const option = this.createElement('option', {
-        value: opt.value,
-      }, [opt.label]) as HTMLOptionElement;
-      this.paymentSelect.appendChild(option);
+      const option = this.createElement(
+        'option',
+        {
+          value: opt.value,
+        },
+        [opt.label],
+      ) as HTMLOptionElement;
+      this.paymentSelect?.appendChild(option);
     });
 
     group.appendChild(this.paymentSelect);
@@ -286,12 +326,13 @@ export class DeliveryForm extends Component<DeliveryFormProps> {
 
     // Получить значения формы
     const data: CreateOrderData = {
-      deliveryAddress: this.addressInput.getValue(),
-      phone: this.phoneInput.getValue(),
-      email: this.emailInput.getValue(),
-      paymentMethod: this.paymentSelect.value as PaymentMethod,
-      deliveryType: this.deliveryTypeSelect.value as DeliveryType,
-      comment: this.commentInput.getValue(),
+      firstName: this.firstNameInput?.getValue() ?? '',
+      deliveryAddress: this.addressInput?.getValue() ?? '',
+      phone: this.phoneInput?.getValue() ?? '',
+      email: this.emailInput?.getValue() ?? '',
+      paymentMethod: (this.paymentSelect?.value ?? 'cash') as PaymentMethod,
+      deliveryType: (this.deliveryTypeSelect?.value ?? 'courier') as DeliveryType,
+      comment: this.commentInput?.getValue() ?? '',
     };
 
     // Валидация
@@ -303,19 +344,20 @@ export class DeliveryForm extends Component<DeliveryFormProps> {
 
     // Отправить форму
     this.setState({ loading: true });
-    this.submitButton.disable();
+    this.submitButton?.disable();
 
     try {
       await this.props.onSubmit(data);
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : 'Ошибка при оформлении заказа';
+      const message = error instanceof Error ? error.message : 'Ошибка при оформлении заказа';
       this.setState({
         loading: false,
         generalError: message,
       });
-      this.submitButton.enable();
+      this.submitButton?.enable();
       this.updateGeneralError();
+      // Показать уведомление об ошибке
+      Toast.showError(message);
     }
   }
 
@@ -324,6 +366,10 @@ export class DeliveryForm extends Component<DeliveryFormProps> {
    */
   private validate(data: CreateOrderData): Record<string, string> {
     const errors: Record<string, string> = {};
+
+    if (!data.firstName.trim()) {
+      errors.firstName = 'Укажите имя';
+    }
 
     if (!data.deliveryAddress.trim()) {
       errors.address = 'Укажите адрес доставки';
@@ -361,24 +407,22 @@ export class DeliveryForm extends Component<DeliveryFormProps> {
     });
   }
 
-  /**
-   * Очистить ошибки
-   */
-  private clearErrors(): void {
-    // Очистить тексты ошибок
-    document
-      .querySelectorAll('.delivery-form__field-error')
-      .forEach((el) => (el.textContent = ''));
+   /**
+    * Очистить ошибки
+    */
+   private clearErrors(): void {
+     // Очистить тексты ошибок
+     document.querySelectorAll('.delivery-form__field-error').forEach((el) => {
+       el.textContent = '';
+     });
 
-    // Убрать класс ошибки с полей
-    document
-      .querySelectorAll('.input--error')
-      .forEach((el) => el.classList.remove('input--error'));
+     // Убрать класс ошибки с полей
+     document.querySelectorAll('.input--error').forEach((el) => {
+       el.classList.remove('input--error');
+     });
 
     this.state.generalError = null;
-    const errorContainer = this.element?.querySelector(
-      '.delivery-form__error-container',
-    );
+    const errorContainer = this.element?.querySelector('.delivery-form__error-container');
     if (errorContainer) {
       errorContainer.textContent = '';
     }
@@ -388,9 +432,7 @@ export class DeliveryForm extends Component<DeliveryFormProps> {
    * Обновить отображение общей ошибки
    */
   private updateGeneralError(): void {
-    const errorContainer = this.element?.querySelector(
-      '.delivery-form__error-container',
-    );
+    const errorContainer = this.element?.querySelector('.delivery-form__error-container');
     if (errorContainer && this.state.generalError) {
       errorContainer.textContent = this.state.generalError;
       errorContainer.classList.add('delivery-form__error-container--visible');
@@ -402,5 +444,88 @@ export class DeliveryForm extends Component<DeliveryFormProps> {
    */
   private setState(newState: Partial<DeliveryFormState>): void {
     this.state = { ...this.state, ...newState };
+  }
+
+  /**
+   * Настроить маску телефона для поля phoneInput
+   * Формат: +375 (29) XXX-XX-XX
+   */
+  private setupPhoneMask(): void {
+    const input = this.phoneInput?.getInputElement();
+    if (!input) {
+      return;
+    }
+
+    // Обработчик ввода
+    const onInput = (e: Event): void => {
+      const target = e.target as HTMLInputElement;
+      let value = target.value.replace(/\D/g, ''); // Оставляем только цифры
+
+      // Ограничиваем до 13 цифр (375 + 2 + 7)
+      if (value.length > 13) {
+        value = value.slice(0, 13);
+      }
+
+      // Форматируем
+      let formatted = '';
+      if (value.length > 0) {
+        // Код страны: +375
+        if (value.length >= 3) {
+          formatted = `+${value.slice(0, 3)}`;
+        } else {
+          formatted = `+${value}`;
+        }
+
+        // Код оператора: (29)
+        if (value.length >= 5) {
+          formatted += ` (${value.slice(3, 5)}`;
+        } else if (value.length > 3) {
+          formatted += ` (${value.slice(3)}`;
+        }
+
+        // Номер: XXX-XX-XX
+        if (value.length >= 7) {
+          const rest = value.slice(5, 13);
+          formatted += `) ${rest.slice(0, 3)}`;
+          if (rest.length > 3) {
+            formatted += `-${rest.slice(3, 5)}`;
+          }
+          if (rest.length > 5) {
+            formatted += `-${rest.slice(5, 7)}`;
+          }
+        } else if (value.length > 5) {
+          formatted += `) ${value.slice(5)}`;
+        } else if (value.length > 3) {
+          formatted += ')';
+        }
+      }
+
+      target.value = formatted;
+    };
+
+    // Обработчик фокуса - показываем маску если поле пустое
+    const onFocus = (): void => {
+      if (!input.value) {
+        input.value = '+375 (29)';
+      }
+    };
+
+    // Обработчик потери фокуса - валидация
+    const onBlur = (): void => {
+      const value = input.value.replace(/\D/g, '');
+      if (value.length < 13) {
+        new Toast({
+          type: 'error',
+          title: 'Ошибка валидации',
+          message: 'Введите полный номер телефона в формате +375 (29) XXX-XX-XX',
+          duration: 5000,
+        }).open();
+        input.focus();
+      }
+    };
+
+    input.addEventListener('input', onInput);
+    input.addEventListener('focus', onFocus);
+    input.addEventListener('blur', onBlur);
   }
 }

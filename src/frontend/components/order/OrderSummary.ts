@@ -22,10 +22,6 @@ export interface OrderSummaryProps extends ComponentProps {
  * Сводка заказа для отображения на странице доставки
  */
 export class OrderSummary extends Component<OrderSummaryProps> {
-  constructor(props: OrderSummaryProps) {
-    super(props);
-  }
-
   protected getDefaultProps(): OrderSummaryProps {
     return {
       ...super.getDefaultProps(),
@@ -42,9 +38,13 @@ export class OrderSummary extends Component<OrderSummaryProps> {
     });
 
     // Заголовок
-    const title = this.createElement('h2', {
-      className: 'order-summary__title',
-    }, [this.props.title!]);
+    const title = this.createElement(
+      'h2',
+      {
+        className: 'order-summary__title',
+      },
+      [this.props.title ?? ''],
+    );
     container.appendChild(title);
 
     // Список товаров
@@ -71,14 +71,22 @@ export class OrderSummary extends Component<OrderSummaryProps> {
       className: 'order-summary__total',
     });
 
-    const totalLabel = this.createElement('span', {
-      className: 'order-summary__total-label',
-    }, ['Итого:']);
+    const totalLabel = this.createElement(
+      'span',
+      {
+        className: 'order-summary__total-label',
+      },
+      ['Итого:'],
+    );
     totalSection.appendChild(totalLabel);
 
-    const totalValue = this.createElement('span', {
-      className: 'order-summary__total-value',
-    }, [this.formatPrice(total)]);
+    const totalValue = this.createElement(
+      'span',
+      {
+        className: 'order-summary__total-value',
+      },
+      [this.formatPrice(total)],
+    );
     totalSection.appendChild(totalValue);
 
     container.appendChild(totalSection);
@@ -99,14 +107,22 @@ export class OrderSummary extends Component<OrderSummaryProps> {
       className: 'order-summary__item-info',
     });
 
-    const nameEl = this.createElement('span', {
-      className: 'order-summary__item-name',
-    }, [item.name]);
+    const nameEl = this.createElement(
+      'span',
+      {
+        className: 'order-summary__item-name',
+      },
+      [item.name],
+    );
     infoEl.appendChild(nameEl);
 
-    const quantityEl = this.createElement('span', {
-      className: 'order-summary__item-quantity',
-    }, [`× ${item.quantity}`]);
+    const quantityEl = this.createElement(
+      'span',
+      {
+        className: 'order-summary__item-quantity',
+      },
+      [`× ${item.quantity}`],
+    );
     infoEl.appendChild(quantityEl);
 
     itemEl.appendChild(infoEl);
@@ -123,21 +139,33 @@ export class OrderSummary extends Component<OrderSummaryProps> {
 
     if (item.discountPercent) {
       // Показать старую цену зачёркнутой
-      const oldPrice = this.createElement('span', {
-        className: 'order-summary__item-old-price',
-      }, [this.formatPrice(item.price * item.quantity)]);
+      const oldPrice = this.createElement(
+        'span',
+        {
+          className: 'order-summary__item-old-price',
+        },
+        [this.formatPrice(item.price * item.quantity)],
+      );
       priceEl.appendChild(oldPrice);
 
       // Показать новую цену со скидкой
-      const newPrice = this.createElement('span', {
-        className: 'order-summary__item-new-price',
-      }, [this.formatPrice(discountedPrice * item.quantity)]);
+      const newPrice = this.createElement(
+        'span',
+        {
+          className: 'order-summary__item-new-price',
+        },
+        [this.formatPrice(discountedPrice * item.quantity)],
+      );
       priceEl.appendChild(newPrice);
 
       // Показать процент скидки
-      const discountBadge = this.createElement('span', {
-        className: 'order-summary__item-discount',
-      }, [`-${item.discountPercent}%`]);
+      const discountBadge = this.createElement(
+        'span',
+        {
+          className: 'order-summary__item-discount',
+        },
+        [`-${item.discountPercent}%`],
+      );
       priceEl.appendChild(discountBadge);
     } else {
       priceEl.textContent = this.formatPrice(item.price * item.quantity);
@@ -163,7 +191,7 @@ export class OrderSummary extends Component<OrderSummaryProps> {
    * Форматировать цену
    */
   private formatPrice(price: number): string {
-    return `${price.toFixed(2)} BYN`;
+    return `${price.toFixed(2)} ₽`;
   }
 
   /**

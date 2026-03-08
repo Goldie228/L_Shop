@@ -4,6 +4,8 @@
 export interface User {
   id: string;
   name: string;
+  /** Имя (отдельное поле) */
+  firstName: string;
   email: string;
   login: string;
   phone: string;

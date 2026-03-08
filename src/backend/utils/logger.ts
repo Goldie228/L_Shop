@@ -1,9 +1,12 @@
 /**
  * Структурированный логгер на базе Pino
  * Разные уровни логирования для development и production
+ * В production используется ротация файлов логов
  */
 
 import pino from 'pino';
+import { join } from 'path';
+import { existsSync, mkdirSync } from 'fs';
 import { config } from '../config/constants';
 
 /**
@@ -15,13 +18,13 @@ const loggerConfig: pino.LoggerOptions = {
   transport: config.isProduction
     ? undefined
     : {
-        target: 'pino-pretty',
-        options: {
-          colorize: true,
-          translateTime: 'SYS:standard',
-          ignore: 'pid,hostname',
-        },
+      target: 'pino-pretty',
+      options: {
+        colorize: true,
+        translateTime: 'SYS:standard',
+        ignore: 'pid,hostname',
       },
+    },
   // Базовые поля для всех логов
   base: {
     env: config.nodeEnv,
@@ -37,7 +40,26 @@ const loggerConfig: pino.LoggerOptions = {
 /**
  * Экземпляр логгера
  */
-export const logger = pino(loggerConfig);
+let loggerInstance: pino.Logger;
+
+if (config.isProduction) {
+  // В production используем простой файловый транспорт (временно без pino-roll)
+  // TODO: добавить pino-roll после исправления типов
+  const logFile = join(config.logsDir, 'lshop.log');
+  if (!existsSync(config.logsDir)) {
+    mkdirSync(config.logsDir, { recursive: true });
+  }
+  loggerConfig.transport = {
+    target: 'pino/file',
+    options: { destination: logFile },
+  };
+  loggerInstance = pino(loggerConfig);
+} else {
+  // В development используем pino-pretty для читаемого вывода в консоль
+  loggerInstance = pino(loggerConfig);
+}
+
+export const logger = loggerInstance;
 
 /**
  * Создать дочерний логгер с контекстом

@@ -6,10 +6,17 @@
 import { Component, ComponentProps } from '../base/Component.js';
 import { Button } from '../ui/Button.js';
 import { Input } from '../ui/Input.js';
-import { AuthService, AuthEventEmitter, UpdateProfileData, UpdatePasswordData } from '../../services/auth.service.js';
+import {
+  AuthService,
+  AuthEventEmitter,
+  UpdateProfileData,
+  UpdatePasswordData,
+} from '../../services/auth.service.js';
 import { orderService } from '../../services/order.service.js';
 import { store } from '../../store/store.js';
-import { User, validateEmail, validateName, validatePassword } from '../../types/user.js';
+import {
+  User, validateEmail, validateName, validatePassword,
+} from '../../types/user.js';
 import { Order, OrderStatus } from '../../types/order.js';
 import { router } from '../../router/router.js';
 
@@ -37,28 +44,36 @@ interface FormState {
  */
 export class ProfilePage extends Component<ProfilePageProps> {
   private logoutButton: Button | null = null;
+
   private saveButton: Button | null = null;
+
   private orders: Order[] = [];
+
   private isLoadingOrders = false;
-  private isSaving = false;
+
   private formState: FormState = {
     name: '',
     email: '',
     currentPassword: '',
     newPassword: '',
     confirmPassword: '',
-    errors: {}
+    errors: {},
   };
 
   // References to input components
   private nameInput: Input | null = null;
+
   private emailInput: Input | null = null;
+
   private currentPasswordInput: Input | null = null;
+
   private newPasswordInput: Input | null = null;
+
   private confirmPasswordInput: Input | null = null;
 
   // Container references for re-rendering
   private ordersContainer: HTMLElement | null = null;
+
   private toastContainer: HTMLElement | null = null;
 
   protected getDefaultProps(): ProfilePageProps {
@@ -103,9 +118,13 @@ export class ProfilePage extends Component<ProfilePageProps> {
     container.appendChild(this.toastContainer);
 
     // Заголовок
-    const title = this.createElement('h1', {
-      className: 'profile-page__title',
-    }, ['Профиль пользователя']);
+    const title = this.createElement(
+      'h1',
+      {
+        className: 'profile-page__title',
+      },
+      ['Профиль пользователя'],
+    );
     container.appendChild(title);
 
     // Основной контент - двухколоночный макет
@@ -124,9 +143,13 @@ export class ProfilePage extends Component<ProfilePageProps> {
     });
 
     // Аватар (первая буква имени)
-    const avatar = this.createElement('div', {
-      className: 'profile-page__avatar',
-    }, [user.name?.charAt(0).toUpperCase() || '?']);
+    const avatar = this.createElement(
+      'div',
+      {
+        className: 'profile-page__avatar',
+      },
+      [user.name?.charAt(0).toUpperCase() || '?'],
+    );
     card.appendChild(avatar);
 
     // Информация
@@ -135,60 +158,96 @@ export class ProfilePage extends Component<ProfilePageProps> {
     });
 
     // Имя
-    const nameEl = this.createElement('div', {
-      className: 'profile-page__field',
-    }, [
-      this.createElement('span', { className: 'profile-page__label' }, ['Имя:']),
-      this.createElement('span', { className: 'profile-page__value' }, [user.name || 'Не указано']),
-    ]);
+    const nameEl = this.createElement(
+      'div',
+      {
+        className: 'profile-page__field',
+      },
+      [
+        this.createElement('span', { className: 'profile-page__label' }, ['Имя:']),
+        this.createElement('span', { className: 'profile-page__value' }, [
+          user.name || 'Не указано',
+        ]),
+      ],
+    );
     info.appendChild(nameEl);
 
     // Логин
-    const loginEl = this.createElement('div', {
-      className: 'profile-page__field',
-    }, [
-      this.createElement('span', { className: 'profile-page__label' }, ['Логин:']),
-      this.createElement('span', { className: 'profile-page__value' }, [user.login || 'Не указано']),
-    ]);
+    const loginEl = this.createElement(
+      'div',
+      {
+        className: 'profile-page__field',
+      },
+      [
+        this.createElement('span', { className: 'profile-page__label' }, ['Логин:']),
+        this.createElement('span', { className: 'profile-page__value' }, [
+          user.login || 'Не указано',
+        ]),
+      ],
+    );
     info.appendChild(loginEl);
 
     // Email
-    const emailEl = this.createElement('div', {
-      className: 'profile-page__field',
-    }, [
-      this.createElement('span', { className: 'profile-page__label' }, ['Email:']),
-      this.createElement('span', { className: 'profile-page__value' }, [user.email || 'Не указано']),
-    ]);
+    const emailEl = this.createElement(
+      'div',
+      {
+        className: 'profile-page__field',
+      },
+      [
+        this.createElement('span', { className: 'profile-page__label' }, ['Email:']),
+        this.createElement('span', { className: 'profile-page__value' }, [
+          user.email || 'Не указано',
+        ]),
+      ],
+    );
     info.appendChild(emailEl);
 
     // Телефон
-    const phoneEl = this.createElement('div', {
-      className: 'profile-page__field',
-    }, [
-      this.createElement('span', { className: 'profile-page__label' }, ['Телефон:']),
-      this.createElement('span', { className: 'profile-page__value' }, [user.phone || 'Не указано']),
-    ]);
+    const phoneEl = this.createElement(
+      'div',
+      {
+        className: 'profile-page__field',
+      },
+      [
+        this.createElement('span', { className: 'profile-page__label' }, ['Телефон:']),
+        this.createElement('span', { className: 'profile-page__value' }, [
+          user.phone || 'Не указано',
+        ]),
+      ],
+    );
     info.appendChild(phoneEl);
 
     // Роль с визуальным индикатором
-    const roleEl = this.createElement('div', {
-      className: 'profile-page__field',
-    }, [
-      this.createElement('span', { className: 'profile-page__label' }, ['Роль:']),
-      this.createElement('span', {
-        className: `profile-page__role profile-page__role--${user.role}`
-      }, [user.role === 'admin' ? 'Администратор' : 'Пользователь']),
-    ]);
+    const roleEl = this.createElement(
+      'div',
+      {
+        className: 'profile-page__field',
+      },
+      [
+        this.createElement('span', { className: 'profile-page__label' }, ['Роль:']),
+        this.createElement(
+          'span',
+          {
+            className: `profile-page__role profile-page__role--${user.role}`,
+          },
+          [user.role === 'admin' ? 'Администратор' : 'Пользователь'],
+        ),
+      ],
+    );
     info.appendChild(roleEl);
 
     // Дата регистрации в формате дд.мм.гггг
     const createdAt = user.createdAt ? this.formatDate(user.createdAt) : 'Не указано';
-    const createdAtEl = this.createElement('div', {
-      className: 'profile-page__field',
-    }, [
-      this.createElement('span', { className: 'profile-page__label' }, ['Дата регистрации:']),
-      this.createElement('span', { className: 'profile-page__value' }, [createdAt]),
-    ]);
+    const createdAtEl = this.createElement(
+      'div',
+      {
+        className: 'profile-page__field',
+      },
+      [
+        this.createElement('span', { className: 'profile-page__label' }, ['Дата регистрации:']),
+        this.createElement('span', { className: 'profile-page__value' }, [createdAt]),
+      ],
+    );
     info.appendChild(createdAtEl);
 
     card.appendChild(info);
@@ -199,19 +258,31 @@ export class ProfilePage extends Component<ProfilePageProps> {
       const adminPanel = this.createElement('div', {
         className: 'profile-page__admin-panel',
       });
-      const adminIcon = this.createElement('span', {
-        className: 'profile-page__admin-icon',
-      }, ['⚙️']);
+      const adminIcon = this.createElement(
+        'span',
+        {
+          className: 'profile-page__admin-icon',
+        },
+        ['⚙️'],
+      );
       adminPanel.appendChild(adminIcon);
-      
-      const adminTitle = this.createElement('h3', {
-        className: 'profile-page__admin-title',
-      }, ['Панель управления']);
+
+      const adminTitle = this.createElement(
+        'h3',
+        {
+          className: 'profile-page__admin-title',
+        },
+        ['Панель управления'],
+      );
       adminPanel.appendChild(adminTitle);
 
-      const adminLink = this.createElement('button', {
-        className: 'profile-page__admin-button',
-      }, ['Перейти в админ-панель']);
+      const adminLink = this.createElement(
+        'button',
+        {
+          className: 'profile-page__admin-button',
+        },
+        ['Перейти в админ-панель'],
+      );
       adminLink.addEventListener('click', () => {
         router.navigate('/admin');
       });
@@ -232,9 +303,13 @@ export class ProfilePage extends Component<ProfilePageProps> {
       className: 'profile-page__section',
     });
 
-    const ordersTitle = this.createElement('h2', {
-      className: 'profile-page__section-title',
-    }, ['История заказов']);
+    const ordersTitle = this.createElement(
+      'h2',
+      {
+        className: 'profile-page__section-title',
+      },
+      ['История заказов'],
+    );
     ordersSection.appendChild(ordersTitle);
 
     this.ordersContainer = this.createElement('div', {
@@ -242,17 +317,25 @@ export class ProfilePage extends Component<ProfilePageProps> {
     });
 
     if (this.isLoadingOrders) {
-      const loadingEl = this.createElement('div', {
-        className: 'profile-page__loading',
-      }, ['Загрузка заказов...']);
+      const loadingEl = this.createElement(
+        'div',
+        {
+          className: 'profile-page__loading',
+        },
+        ['Загрузка заказов...'],
+      );
       this.ordersContainer.appendChild(loadingEl);
     } else if (this.orders.length === 0) {
-      const emptyEl = this.createElement('div', {
-        className: 'profile-page__empty',
-      }, ['У вас пока нет заказов']);
+      const emptyEl = this.createElement(
+        'div',
+        {
+          className: 'profile-page__empty',
+        },
+        ['У вас пока нет заказов'],
+      );
       this.ordersContainer.appendChild(emptyEl);
     } else {
-      this.orders.forEach(order => {
+      this.orders.forEach((order) => {
         const orderCard = this.renderOrderCard(order);
         this.ordersContainer?.appendChild(orderCard);
       });
@@ -261,10 +344,14 @@ export class ProfilePage extends Component<ProfilePageProps> {
     ordersSection.appendChild(this.ordersContainer);
 
     // Ссылка на все заказы
-    const allOrdersLink = this.createElement('a', {
-      className: 'profile-page__orders-link',
-      href: '/orders',
-    }, ['Посмотреть все заказы']);
+    const allOrdersLink = this.createElement(
+      'a',
+      {
+        className: 'profile-page__orders-link',
+        href: '/orders',
+      },
+      ['Посмотреть все заказы'],
+    );
     allOrdersLink.addEventListener('click', (e) => {
       e.preventDefault();
       router.navigate('/orders');
@@ -278,9 +365,13 @@ export class ProfilePage extends Component<ProfilePageProps> {
       className: 'profile-page__section',
     });
 
-    const editTitle = this.createElement('h2', {
-      className: 'profile-page__section-title',
-    }, ['Редактирование профиля']);
+    const editTitle = this.createElement(
+      'h2',
+      {
+        className: 'profile-page__section-title',
+      },
+      ['Редактирование профиля'],
+    );
     editSection.appendChild(editTitle);
 
     const editForm = this.createElement('form', {
@@ -288,9 +379,13 @@ export class ProfilePage extends Component<ProfilePageProps> {
     });
 
     // Поле Имя
-    const nameLabel = this.createElement('label', {
-      className: 'profile-page__form-label',
-    }, ['Имя']);
+    const nameLabel = this.createElement(
+      'label',
+      {
+        className: 'profile-page__form-label',
+      },
+      ['Имя'],
+    );
     editForm.appendChild(nameLabel);
 
     this.nameInput = new Input({
@@ -313,9 +408,13 @@ export class ProfilePage extends Component<ProfilePageProps> {
     }
 
     // Поле Email
-    const emailLabel = this.createElement('label', {
-      className: 'profile-page__form-label',
-    }, ['Email']);
+    const emailLabel = this.createElement(
+      'label',
+      {
+        className: 'profile-page__form-label',
+      },
+      ['Email'],
+    );
     editForm.appendChild(emailLabel);
 
     this.emailInput = new Input({
@@ -338,15 +437,23 @@ export class ProfilePage extends Component<ProfilePageProps> {
     }
 
     // Разделитель для пароля
-    const passwordDivider = this.createElement('div', {
-      className: 'profile-page__form-divider',
-    }, ['Смена пароля (необязательно)']);
+    const passwordDivider = this.createElement(
+      'div',
+      {
+        className: 'profile-page__form-divider',
+      },
+      ['Смена пароля (необязательно)'],
+    );
     editForm.appendChild(passwordDivider);
 
     // Поле Текущий пароль
-    const currentPasswordLabel = this.createElement('label', {
-      className: 'profile-page__form-label',
-    }, ['Текущий пароль']);
+    const currentPasswordLabel = this.createElement(
+      'label',
+      {
+        className: 'profile-page__form-label',
+      },
+      ['Текущий пароль'],
+    );
     editForm.appendChild(currentPasswordLabel);
 
     this.currentPasswordInput = new Input({
@@ -368,9 +475,13 @@ export class ProfilePage extends Component<ProfilePageProps> {
     }
 
     // Поле Новый пароль
-    const newPasswordLabel = this.createElement('label', {
-      className: 'profile-page__form-label',
-    }, ['Новый пароль']);
+    const newPasswordLabel = this.createElement(
+      'label',
+      {
+        className: 'profile-page__form-label',
+      },
+      ['Новый пароль'],
+    );
     editForm.appendChild(newPasswordLabel);
 
     this.newPasswordInput = new Input({
@@ -393,9 +504,13 @@ export class ProfilePage extends Component<ProfilePageProps> {
     }
 
     // Поле Подтверждение пароля
-    const confirmPasswordLabel = this.createElement('label', {
-      className: 'profile-page__form-label',
-    }, ['Подтверждение пароля']);
+    const confirmPasswordLabel = this.createElement(
+      'label',
+      {
+        className: 'profile-page__form-label',
+      },
+      ['Подтверждение пароля'],
+    );
     editForm.appendChild(confirmPasswordLabel);
 
     this.confirmPasswordInput = new Input({
@@ -418,9 +533,13 @@ export class ProfilePage extends Component<ProfilePageProps> {
 
     // Общая ошибка формы
     if (this.formState.errors.form) {
-      const formError = this.createElement('div', {
-        className: 'profile-page__form-error',
-      }, [this.formState.errors.form]);
+      const formError = this.createElement(
+        'div',
+        {
+          className: 'profile-page__form-error',
+        },
+        [this.formState.errors.form],
+      );
       editForm.appendChild(formError);
     }
 
@@ -473,28 +592,44 @@ export class ProfilePage extends Component<ProfilePageProps> {
       className: 'profile-page__order-header',
     });
 
-    const orderId = this.createElement('span', {
-      className: 'profile-page__order-id',
-    }, [`Заказ #${order.id.slice(-6)}`]);
+    const orderId = this.createElement(
+      'span',
+      {
+        className: 'profile-page__order-id',
+      },
+      [`Заказ #${order.id.slice(-6)}`],
+    );
     header.appendChild(orderId);
 
-    const orderDate = this.createElement('span', {
-      className: 'profile-page__order-date',
-    }, [this.formatDate(order.createdAt)]);
+    const orderDate = this.createElement(
+      'span',
+      {
+        className: 'profile-page__order-date',
+      },
+      [this.formatDate(order.createdAt)],
+    );
     header.appendChild(orderDate);
 
     card.appendChild(header);
 
     // Статус
-    const statusEl = this.createElement('span', {
-      className: `profile-page__order-status profile-page__order-status--${order.status}`,
-    }, [this.getStatusLabel(order.status)]);
+    const statusEl = this.createElement(
+      'span',
+      {
+        className: `profile-page__order-status profile-page__order-status--${order.status}`,
+      },
+      [this.getStatusLabel(order.status)],
+    );
     card.appendChild(statusEl);
 
     // Сумма
-    const totalEl = this.createElement('div', {
-      className: 'profile-page__order-total',
-    }, [`${order.totalSum.toLocaleString('ru-RU')} ₽`]);
+    const totalEl = this.createElement(
+      'div',
+      {
+        className: 'profile-page__order-total',
+      },
+      [`${order.totalSum.toLocaleString('ru-RU')} ₽`],
+    );
     card.appendChild(totalEl);
 
     return card;
@@ -517,7 +652,7 @@ export class ProfilePage extends Component<ProfilePageProps> {
   private getStatusLabel(status: OrderStatus): string {
     const labels: Record<OrderStatus, string> = {
       pending: 'Ожидает',
-      confirmed: 'Подтверждён',
+      processing: 'В обработке',
       shipped: 'Отправлен',
       delivered: 'Доставлен',
       cancelled: 'Отменён',
@@ -555,6 +690,9 @@ export class ProfilePage extends Component<ProfilePageProps> {
             error = validation.error || '';
           }
         }
+        break;
+      default:
+        // Неизвестное поле - ничего не валидируем
         break;
     }
 
@@ -627,7 +765,6 @@ export class ProfilePage extends Component<ProfilePageProps> {
       return;
     }
 
-    this.isSaving = true;
     this.saveButton?.setLoading(true);
 
     try {
@@ -664,17 +801,16 @@ export class ProfilePage extends Component<ProfilePageProps> {
 
       // Перерисовать форму
       this.refreshDisplay();
-
     } catch (error) {
       console.error('[ProfilePage] Ошибка сохранения:', error);
-      
+
       // Обработка ошибок
       if (error instanceof Error) {
         let errorMessage = 'Ошибка сохранения профиля';
-        
+
         // Проверяем, есть ли更多信息 в ошибке
         if ('statusCode' in error) {
-          const statusCode = (error as { statusCode: number }).statusCode;
+          const { statusCode } = (error as { statusCode: number });
           if (statusCode === 409) {
             errorMessage = 'Email уже используется другим пользователем';
             this.formState.errors.email = errorMessage;
@@ -683,7 +819,7 @@ export class ProfilePage extends Component<ProfilePageProps> {
             this.formState.errors.currentPassword = errorMessage;
           }
         }
-        
+
         this.showToast(errorMessage, 'error');
       } else {
         this.showToast('Произошла ошибка при сохранении', 'error');
@@ -691,7 +827,6 @@ export class ProfilePage extends Component<ProfilePageProps> {
 
       this.update();
     } finally {
-      this.isSaving = false;
       this.saveButton?.setLoading(false);
     }
   }
@@ -702,9 +837,13 @@ export class ProfilePage extends Component<ProfilePageProps> {
   private showToast(message: string, type: 'success' | 'error'): void {
     if (!this.toastContainer) return;
 
-    const toast = this.createElement('div', {
-      className: `profile-page__toast profile-page__toast--${type}`,
-    }, [message]);
+    const toast = this.createElement(
+      'div',
+      {
+        className: `profile-page__toast profile-page__toast--${type}`,
+      },
+      [message],
+    );
 
     this.toastContainer.appendChild(toast);
 

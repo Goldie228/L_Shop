@@ -12,7 +12,7 @@ import { Product } from '../../types/product.js';
  */
 export interface ProductCardProps extends ComponentProps {
   /** Данные продукта */
-  product: Product;
+  product?: Product | null;
   /** Авторизован ли пользователь */
   isAuthenticated: boolean;
   /** Callback для добавления в корзину */
@@ -42,7 +42,7 @@ export class ProductCard extends Component<ProductCardProps> {
   protected getDefaultProps(): ProductCardProps {
     return {
       ...super.getDefaultProps(),
-      product: {} as Product,
+      product: null,
       isAuthenticated: false,
     };
   }
@@ -51,7 +51,16 @@ export class ProductCard extends Component<ProductCardProps> {
    * Отрендерить карточку продукта
    */
   public render(): HTMLElement {
-    const { product, isAuthenticated, className } = this.props;
+    const {
+      product, isAuthenticated, className, onAddToCart,
+    } = this.props;
+
+    // Guard clause - не рендерим без продукта
+    if (!product) {
+      this.element = this.createElement('div', { className: 'product-card product-card--loading' });
+      this.element.textContent = 'Загрузка...';
+      return this.element;
+    }
 
     // Построить классы
     const classes = ['product-card'];
@@ -68,22 +77,22 @@ export class ProductCard extends Component<ProductCardProps> {
     });
 
     // Изображение продукта
-    const imageContainer = this.renderImage();
+    const imageContainer = this.renderImage(product);
     this.element.appendChild(imageContainer);
 
     // Контент карточки
-    const content = this.renderContent();
+    const content = this.renderContent(product);
     this.element.appendChild(content);
 
     // Рейтинг (Вариант 17)
     if (product.rating !== undefined) {
-      const ratingElement = this.renderRating();
+      const ratingElement = this.renderRating(product);
       this.element.appendChild(ratingElement);
     }
 
     // Кнопка "В корзину" только для авторизованных
-    if (isAuthenticated && product.inStock) {
-      this.renderAddButton();
+    if (isAuthenticated && product.inStock && onAddToCart) {
+      this.renderAddButton(product, onAddToCart);
     }
 
     return this.element;
@@ -92,9 +101,7 @@ export class ProductCard extends Component<ProductCardProps> {
   /**
    * Отрендерить изображение продукта
    */
-  private renderImage(): HTMLElement {
-    const { product } = this.props;
-
+  private renderImage(product: Product): HTMLElement {
     const imageContainer = this.createElement('div', {
       className: 'product-card__image',
     });
@@ -112,11 +119,18 @@ export class ProductCard extends Component<ProductCardProps> {
       };
       imageContainer.appendChild(img);
     } else {
-      // Заглушка если нет изображения
+      // Заглушка если нет изображения (SVG иконка)
       const placeholder = this.createElement('div', {
         className: 'product-card__placeholder',
       });
-      placeholder.textContent = '📷';
+      placeholder.innerHTML = `
+        <svg class="product-card__placeholder-image" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <circle cx="8.5" cy="8.5" r="1.5"></circle>
+          <polyline points="21 15 16 10 5 21"></polyline>
+        </svg>
+      `;
       imageContainer.appendChild(placeholder);
     }
 
@@ -135,9 +149,7 @@ export class ProductCard extends Component<ProductCardProps> {
   /**
    * Отрендерить контент карточки (название и цена)
    */
-  private renderContent(): HTMLElement {
-    const { product } = this.props;
-
+  private renderContent(product: Product): HTMLElement {
     const content = this.createElement('div', {
       className: 'product-card__content',
     });
@@ -173,7 +185,7 @@ export class ProductCard extends Component<ProductCardProps> {
         className: 'product-card__original-price',
       });
       originalPrice.textContent = this.formatPrice(
-        product.price * (1 + product.discountPercent / 100)
+        product.price * (1 + product.discountPercent / 100),
       );
       priceContainer.appendChild(originalPrice);
     }
@@ -196,25 +208,28 @@ export class ProductCard extends Component<ProductCardProps> {
   /**
    * Отрендерить рейтинг (Вариант 17)
    */
-  private renderRating(): HTMLElement {
-    const { product } = this.props;
-
+  private renderRating(product: Product): HTMLElement {
     const ratingElement = this.createElement('div', {
       className: 'product-card__rating',
     });
 
-    // Звезда рейтинга
+    // Звезда рейтинга (SVG)
     const star = this.createElement('span', {
       className: 'product-card__rating-star',
     });
-    star.textContent = '★';
+    star.innerHTML = `
+      <svg class="product-card__rating-star-icon" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18
+          3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+      </svg>
+    `;
     ratingElement.appendChild(star);
 
     // Значение рейтинга
     const ratingValue = this.createElement('span', {
       className: 'product-card__rating-value',
     });
-    ratingValue.textContent = product.rating!.toFixed(1);
+    ratingValue.textContent = (product.rating ?? 0).toFixed(1);
     ratingElement.appendChild(ratingValue);
 
     // Количество отзывов
@@ -232,15 +247,13 @@ export class ProductCard extends Component<ProductCardProps> {
   /**
    * Отрендерить кнопку добавления в корзину
    */
-  private renderAddButton(): void {
-    const { product, onAddToCart } = this.props;
-
+  private renderAddButton(product: Product, onAddToCart: (productId: string) => void): void {
     this.addButton = new Button({
       text: 'В корзину',
       variant: 'primary',
       size: 'md',
       className: 'product-card__add-button',
-      onClick: () => onAddToCart?.(product.id),
+      onClick: () => onAddToCart(product.id),
     });
 
     this.addButton.mount(this.element!);

@@ -7,9 +7,12 @@ import { Component, ComponentProps } from '../base/Component';
 import { DeliveryForm } from '../order/DeliveryForm';
 import { OrderSummary } from '../order/OrderSummary';
 import { orderService } from '../../services/order.service';
+import { api } from '../../services/api';
 import { store } from '../../store/store';
 import { router } from '../../router/router';
 import { Order, OrderItem, CreateOrderData } from '../../types/order';
+import { CartWithProducts, CartItemWithProduct } from '../../types/cart';
+import { Toast } from '../ui/Toast';
 
 /**
  * Пропсы страницы доставки
@@ -31,6 +34,10 @@ export interface DeliveryPageState {
   success: boolean;
   /** Созданный заказ */
   order: Order | null;
+  /** Данные корзины */
+  cartData: CartWithProducts | null;
+  /** Флаг загрузки корзины */
+  isLoadingCart: boolean;
 }
 
 /**
@@ -42,10 +49,17 @@ export class DeliveryPage extends Component<DeliveryPageProps> {
     error: null,
     success: false,
     order: null,
+    cartData: null,
+    isLoadingCart: false,
   };
 
   private deliveryForm!: DeliveryForm;
+
   private orderSummary!: OrderSummary;
+
+  private cartData: CartWithProducts | null = null;
+
+  private isLoadingCart = false;
 
   constructor(props: DeliveryPageProps = {}) {
     super(props);
@@ -78,6 +92,11 @@ export class DeliveryPage extends Component<DeliveryPageProps> {
       return container;
     }
 
+    // Загружаем корзину при первом рендере
+    if (!this.cartData && !this.isLoadingCart && !this.state.error) {
+      this.loadCart();
+    }
+
     // Основной контент
     const content = this.createElement('div', {
       className: 'delivery-page__content',
@@ -103,7 +122,7 @@ export class DeliveryPage extends Component<DeliveryPageProps> {
 
     this.orderSummary = new OrderSummary({
       className: 'delivery-page__summary',
-      items: this.props.items || [],
+      items: this.convertCartToOrderItems(),
       title: 'Ваш заказ',
     });
     summaryColumn.appendChild(this.orderSummary.render());
@@ -113,10 +132,26 @@ export class DeliveryPage extends Component<DeliveryPageProps> {
 
     // Отображение ошибки
     if (this.state.error) {
-      const errorEl = this.createElement('div', {
-        className: 'delivery-page__error',
-      }, [this.state.error]);
+      const errorEl = this.createElement(
+        'div',
+        {
+          className: 'delivery-page__error',
+        },
+        [this.state.error],
+      );
       container.appendChild(errorEl);
+    }
+
+    // Индикатор загрузки корзины
+    if (this.isLoadingCart) {
+      const loadingEl = this.createElement(
+        'div',
+        {
+          className: 'delivery-page__loading',
+        },
+        ['Загрузка корзины...'],
+      );
+      container.appendChild(loadingEl);
     }
 
     return container;
@@ -130,19 +165,31 @@ export class DeliveryPage extends Component<DeliveryPageProps> {
       className: 'delivery-page__auth-required',
     });
 
-    const title = this.createElement('h2', {
-      className: 'delivery-page__auth-title',
-    }, ['Требуется авторизация']);
+    const title = this.createElement(
+      'h2',
+      {
+        className: 'delivery-page__auth-title',
+      },
+      ['Требуется авторизация'],
+    );
     container.appendChild(title);
 
-    const message = this.createElement('p', {
-      className: 'delivery-page__auth-message',
-    }, ['Для оформления заказа необходимо войти в систему.']);
+    const message = this.createElement(
+      'p',
+      {
+        className: 'delivery-page__auth-message',
+      },
+      ['Для оформления заказа необходимо войти в систему.'],
+    );
     container.appendChild(message);
 
-    const loginButton = this.createElement('button', {
-      className: 'btn btn--primary',
-    }, ['Войти']);
+    const loginButton = this.createElement(
+      'button',
+      {
+        className: 'btn btn--primary',
+      },
+      ['Войти'],
+    );
     this.addEventListener(loginButton, 'click', () => {
       store.openModal('auth');
     });
@@ -159,24 +206,41 @@ export class DeliveryPage extends Component<DeliveryPageProps> {
       className: 'delivery-page__success',
     });
 
+    // SVG иконка галочки
     const icon = this.createElement('div', {
       className: 'delivery-page__success-icon',
-    }, ['✓']);
+      innerHTML: `<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <polyline points="9 12 12 15 16 9"></polyline>
+      </svg>`,
+    });
     container.appendChild(icon);
 
-    const title = this.createElement('h2', {
-      className: 'delivery-page__success-title',
-    }, ['Заказ оформлен!']);
+    const title = this.createElement(
+      'h2',
+      {
+        className: 'delivery-page__success-title',
+      },
+      ['Заказ оформлен!'],
+    );
     container.appendChild(title);
 
-    const orderInfo = this.createElement('p', {
-      className: 'delivery-page__success-order',
-    }, [`Номер заказа: ${this.state.order!.id}`]);
+    const orderInfo = this.createElement(
+      'p',
+      {
+        className: 'delivery-page__success-order',
+      },
+      [`Номер заказа: ${this.state.order?.id ?? '—'}`],
+    );
     container.appendChild(orderInfo);
 
-    const message = this.createElement('p', {
-      className: 'delivery-page__success-message',
-    }, ['Спасибо за заказ! Мы свяжемся с вами для подтверждения.']);
+    const message = this.createElement(
+      'p',
+      {
+        className: 'delivery-page__success-message',
+      },
+      ['Спасибо за заказ! Мы свяжемся с вами для подтверждения.'],
+    );
     container.appendChild(message);
 
     // Кнопки
@@ -184,17 +248,25 @@ export class DeliveryPage extends Component<DeliveryPageProps> {
       className: 'delivery-page__success-actions',
     });
 
-    const catalogButton = this.createElement('button', {
-      className: 'btn btn--primary',
-    }, ['Продолжить покупки']);
+    const catalogButton = this.createElement(
+      'button',
+      {
+        className: 'btn btn--primary',
+      },
+      ['Продолжить покупки'],
+    );
     this.addEventListener(catalogButton, 'click', () => {
       router.navigate('/');
     });
     actions.appendChild(catalogButton);
 
-    const ordersButton = this.createElement('button', {
-      className: 'btn btn--outline',
-    }, ['Мои заказы']);
+    const ordersButton = this.createElement(
+      'button',
+      {
+        className: 'btn btn--outline',
+      },
+      ['Мои заказы'],
+    );
     this.addEventListener(ordersButton, 'click', () => {
       router.navigate('/orders');
     });
@@ -220,19 +292,26 @@ export class DeliveryPage extends Component<DeliveryPageProps> {
         error: null,
         success: true,
         order,
+        cartData: null,
+        isLoadingCart: false,
       };
+
+      // Показать уведомление об успехе
+      Toast.showSuccess('Заказ успешно оформлен!');
 
       // Обновить отображение
       this.update();
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : 'Ошибка при оформлении заказа';
+      const message = error instanceof Error ? error.message : 'Ошибка при оформлении заказа';
 
       this.state = {
         ...this.state,
         loading: false,
         error: message,
       };
+
+      // Показать уведомление об ошибке
+      Toast.showError(message);
 
       // Обновить форму
       if (this.deliveryForm) {
@@ -248,6 +327,55 @@ export class DeliveryPage extends Component<DeliveryPageProps> {
     this.props.items = items;
     if (this.orderSummary) {
       this.orderSummary.updateItems(items);
+    }
+  }
+
+  /**
+   * Загрузить данные корзины с API
+   */
+  private async loadCart(): Promise<void> {
+    if (this.isLoadingCart || this.state.success) return;
+
+    this.isLoadingCart = true;
+    this.state.isLoadingCart = true;
+
+    try {
+      this.cartData = await api.get<CartWithProducts>('/api/cart');
+      this.updateOrderSummary();
+    } catch (error) {
+      console.error('[DeliveryPage] Ошибка загрузки корзины:', error);
+      this.state.error = 'Не удалось загрузить корзину';
+      this.update();
+    } finally {
+      this.isLoadingCart = false;
+      this.state.isLoadingCart = false;
+    }
+  }
+
+  /**
+   * Преобразовать данные корзины в элементы заказа
+   */
+  private convertCartToOrderItems(): OrderItem[] {
+    if (!this.cartData) return [];
+
+    return this.cartData.items.map(
+      (item: CartItemWithProduct): OrderItem => ({
+        productId: item.productId,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        discountPercent: item.discountPercent,
+        currency: 'BYN',
+      }),
+    );
+  }
+
+  /**
+   * Обновить сводку заказа данными из корзины
+   */
+  private updateOrderSummary(): void {
+    if (this.orderSummary && this.cartData) {
+      this.orderSummary.updateItems(this.convertCartToOrderItems());
     }
   }
 }

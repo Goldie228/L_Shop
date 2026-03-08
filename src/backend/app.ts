@@ -193,6 +193,23 @@ async function startServer(): Promise<void> {
       logger.info({ port: config.port, env: config.nodeEnv }, 'Сервер запущен');
     });
 
+    // Обработка ошибок запуска сервера (например, порт занят)
+    server.on('error', (err: NodeJS.ErrnoException) => {
+      if (err.code === 'EADDRINUSE') {
+        logger.error(
+          {
+            port: config.port,
+            message: `Порт ${config.port} уже занят другим процессом`,
+            hint: 'Используйте команду "lsof -i :3001" чтобы найти процесс или измените PORT в .env',
+          },
+          'Не удалось запустить сервер',
+        );
+      } else {
+        logger.error({ err, stack: err.stack }, 'Неожиданная ошибка сервера');
+      }
+      process.exit(1);
+    });
+
     // Graceful shutdown позволяет завершить текущие запросы перед остановкой
     const gracefulShutdown = (signal: string): void => {
       logger.info({ signal }, 'Получен сигнал завершения');
@@ -212,7 +229,18 @@ async function startServer(): Promise<void> {
     process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
     process.on('SIGINT', () => gracefulShutdown('SIGINT'));
   } catch (error) {
-    logger.error({ error }, 'Ошибка запуска сервера');
+    if (error instanceof Error) {
+      logger.error(
+        {
+          error: error.message,
+          stack: error.stack,
+          name: error.name,
+        },
+        'Ошибка инициализации сервера',
+      );
+    } else {
+      logger.error({ error }, 'Неизвестная ошибка инициализации сервера');
+    }
     process.exit(1);
   }
 }

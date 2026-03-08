@@ -7,13 +7,14 @@
  */
 
 import { Component, ComponentProps } from '../base/Component.js';
+import { Icon } from '../ui/Icon.js';
 
 /**
  * Пропсы для компонента Footer
  */
 export interface FooterProps extends ComponentProps {
   /** Год для копирайта */
-  year?: number;
+  year: number;
 }
 
 /**
@@ -79,14 +80,22 @@ export class Footer extends Component<FooterProps> {
       className: 'footer__brand',
     });
 
-    const logo = this.createElement('a', {
-      href: '/',
-      className: 'footer__logo',
-    }, ['L_Shop']);
+    const logo = this.createElement(
+      'a',
+      {
+        href: '/',
+        className: 'footer__logo',
+      },
+      ['L_Shop'],
+    );
 
-    const description = this.createElement('p', {
-      className: 'footer__description',
-    }, ['Интернет-магазин с широким ассортиментом товаров по выгодным ценам.']);
+    const description = this.createElement(
+      'p',
+      {
+        className: 'footer__description',
+      },
+      ['Интернет-магазин с широким ассортиментом товаров по выгодным ценам.'],
+    );
 
     brandCol.appendChild(logo);
     brandCol.appendChild(description);
@@ -97,9 +106,13 @@ export class Footer extends Component<FooterProps> {
       className: 'footer__links',
     });
 
-    const linksTitle = this.createElement('h4', {
-      className: 'footer__links-title',
-    }, ['Навигация']);
+    const linksTitle = this.createElement(
+      'h4',
+      {
+        className: 'footer__links-title',
+      },
+      ['Навигация'],
+    );
 
     const linksList = this.createElement('ul', {
       className: 'footer__links-list',
@@ -110,14 +123,20 @@ export class Footer extends Component<FooterProps> {
       { text: 'Каталог', href: '/catalog' },
       { text: 'О нас', href: '/about' },
       { text: 'Контакты', href: '/contacts' },
+      { text: 'Доставка', href: '/delivery' },
+      { text: 'Возврат', href: '/returns' },
     ];
 
-    links.forEach(link => {
+    links.forEach((link) => {
       const item = this.createElement('li', {});
-      const anchor = this.createElement('a', {
-        href: link.href,
-        className: 'footer__link',
-      }, [link.text]);
+      const anchor = this.createElement(
+        'a',
+        {
+          href: link.href,
+          className: 'footer__link',
+        },
+        [link.text],
+      );
       item.appendChild(anchor);
       linksList.appendChild(item);
     });
@@ -131,9 +150,13 @@ export class Footer extends Component<FooterProps> {
       className: 'footer__contacts',
     });
 
-    const contactsTitle = this.createElement('h4', {
-      className: 'footer__links-title',
-    }, ['Контакты']);
+    const contactsTitle = this.createElement(
+      'h4',
+      {
+        className: 'footer__links-title',
+      },
+      ['Контакты'],
+    );
 
     const contactsList = this.createElement('ul', {
       className: 'footer__links-list',
@@ -144,12 +167,19 @@ export class Footer extends Component<FooterProps> {
       { text: '+375 (29) 123-45-67', icon: 'phone' },
     ];
 
-    contacts.forEach(contact => {
+    contacts.forEach((contact) => {
       const item = this.createElement('li', {});
-      const anchor = this.createElement('a', {
-        href: contact.icon === 'email' ? `mailto:${contact.text}` : `tel:${contact.text.replace(/\D/g, '')}`,
-        className: 'footer__link',
-      }, [contact.text]);
+      const anchor = this.createElement(
+        'a',
+        {
+          href:
+            contact.icon === 'email'
+              ? `mailto:${contact.text}`
+              : `tel:${contact.text.replace(/\D/g, '')}`,
+          className: 'footer__link',
+        },
+        [contact.text],
+      );
       item.appendChild(anchor);
       contactsList.appendChild(item);
     });
@@ -157,6 +187,54 @@ export class Footer extends Component<FooterProps> {
     contactsCol.appendChild(contactsTitle);
     contactsCol.appendChild(contactsList);
     content.appendChild(contactsCol);
+
+    // Колонка с социальными сетями
+    const socialCol = this.createElement('div', {
+      className: 'footer__social',
+    });
+
+    const socialTitle = this.createElement(
+      'h4',
+      {
+        className: 'footer__links-title',
+      },
+      ['Соцсети'],
+    );
+
+    const socialLinks = this.createElement('div', {
+      className: 'footer__social-links',
+    });
+
+    // Социальные сети (используем Icon компонент)
+    const socialNetworks = [
+      { name: 'VK', href: 'https://vk.com/lshop', iconName: 'vk' as const },
+      { name: 'Telegram', href: 'https://t.me/lshop', iconName: 'telegram' as const },
+      { name: 'Instagram', href: 'https://instagram.com/lshop', iconName: 'instagram' as const },
+      { name: 'YouTube', href: 'https://youtube.com/@lshop', iconName: 'youtube' as const },
+    ];
+
+    socialNetworks.forEach((network) => {
+      const link = this.createElement('a', {
+        href: network.href,
+        className: 'footer__social-link',
+        'aria-label': `Мы в ${network.name}`,
+        target: '_blank',
+        rel: 'noopener noreferrer',
+      });
+
+      const icon = new Icon({
+        name: network.iconName,
+        size: 24,
+        className: 'footer__social-icon',
+        ariaLabel: `Иконка ${network.name}`,
+      });
+      link.appendChild(icon.render());
+      socialLinks.appendChild(link);
+    });
+
+    socialCol.appendChild(socialTitle);
+    socialCol.appendChild(socialLinks);
+    content.appendChild(socialCol);
 
     return content;
   }
@@ -170,9 +248,13 @@ export class Footer extends Component<FooterProps> {
       className: 'footer__bottom',
     });
 
-    const copyright = this.createElement('p', {
-      className: 'footer__copyright',
-    }, [`© ${this.props.year ?? new Date().getFullYear()} L_Shop. Все права защищены.`]);
+    const copyright = this.createElement(
+      'p',
+      {
+        className: 'footer__copyright',
+      },
+      [`© ${this.props.year} L_Shop. Все права защищены.`],
+    );
 
     bottom.appendChild(copyright);
     return bottom;

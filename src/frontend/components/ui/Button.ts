@@ -11,7 +11,14 @@ import { Component, ComponentProps } from '../base/Component.js';
 /**
  * Типы вариантов кнопки
  */
-export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost';
+export type ButtonVariant =
+  | 'primary'
+  | 'secondary'
+  | 'outline'
+  | 'ghost'
+  | 'danger'
+  | 'success'
+  | 'link';
 
 /**
  * Типы размеров кнопки
@@ -40,18 +47,13 @@ export interface ButtonProps extends ComponentProps {
   testId?: string;
   /** Растянуть на всю ширину */
   block?: boolean;
+  /** Только иконка (без текста) */
+  iconOnly?: boolean;
+  /** Иконка слева от текста */
+  leftIcon?: string;
+  /** Иконка справа от текста */
+  rightIcon?: string;
 }
-
-/**
- * SVG иконка спиннера для состояния загрузки
- */
-const SPINNER_ICON = `
-  <svg class="btn__spinner" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-dasharray="31.416" stroke-dashoffset="10">
-      <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite"/>
-    </circle>
-  </svg>
-`;
 
 /**
  * Компонент кнопки с вариантами, размерами и состояниями
@@ -98,6 +100,10 @@ export class Button extends Component<ButtonProps> {
       type: 'button',
       disabled: false,
       loading: false,
+      block: false,
+      iconOnly: false,
+      leftIcon: undefined,
+      rightIcon: undefined,
     } as ButtonProps;
   }
 
@@ -106,97 +112,230 @@ export class Button extends Component<ButtonProps> {
    * @returns Элемент кнопки
    */
   public render(): HTMLButtonElement {
-    const { variant, size, type, loading, disabled, className, testId, text, block } =
-      this.props;
+    const {
+      text,
+      variant = 'primary',
+      size = 'md',
+      type = 'button',
+      disabled = false,
+      loading = false,
+      block = false,
+      iconOnly = false,
+      leftIcon,
+      rightIcon,
+      className,
+      id,
+      dataAttrs,
+      onClick,
+    } = this.props;
 
-    // Построить имена классов
-    const classes = ['btn'];
-    classes.push(`btn--${variant ?? 'primary'}`);
-    classes.push(`btn--${size ?? 'md'}`);
-
-    if (loading) classes.push('btn--loading');
-    if (block) classes.push('btn--block');
-    if (className) classes.push(className);
-
-    // Создать атрибуты кнопки
-    const attributes: Record<string, string | boolean> = {
-      type: type ?? 'button',
-      className: classes.join(' '),
-      disabled: disabled || loading || false,
-      'data-testid': testId ?? `btn-${variant ?? 'primary'}-${size ?? 'md'}`,
-      'aria-busy': loading ? 'true' : 'false',
-      'aria-disabled': (disabled || loading) ? 'true' : 'false',
+    // Создаём атрибуты для кнопки
+    const attrs: Record<string, string | number | boolean> = {
+      className: this.buildClassName(
+        variant,
+        size,
+        block,
+        iconOnly,
+        loading,
+        disabled,
+        className,
+      ),
+      type,
+      'aria-busy': loading,
+      'aria-disabled': disabled || loading,
     };
 
-    // Создать элемент кнопки
-    const button = this.createElement(
-      'button',
-      attributes,
-      this.renderContent()
-    );
+    // Добавляем id если указан
+    if (id !== undefined) {
+      attrs.id = id;
+    }
 
-    // Добавить обработчик клика
-    this.addEventListener(button, 'click', this.handleClick);
+    // Создаём кнопку
+    this.buttonElement = this.createElement('button', attrs);
 
-    this.buttonElement = button;
-    this.element = button;
-    return button;
+    // Устанавливаем data атрибуты для тестирования
+    if (dataAttrs && this.buttonElement) {
+      Object.entries(dataAttrs).forEach(([key, value]) => {
+        this.buttonElement.dataset[key] = value;
+      });
+    }
+
+    // Добавляем testId если указан
+    if (this.props.testId) {
+      this.buttonElement.setAttribute('data-testid', this.props.testId);
+    }
+
+    // Рендерим содержимое кнопки
+    this.renderContent(leftIcon, rightIcon, iconOnly, text, loading);
+
+    // Добавляем обработчик клика
+    if (onClick) {
+      this.addEventListener(this.buttonElement, 'click', () => {
+        if (!disabled && !loading) {
+          onClick();
+        }
+      });
+    }
+
+    return this.buttonElement;
   }
 
   /**
-   * Отрендерить содержимое кнопки
-   * @returns Массив дочерних узлов
+   * Построить CSS классы для кнопки
+   * @param variant - Вариант кнопки
+   * @param size - Размер кнопки
+   * @param block - Растянуть на всю ширину
+   * @param iconOnly - Только иконка
+   * @param loading - Состояние загрузки
+   * @param disabled - Отключена ли кнопка
+   * @param extraClassName - Дополнительные классы
+   * @returns Строка с классами
    */
-  private renderContent(): (string | Element)[] {
-    const { text, loading } = this.props;
-    const children: (string | Element)[] = [];
+  private buildClassName(
+    variant: ButtonVariant,
+    size: ButtonSize,
+    block: boolean,
+    iconOnly: boolean,
+    loading: boolean,
+    disabled: boolean,
+    extraClassName?: string,
+  ): string {
+    const classes = ['btn'];
 
-    // Добавить спиннер при загрузке
+    // Базовый вариант
+    classes.push(`btn--${variant}`);
+
+    // Размер
+    classes.push(`btn--${size}`);
+
+    // Модификаторы
+    if (block) classes.push('btn--block');
+    if (iconOnly) classes.push('btn--icon-only');
+    if (loading) classes.push('btn--loading');
+    if (disabled) classes.push('btn--disabled');
+
+    // Дополнительные классы
+    if (extraClassName) {
+      classes.push(extraClassName);
+    }
+
+    return classes.join(' ');
+  }
+
+  /**
+   * Создать SVG элемент спиннера для состояния загрузки
+   * @returns SVG элемент спиннера
+   */
+  private createSpinnerElement(): SVGElement {
+    // Создаем SVG спиннер безопасно через createSVGElement
+    const svg = this.createSVGElement('svg', {
+      className: 'btn__spinner',
+      viewBox: '0 0 24 24',
+      fill: 'none',
+      xmlns: 'http://www.w3.org/2000/svg',
+    }) as SVGSVGElement;
+
+    // Создаем круг
+    const circle = this.createSVGElement('circle', {
+      cx: 12,
+      cy: 12,
+      r: 10,
+      stroke: 'currentColor',
+      'stroke-width': 3,
+      'stroke-linecap': 'round',
+      'stroke-dasharray': 31.416,
+      'stroke-dashoffset': 10,
+    });
+
+    // Создаем анимацию вращения
+    const animateTransform = this.createSVGElement('animateTransform', {
+      attributeName: 'transform',
+      type: 'rotate',
+      from: '0 12 12',
+      to: '360 12 12',
+      dur: '1s',
+      repeatCount: 'indefinite',
+    });
+
+    // Собираем иерархию
+    circle.appendChild(animateTransform);
+    svg.appendChild(circle);
+
+    return svg;
+  }
+
+  /**
+   * Отрендерить содержимое кнопки (иконки и текст)
+   * @param leftIcon - Иконка слева
+   * @param rightIcon - Иконка справа
+   * @param iconOnly - Только иконка
+   * @param text - Текст кнопки
+   * @param loading - Состояние загрузки
+   */
+  private renderContent(
+    leftIcon: string | undefined,
+    rightIcon: string | undefined,
+    iconOnly: boolean,
+    text: string,
+    loading: boolean,
+  ): void {
+    if (!this.buttonElement) return;
+
+    // Очищаем содержимое
+    this.buttonElement.innerHTML = '';
+
+    // Добавляем левую иконку
+    if (leftIcon) {
+      const iconSpan = this.createElement('span', {
+        className: 'btn__icon btn__icon--left',
+      });
+      // Используем безопасный метод для SVG
+      const svgElement = this.createSVGFromString(leftIcon);
+      if (svgElement) {
+        iconSpan.appendChild(svgElement);
+      }
+      this.buttonElement.appendChild(iconSpan);
+    }
+
+    // Добавляем текст (если не iconOnly или если текст указаен)
+    if (!iconOnly || text) {
+      const textSpan = this.createElement(
+        'span',
+        {
+          className: 'btn__text',
+        },
+        [text],
+      );
+      this.buttonElement.appendChild(textSpan);
+    }
+
+    // Добавляем правую иконку
+    if (rightIcon) {
+      const iconSpan = this.createElement('span', {
+        className: 'btn__icon btn__icon--right',
+      });
+      // Используем безопасный метод для SVG
+      const svgElement = this.createSVGFromString(rightIcon);
+      if (svgElement) {
+        iconSpan.appendChild(svgElement);
+      }
+      this.buttonElement.appendChild(iconSpan);
+    }
+
+    // Добавляем спиннер загрузки
     if (loading) {
-      const spinnerWrapper = this.createElement('span', {
+      const spinnerSpan = this.createElement('span', {
         className: 'btn__spinner-wrapper',
       });
-      spinnerWrapper.innerHTML = SPINNER_ICON;
-      children.push(spinnerWrapper);
+      const spinnerSvg = this.createSpinnerElement();
+      spinnerSpan.appendChild(spinnerSvg);
+      this.buttonElement.appendChild(spinnerSpan);
     }
-
-    // Добавить текст (скрыт при загрузке для сохранения ширины)
-    if (text) {
-      const textSpan = this.createElement('span', {
-        className: loading ? 'btn__text btn__text--hidden' : 'btn__text',
-      });
-      textSpan.textContent = text;
-      children.push(textSpan);
-    }
-
-    return children;
   }
-
-  /**
-   * Обработать событие клика
-   * @param event - Событие клика
-   */
-  private handleClick = (event: MouseEvent): void => {
-    // Не предотвращаем стандартное поведение для submit кнопок
-    // Это позволяет форме отправляться нормально
-    if (this.props.type !== 'submit') {
-      event.preventDefault();
-    }
-    
-    if (!this.props.disabled && !this.props.loading && this.props.onClick) {
-      this.props.onClick();
-    }
-  };
 
   /**
    * Установить состояние загрузки
    * @param loading - Состояние загрузки
-   *
-   * @example
-   * ```typescript
-   * button.setLoading(true);  // Показать спиннер
-   * button.setLoading(false); // Скрыть спиннер
-   * ```
    */
   public setLoading(loading: boolean): void {
     this.setProps({ loading });
@@ -204,34 +343,28 @@ export class Button extends Component<ButtonProps> {
   }
 
   /**
-   * Установить состояние disabled
-   * @param disabled - Состояние disabled
-   *
-   * @example
-   * ```typescript
-   * button.setDisabled(true);  // Отключить кнопку
-   * button.setDisabled(false); // Включить кнопку
-   * ```
+   * Установить состояние отключения
+   * @param disabled - Состояние отключения
    */
   public setDisabled(disabled: boolean): void {
     this.setProps({ disabled });
-    if (this.buttonElement) {
-      this.buttonElement.disabled = disabled;
-      this.buttonElement.setAttribute('aria-disabled', disabled ? 'true' : 'false');
-    }
+    this.update();
   }
 
   /**
-   * Выполнить программный клик по кнопке
-   *
-   * @example
-   * ```typescript
-   * button.click(); // Вызовет onClick обработчик
-   * ```
+   * Выполнить программный клик
    */
   public click(): void {
     if (this.buttonElement && !this.props.disabled && !this.props.loading) {
       this.buttonElement.click();
     }
+  }
+
+  /**
+   * Получить элемент кнопки
+   * @returns Элемент кнопки
+   */
+  public getButtonElement(): HTMLButtonElement | null {
+    return this.buttonElement;
   }
 }

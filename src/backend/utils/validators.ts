@@ -41,10 +41,10 @@ export const isValidEmail = (email: string): boolean => {
 
   // Домен не должен начинаться или заканчиваться точкой или дефисом
   if (
-    domain.startsWith('.') ||
-    domain.endsWith('.') ||
-    domain.startsWith('-') ||
-    domain.endsWith('-')
+    domain.startsWith('.')
+    || domain.endsWith('.')
+    || domain.startsWith('-')
+    || domain.endsWith('-')
   ) {
     return false;
   }
@@ -135,4 +135,45 @@ export const validateName = (name: string): { valid: boolean; error?: string } =
   }
 
   return { valid: true };
+};
+
+/**
+ * Регулярное выражение для валидации белорусских телефонных номеров
+ * Формат: +375 + ровно 9 цифр (например, +375291234567)
+ */
+const BELARUS_PHONE_REGEX = /^\+375\d{9}$/;
+
+/**
+ * Валидация белорусского телефонного номера
+ * @param phone - Телефон для проверки
+ * @returns true если телефон валиден
+ */
+export const isValidBelarusPhone = (phone: string): boolean => {
+  if (!phone || typeof phone !== 'string') {
+    return false;
+  }
+
+  return BELARUS_PHONE_REGEX.test(phone);
+};
+
+/**
+ * Валидация цены
+ * @param price - Цена для проверки (число или строка)
+ * @returns true если цена валидна
+ */
+export const isValidPrice = (price: number | string): boolean => {
+  if (price === null || price === undefined) {
+    return false;
+  }
+
+  // Преобразуем строку в число
+  const num = typeof price === 'string' ? parseFloat(price) : price;
+
+  // Проверяем, что это валидное число
+  if (Number.isNaN(num) || !Number.isFinite(num)) {
+    return false;
+  }
+
+  // Проверяем диапазон: минимум 0.01, максимум 999999.99
+  return num >= 0.01 && num <= 999999.99;
 };

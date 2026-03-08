@@ -1,6 +1,6 @@
 /**
  * Утилиты для работы с файлами данных
- * Включает защиту от гонки данных через мьютекс
+ * Включает защиту от гонки данных через мьютекс и кэширование чтений
  */
 
 import fs from 'fs/promises';
@@ -8,6 +8,7 @@ import path from 'path';
 import { Mutex } from 'async-mutex';
 import { config } from '../config/constants';
 import { createContextLogger } from './logger';
+import { BusinessError } from '../errors/business-error.base';
 
 const logger = createContextLogger('FileUtils');
 const DATA_DIR = config.dataDir;
@@ -19,13 +20,80 @@ const DATA_DIR = config.dataDir;
 const fileMutexes = new Map<string, Mutex>();
 
 /**
+ * Кэш для хранения содержимого файлов
+ * Ключ: путь к файлу
+ * Значение: { data: unknown[], mtime: number, timestamp: number }
+ * mtime - время последней модификации файла (из файловой системы)
+ * timestamp - время добавления в кэш (для TTL)
+ */
+const fileCache = new Map<string, { data: unknown[]; mtime: number; timestamp: number }>();
+
+/**
+ * Время жизни кэша в миллисекундах (5 секунд)
+ */
+const CACHE_TTL = 5_000;
+
+/**
  * Получить или создать мьютекс для файла
  */
 function getMutex(filename: string): Mutex {
   if (!fileMutexes.has(filename)) {
     fileMutexes.set(filename, new Mutex());
   }
-  return fileMutexes.get(filename)!;
+  const mutex = fileMutexes.get(filename);
+  if (!mutex) {
+    throw new Error(`Мьютекс для файла ${filename} не найден`);
+  }
+  return mutex;
+}
+
+/**
+ * Проверить, актуален ли кэш для файла
+ * Кэш актуален если:
+ * - Файл есть в кэше
+ * - Время жизни кэша не истекло
+ * - Время модификации файла (mtime) совпадает с сохранённым
+ */
+async function isCacheValid(filename: string): Promise<boolean> {
+  const cacheEntry = fileCache.get(filename);
+  if (!cacheEntry) {
+    return false;
+  }
+
+  // Проверяем TTL
+  const now = Date.now();
+  if (now - cacheEntry.timestamp > CACHE_TTL) {
+    fileCache.delete(filename);
+    return false;
+  }
+
+  // Проверяем mtime файла
+  try {
+    const filePath = path.join(DATA_DIR, filename);
+    const stats = await fs.stat(filePath);
+    if (stats.mtimeMs !== cacheEntry.mtime) {
+      fileCache.delete(filename);
+      return false;
+    }
+    return true;
+  } catch {
+    // Если файл не существует, кэш невалиден
+    fileCache.delete(filename);
+    return false;
+  }
+}
+
+/**
+ * Очистить кэш для конкретного файла или весь кэш
+ */
+export function clearCache(filename?: string): void {
+  if (filename) {
+    fileCache.delete(filename);
+    logger.debug(`Кэш очищен для файла: ${filename}`);
+  } else {
+    fileCache.clear();
+    logger.debug('Весь кэш очищен');
+  }
 }
 
 /**
@@ -59,11 +127,23 @@ export async function ensureDataFiles(): Promise<void> {
 /**
  * Читает JSON-файл и возвращает массив объектов
  * При отсутствии файла возвращает пустой массив
+ * Использует кэширование для повышения производительности
  */
 export async function readJsonFile<T>(filename: string): Promise<T[]> {
   const filePath = path.join(DATA_DIR, filename);
 
   try {
+    // Проверяем кэш
+    if (await isCacheValid(filename)) {
+      const cacheEntry = fileCache.get(filename);
+      if (!cacheEntry) {
+        throw new Error(`Кэш не найден для файла: ${filename}`);
+      }
+      logger.debug(`Возвращено из кэша: ${filename}`);
+      return cacheEntry.data as T[];
+    }
+
+    // Читаем файл
     const data = await fs.readFile(filePath, 'utf-8');
 
     if (!data.trim()) {
@@ -76,6 +156,15 @@ export async function readJsonFile<T>(filename: string): Promise<T[]> {
       logger.warn(`Файл ${filename} не содержит массив`);
       return [] as T[];
     }
+
+    // Сохраняем в кэш с mtime
+    const stats = await fs.stat(filePath);
+    fileCache.set(filename, {
+      data: parsed as unknown[],
+      mtime: stats.mtimeMs,
+      timestamp: Date.now(),
+    });
+    logger.debug(`Прочитано и закэшировано: ${filename}`);
 
     return parsed as T[];
   } catch (error) {
@@ -92,6 +181,7 @@ export async function readJsonFile<T>(filename: string): Promise<T[]> {
 /**
  * Записывает массив объектов в JSON-файл
  * Использует мьютекс для предотвращения гонки данных
+ * Инвалидирует кэш после записи
  */
 export async function writeJsonFile<T>(filename: string, data: T[]): Promise<void> {
   const filePath = path.join(DATA_DIR, filename);
@@ -102,6 +192,10 @@ export async function writeJsonFile<T>(filename: string, data: T[]): Promise<voi
     try {
       const jsonData = JSON.stringify(data, null, 2);
       await fs.writeFile(filePath, jsonData, 'utf-8');
+
+      // Инвалидируем кэш для этого файла
+      fileCache.delete(filename);
+      logger.debug(`Кэш инвалидирован после записи: ${filename}`);
     } catch (error) {
       logger.error({ error }, `Ошибка записи ${filename}`);
       throw new Error(`Ошибка записи ${filename}`);
@@ -151,8 +245,17 @@ export async function modifyJsonFile<T>(
     try {
       const jsonData = JSON.stringify(modified, null, 2);
       await fs.writeFile(filePath, jsonData, 'utf-8');
+
+      // Инвалидируем кэш для этого файла
+      fileCache.delete(filename);
+      logger.debug(`Кэш инвалидирован после модификации: ${filename}`);
+
       return modified;
     } catch (error) {
+      // Пробрасываем бизнес-ошибки без обёртки
+      if (error instanceof BusinessError) {
+        throw error;
+      }
       logger.error({ error }, `Ошибка записи ${filename}`);
       throw new Error(`Ошибка записи ${filename}`);
     }

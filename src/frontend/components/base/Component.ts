@@ -50,16 +50,16 @@ export type EventHandler<E = Event> = (event: E) => void;
 /**
  * Базовый абстрактный класс для всех UI компонентов
  * Предоставляет жизненный цикл, управление состоянием и автоматическую очистку событий
- * 
+ *
  * @typeParam TProps - Тип пропсов компонента (для обратной совместимости)
- * 
+ *
  * @example
  * ```typescript
  * interface ButtonProps extends ComponentProps {
  *   label: string;
  *   onClick?: () => void;
  * }
- * 
+ *
  * class Button extends Component<ButtonProps> {
  *   public render(): HTMLElement {
  *     const btn = this.createElement('button', {
@@ -100,7 +100,7 @@ export abstract class Component<TProps extends ComponentProps = ComponentProps> 
   protected getDefaultProps(): TProps {
     return {
       className: '',
-      visible: true
+      visible: true,
     } as TProps;
   }
 
@@ -131,11 +131,11 @@ export abstract class Component<TProps extends ComponentProps = ComponentProps> 
     if (!parent) {
       throw new Error('Родительский элемент не найден');
     }
-    
+
     if (!this.element) {
       this.element = this.render();
     }
-    
+
     parent.appendChild(this.element);
     this.onMount();
   }
@@ -145,7 +145,7 @@ export abstract class Component<TProps extends ComponentProps = ComponentProps> 
    */
   public unmount(): void {
     // Отмонтировать дочерние элементы сначала
-    this.children.forEach(child => child.unmount());
+    this.children.forEach((child) => child.unmount());
     this.children = [];
 
     // Удалить слушатели событий
@@ -255,12 +255,12 @@ export abstract class Component<TProps extends ComponentProps = ComponentProps> 
   protected createElement<K extends keyof HTMLElementTagNameMap>(
     tag: K,
     attrs: Record<string, string | boolean | number> = {},
-    children: (Element | string)[] = []
+    children: (Element | string)[] = [],
   ): HTMLElementTagNameMap[K] {
     const element = document.createElement(tag);
 
     // Установить атрибуты
-    for (const [key, value] of Object.entries(attrs)) {
+    Object.entries(attrs).forEach(([key, value]) => {
       if (key === 'className') {
         element.className = String(value);
       } else if (key === 'style' && typeof value === 'string') {
@@ -272,10 +272,10 @@ export abstract class Component<TProps extends ComponentProps = ComponentProps> 
       } else {
         element.setAttribute(key, String(value));
       }
-    }
+    });
 
     // Добавить дочерние элементы
-    children.forEach(child => {
+    children.forEach((child) => {
       if (typeof child === 'string') {
         element.appendChild(document.createTextNode(child));
       } else {
@@ -284,6 +284,121 @@ export abstract class Component<TProps extends ComponentProps = ComponentProps> 
     });
 
     return element;
+  }
+
+  /**
+   * Создать SVG элемент с атрибутами
+   * Безопасная альтернатива innerHTML для SVG
+   * @param tag - SVG тег (без namespace)
+   * @param attrs - Атрибуты элемента
+   * @param children - Дочерние элементы или текст
+   * @returns Созданный SVG элемент
+   */
+  protected createSVGElement(
+    tag: string,
+    attrs: Record<string, string | boolean | number> = {},
+    children: (Element | string)[] = [],
+  ): SVGElement {
+    const SVG_NS = 'http://www.w3.org/2000/svg';
+    const element = document.createElementNS(SVG_NS, tag) as SVGElement;
+
+    // Установить атрибуты
+    Object.entries(attrs).forEach(([key, value]) => {
+      if (typeof value === 'boolean') {
+        if (value) {
+          element.setAttribute(key, '');
+        }
+      } else {
+        element.setAttribute(key, String(value));
+      }
+    });
+
+    // Добавить дочерние элементы
+    children.forEach((child) => {
+      if (typeof child === 'string') {
+        element.appendChild(document.createTextNode(child));
+      } else {
+        element.appendChild(child);
+      }
+    });
+
+    return element;
+  }
+
+  /**
+   * Создать SVG элемент из строки SVG
+   * Безопасно парсит SVG строку с использованием DOMParser, защищая от XSS-атак
+   *
+   * Метод использует DOMParser вместо innerHTML для предотвращения XSS-уязвимостей.
+   * Очистка включает:
+   * - Удаление опасных атрибутов событий (onload, onerror, onclick и др.)
+   * - Удаление всех элементов script
+   * - Удаление href-атрибутов с javascript: протоколом
+   * - Проверку ошибок парсинга
+   *
+   * @param svgString - Строка с SVG разметкой
+   * @returns Созданный SVG элемент или null если парсинг не удался
+   * @throws Не выбрасывает исключения, ошибки логируются в консоль
+   *
+   * @example
+   * ```typescript
+   * const svg = this.createSVGFromString('<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>');
+   * if (svg) {
+   *   element.appendChild(svg);
+   * }
+   * ```
+   */
+  protected createSVGFromString(svgString: string): SVGSVGElement | null {
+    if (!svgString || typeof svgString !== 'string') {
+      return null;
+    }
+
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(svgString.trim(), 'image/svg+xml');
+      const svgElement = doc.querySelector('svg');
+
+      if (!svgElement) {
+        console.error('[Component] Не удалось распарсить SVG строку');
+        return null;
+      }
+
+      // Проверка на ошибки парсинга
+      const parserError = doc.querySelector('parsererror');
+      if (parserError) {
+        console.error('[Component] Ошибка парсинга SVG:', parserError.textContent);
+        return null;
+      }
+
+      // Очистка опасных атрибутов
+      const dangerousAttrs = ['onload', 'onerror', 'onclick', 'onmouseover', 'onfocus'];
+      dangerousAttrs.forEach((attr) => {
+        if (svgElement.hasAttribute(attr)) {
+          svgElement.removeAttribute(attr);
+        }
+      });
+
+      // Удаление всех элементов script
+      const scripts = svgElement.querySelectorAll('script');
+      scripts.forEach((script) => script.remove());
+
+      // Удаление внешних ссылок (href с javascript:)
+      // eslint-disable-next-line no-script-url
+      // Примечание: это защита от XSS, а не уязвимость. Мы проверяем и удаляем опасные href.
+      const links = svgElement.querySelectorAll('[href]');
+      // eslint-disable-next-line no-script-url
+      links.forEach((link) => {
+        const href = link.getAttribute('href');
+        if (href?.startsWith('javascript:')) {
+          link.removeAttribute('href');
+        }
+      });
+
+      return svgElement.cloneNode(true) as SVGSVGElement;
+    } catch (error) {
+      console.error('[Component] Ошибка парсинга SVG:', error);
+      return null;
+    }
   }
 
   /**
@@ -297,7 +412,7 @@ export abstract class Component<TProps extends ComponentProps = ComponentProps> 
     element: Element,
     event: K,
     handler: EventHandler<HTMLElementEventMap[K]>,
-    options?: boolean | AddEventListenerOptions
+    options?: boolean | AddEventListenerOptions,
   ): void {
     element.addEventListener(event, handler as EventListener, options);
 
@@ -305,7 +420,10 @@ export abstract class Component<TProps extends ComponentProps = ComponentProps> 
     if (!this.eventListeners.has(element)) {
       this.eventListeners.set(element, new Map());
     }
-    this.eventListeners.get(element)!.set(event, handler as EventHandler);
+    const elementListeners = this.eventListeners.get(element);
+    if (elementListeners) {
+      elementListeners.set(event, handler as EventHandler);
+    }
   }
 
   /**
@@ -353,7 +471,7 @@ export abstract class Component<TProps extends ComponentProps = ComponentProps> 
     }
 
     // Обновить data атрибуты
-    if (this.props.dataAttrs) {
+    if (this.props.dataAttrs && this.element) {
       Object.entries(this.props.dataAttrs).forEach(([key, value]) => {
         this.element!.dataset[key] = value;
       });

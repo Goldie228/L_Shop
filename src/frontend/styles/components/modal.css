@@ -6,17 +6,17 @@
  * @see docs/DESIGN_SYSTEM.md - документация дизайн-системы
  */
 
-/* ====== Фон модального окна ====== */
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: var(--color-bg-overlay);
   backdrop-filter: blur(8px) saturate(120%);
   -webkit-backdrop-filter: blur(8px) saturate(120%);
   z-index: var(--z-modal-backdrop);
   opacity: 0;
   visibility: hidden;
-  transition: all var(--duration-normal) var(--ease-out);
+  transition: opacity var(--duration-normal) var(--ease-out),
+    visibility var(--duration-normal) var(--ease-out);
 }
 
 .modal-backdrop--visible {
@@ -24,7 +24,6 @@
   visibility: visible;
 }
 
-/* ====== Контейнер модального окна ====== */
 .modal {
   position: fixed;
   top: 50%;
@@ -32,14 +31,11 @@
   transform: translate(-50%, -50%) scale(0.95);
   z-index: var(--z-modal);
   width: 90%;
-  max-width: 480px;
+  max-width: 600px;
   max-height: 90vh;
   background: linear-gradient(180deg, var(--color-bg-primary) 0%, var(--color-bg-secondary) 100%);
-  border-radius: var(--radius-2xl);
-  box-shadow: 
-    0 25px 50px -12px rgba(0, 0, 0, 0.25),
-    0 0 0 1px var(--color-border),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
   opacity: 0;
   visibility: hidden;
   transition: all var(--duration-normal) var(--ease-out);
@@ -54,17 +50,16 @@
   transform: translate(-50%, -50%) scale(1);
 }
 
-/* ====== Modal Sizes ====== */
-.modal--sm {
-  max-width: 360px;
+.modal--small {
+  max-width: 400px;
 }
 
-.modal--lg {
-  max-width: 720px;
+.modal--medium {
+  max-width: 600px;
 }
 
-.modal--xl {
-  max-width: 960px;
+.modal--large {
+  max-width: 800px;
 }
 
 .modal--fullscreen {
@@ -73,16 +68,44 @@
   height: 100%;
   max-height: 100%;
   border-radius: 0;
+  top: 0;
+  left: 0;
+  transform: none;
 }
 
-/* ====== Modal Header ====== */
+.modal--fullscreen.modal--visible {
+  transform: none;
+}
+
 .modal__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--spacing-4) var(--spacing-6);
+  padding: var(--spacing-6);
   border-bottom: 1px solid var(--color-border);
   flex-shrink: 0;
+}
+
+.modal__title-container {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  flex: 1;
+}
+
+.modal__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.modal__icon svg {
+  width: 100%;
+  height: 100%;
 }
 
 .modal__title {
@@ -97,16 +120,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   padding: 0;
   background: none;
   border: none;
   border-radius: var(--radius-md);
   color: var(--color-text-secondary);
   cursor: pointer;
-  transition: background-color var(--transition-fast), color var(--transition-fast),
+  transition: background-color var(--transition-fast),
+    color var(--transition-fast),
     transform var(--transition-fast);
+  flex-shrink: 0;
 }
 
 .modal__close:hover {
@@ -125,24 +150,22 @@
 }
 
 .modal__close-icon {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
 }
 
-/* ====== Modal Body ====== */
 .modal__body {
   padding: var(--spacing-6);
   overflow-y: auto;
   flex: 1;
 }
 
-/* ====== Modal Footer ====== */
 .modal__footer {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: var(--spacing-2);
-  padding: var(--spacing-4) var(--spacing-6);
+  gap: var(--spacing-3);
+  padding: var(--spacing-6);
   border-top: 1px solid var(--color-border);
   flex-shrink: 0;
 }
@@ -155,7 +178,171 @@
   justify-content: center;
 }
 
-/* ====== Modal Variants ====== */
+/* Scale анимация */
+.modal--animate-scale.modal--visible {
+  animation: modalScaleIn var(--duration-normal) var(--ease-out) forwards;
+}
+
+/* Slide-up анимация */
+.modal--animate-slide-up.modal--visible {
+  animation: modalSlideInUp var(--duration-normal) var(--ease-out) forwards;
+}
+
+/* Fade анимация */
+.modal--animate-fade.modal--visible {
+  animation: modalFadeIn var(--duration-normal) var(--ease-out) forwards;
+}
+
+@keyframes modalScaleIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes modalSlideInUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -40%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal-backdrop,
+  .modal,
+  .modal__close,
+  .modal__icon {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .modal--animate-scale.modal--visible,
+  .modal--animate-slide-up.modal--visible,
+  .modal--animate-fade.modal--visible {
+    animation: none;
+  }
+
+  .modal {
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  .modal--visible {
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+body.modal-open {
+  overflow: hidden;
+}
+
+.modal + .modal-backdrop {
+  z-index: calc(var(--z-modal-backdrop) + 10);
+}
+
+.modal + .modal {
+  z-index: calc(var(--z-modal) + 10);
+}
+
+
+/* Мобильные устройства (≤640px) */
+@media (max-width: 640px) {
+  .modal {
+    width: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 0;
+    top: 0;
+    left: 0;
+    transform: translateY(100%);
+  }
+
+  .modal--visible {
+    transform: translateY(0);
+  }
+
+  .modal--animate-slide-up.modal--visible,
+  .modal--animate-scale.modal--visible,
+  .modal--animate-fade.modal--visible {
+    animation: modalSlideInUpMobile var(--duration-normal) var(--ease-out) forwards;
+  }
+
+  @keyframes modalSlideInUpMobile {
+    from {
+      opacity: 0;
+      transform: translateY(100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .modal__header {
+    padding: var(--spacing-4);
+  }
+
+  .modal__body {
+    padding: var(--spacing-4);
+  }
+
+  .modal__footer {
+    padding: var(--spacing-4);
+    flex-direction: column;
+  }
+
+  .modal__close {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* Очень маленькие экраны (≤320px) */
+@media (max-width: 320px) {
+  .modal {
+    width: 100vw;
+    height: 100vh;
+    max-width: 100vw;
+    max-height: 100vh;
+  }
+
+  .modal__header {
+    padding: var(--spacing-3);
+  }
+
+  .modal__body {
+    padding: var(--spacing-3);
+  }
+
+  .modal__footer {
+    padding: var(--spacing-3);
+  }
+
+  .modal__title {
+    font-size: var(--font-size-base);
+  }
+}
+
+:root.dark-theme .modal {
+  background: linear-gradient(180deg, var(--color-bg-primary) 0%, var(--color-bg-secondary) 100%);
+}
+
 
 /* Модальное окно аутентификации */
 .modal--auth {
@@ -186,139 +373,4 @@
   border-top: none;
   justify-content: center;
   padding-top: 0;
-}
-
-/* ====== Modal Animations ====== */
-.modal--animate-slide-up.modal--visible {
-  animation: slideInUp var(--duration-normal) var(--ease-out);
-}
-
-.modal--animate-fade.modal--visible {
-  animation: fadeIn var(--duration-normal) var(--ease-out);
-}
-
-.modal--animate-scale.modal--visible {
-  animation: scaleIn var(--duration-normal) var(--ease-out);
-}
-
-/* ====== Modal Scroll Lock ====== */
-body.modal-open {
-  overflow: hidden;
-}
-
-/* ====== Nested Modals ====== */
-.modal + .modal-backdrop {
-  z-index: calc(var(--z-modal-backdrop) + 10);
-}
-
-.modal + .modal {
-  z-index: calc(var(--z-modal) + 10);
-}
-
-/* ====== Responsive ====== */
-@media (max-width: 640px) {
-  .modal {
-    width: 100%;
-    max-width: 100%;
-    max-height: 100%;
-    border-radius: 0;
-    top: 0;
-    left: 0;
-    transform: translateY(100%);
-  }
-
-  .modal--visible {
-    transform: translateY(0);
-  }
-
-  .modal--animate-slide-up.modal--visible {
-    animation: none;
-  }
-
-  .modal__header {
-    padding: var(--spacing-4);
-  }
-
-  .modal__body {
-    padding: var(--spacing-4);
-  }
-
-  .modal__footer {
-    padding: var(--spacing-4);
-    flex-direction: column;
-  }
-
-  .modal__footer .btn {
-    width: 100%;
-  }
-
-  /* Модальное окно аутентификации (мобильное) */
-  .modal--auth {
-    max-width: 100%;
-    justify-content: flex-start;
-    padding-top: var(--spacing-8);
-  }
-}
-
-/* ====== Tablet and up ====== */
-@media (min-width: 641px) {
-  .modal--slide-up {
-    top: auto;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    transform: translateY(100%);
-    max-width: 100%;
-    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  }
-
-  .modal--slide-up.modal--visible {
-    transform: translateY(0);
-  }
-}
-
-/* ====== Large Screens ====== */
-@media (min-width: 1024px) {
-  .modal {
-    max-width: 520px;
-  }
-
-  .modal--lg {
-    max-width: 800px;
-  }
-
-  .modal--xl {
-    max-width: 1140px;
-  }
-}
-
-/* ====== Dark Theme ====== */
-:root.dark-theme .modal-backdrop {
-  background-color: var(--color-bg-overlay-dark);
-}
-
-:root.dark-theme .modal {
-  background-color: var(--color-bg-elevated-dark);
-  box-shadow: var(--shadow-dark-5);
-}
-
-:root.dark-theme .modal__header {
-  border-bottom-color: var(--color-border-primary-dark);
-}
-
-:root.dark-theme .modal__title {
-  color: var(--color-text-primary-dark);
-}
-
-:root.dark-theme .modal__close {
-  color: var(--color-text-secondary-dark);
-}
-
-:root.dark-theme .modal__close:hover {
-  background-color: var(--state-hover-bg-dark);
-  color: var(--color-text-primary-dark);
-}
-
-:root.dark-theme .modal__footer {
-  border-top-color: var(--color-border-primary-dark);
 }

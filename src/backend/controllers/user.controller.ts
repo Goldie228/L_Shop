@@ -26,9 +26,12 @@ export type UserWithoutPassword = Omit<User, 'password'>;
  * Получить всех пользователей
  * GET /api/admin/users
  * Защищено: требуется роль admin
- * @returns Массив пользователей без паролей
+ * @param _req - AuthRequest с информацией о текущем пользователе (установлен auth middleware)
+ * @param res - Ответ Express
+ * @returns 200 с массивом пользователей без паролей
+ * @throws {AuthorizationError} Если у пользователя нет прав администратора (обрабатывается в middleware)
  */
-export async function getAllUsers(_req: AuthRequest, res: Response): Promise<void> {
+export async function getAllUsers(_req: AuthRequest, res: Response): Promise<undefined> {
   try {
     const users = await userService.getAllUsers();
     // Удаляем пароли из ответа
@@ -37,7 +40,7 @@ export async function getAllUsers(_req: AuthRequest, res: Response): Promise<voi
     );
     res.status(200).json(usersWithoutPassword);
   } catch (error) {
-    console.error('[UserController] Ошибка при получении пользователей:', error);
+    logger.error({ err: error }, 'Ошибка при получении пользователей');
     res.status(500).json({
       message: 'Ошибка при получении списка пользователей',
       error: 'INTERNAL_ERROR',
@@ -49,11 +52,15 @@ export async function getAllUsers(_req: AuthRequest, res: Response): Promise<voi
  * Изменить роль пользователя
  * PUT /api/admin/users/:id/role
  * Защищено: требуется роль admin, нельзя менять свою роль
- * @param req.params.id - ID пользователя
- * @param req.body.role - Новая роль ('user' | 'admin')
- * @returns Обновлённый пользователь без пароля
+ * @param req - AuthRequest с params { id } и body { role }
+ * @param res - Ответ Express
+ * @returns 200 с обновлённым пользователем без пароля
+ * @throws {ValidationError} При невалидной роли
+ * @throws {AuthenticationError} Если сессия недействительна или токен отсутствует
+ * @throws {AuthorizationError} При попытке изменить свою роль или отсутствии прав администратора
+ * @throws {NotFoundError} Если пользователь не найден
  */
-export async function updateUserRole(req: AuthRequest, res: Response): Promise<void> {
+export async function updateUserRole(req: AuthRequest, res: Response): Promise<undefined> {
   try {
     const { id } = req.params;
     const { role } = req.body;
@@ -109,7 +116,7 @@ export async function updateUserRole(req: AuthRequest, res: Response): Promise<v
     const { password: _password, ...userWithoutPassword } = updatedUser;
     res.status(200).json(userWithoutPassword);
   } catch (error) {
-    console.error('[UserController] Ошибка при изменении роли:', error);
+    logger.error({ err: error }, 'Ошибка при изменении роли');
     res.status(500).json({
       message: 'Ошибка при изменении роли пользователя',
       error: 'INTERNAL_ERROR',
@@ -121,10 +128,14 @@ export async function updateUserRole(req: AuthRequest, res: Response): Promise<v
  * Заблокировать или разблокировать пользователя
  * PUT /api/admin/users/:id/block
  * Защищено: требуется роль admin, нельзя блокировать себя
- * @param req.params.id - ID пользователя
- * @returns Обновлённый пользователь без пароля
+ * @param req - AuthRequest с params { id }
+ * @param res - Ответ Express
+ * @returns 200 с сообщением об успешном изменении статуса и обновлённым пользователем без пароля
+ * @throws {AuthenticationError} Если сессия недействительна или токен отсутствует
+ * @throws {AuthorizationError} При попытке заблокировать себя или отсутствии прав администратора
+ * @throws {NotFoundError} Если пользователь не найден
  */
-export async function toggleUserBlock(req: AuthRequest, res: Response): Promise<void> {
+export async function toggleUserBlock(req: AuthRequest, res: Response): Promise<undefined> {
   try {
     const { id } = req.params;
 
@@ -174,7 +185,7 @@ export async function toggleUserBlock(req: AuthRequest, res: Response): Promise<
       user: userWithoutPassword,
     });
   } catch (error) {
-    console.error('[UserController] Ошибка при блокировке:', error);
+    logger.error({ err: error }, 'Ошибка при блокировке');
     res.status(500).json({
       message: 'Ошибка при блокировке пользователя',
       error: 'INTERNAL_ERROR',
@@ -186,11 +197,15 @@ export async function toggleUserBlock(req: AuthRequest, res: Response): Promise<
  * Обновить профиль пользователя (имя, email)
  * PUT /api/users/profile
  * Защищено: требуется авторизация
- * @param req.body.name - Новое имя
- * @param req.body.email - Новый email
- * @returns Обновлённый пользователь без пароля
+ * @param req - AuthRequest с body { name, email }
+ * @param res - Ответ Express
+ * @returns 200 с обновлённым пользователем без пароля
+ * @throws {ValidationError} Если имя или email некорректны
+ * @throws {AuthenticationError} Если сессия недействительна или токен отсутствует
+ * @throws {NotFoundError} Если пользователь не найден
+ * @throws {ConflictError} Если email уже используется другим пользователем
  */
-export async function updateProfile(req: AuthRequest, res: Response): Promise<void> {
+export async function updateProfile(req: AuthRequest, res: Response): Promise<undefined> {
   try {
     const { name, email } = req.body;
 
@@ -266,11 +281,14 @@ export async function updateProfile(req: AuthRequest, res: Response): Promise<vo
  * Изменить пароль пользователя
  * PUT /api/users/password
  * Защищено: требуется авторизация
- * @param req.body.currentPassword - Текущий пароль
- * @param req.body.newPassword - Новый пароль (минимум 6 символов)
- * @returns Успешный ответ
+ * @param req - AuthRequest с body { currentPassword, newPassword }
+ * @param res - Ответ Express
+ * @returns 200 с сообщением об успешном изменении пароля
+ * @throws {ValidationError} Если новый пароль некорректен или текущий пароль не указан
+ * @throws {AuthenticationError} Если сессия недействительна, токен отсутствует или текущий пароль неверен
+ * @throws {NotFoundError} Если пользователь не найден
  */
-export async function updatePassword(req: AuthRequest, res: Response): Promise<void> {
+export async function updatePassword(req: AuthRequest, res: Response): Promise<undefined> {
   try {
     const { currentPassword, newPassword } = req.body;
 

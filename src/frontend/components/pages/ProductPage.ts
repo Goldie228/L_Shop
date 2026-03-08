@@ -72,6 +72,17 @@ export class ProductPage extends Component<ProductPageProps> {
     }
   }
 
+  // SVG иконки для безопасного рендеринга (без innerHTML)
+  private static readonly PLACEHOLDER_IMAGE_SVG = '<svg class="product-page__placeholder-image" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>';
+
+  private static readonly FILLED_STAR_SVG = '<svg class="product-page__rating-star-icon product-page__rating-star-icon--filled" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
+
+  private static readonly HALF_STAR_SVG = '<svg class="product-page__rating-star-icon product-page__rating-star-icon--half" viewBox="0 0 24 24" fill="currentColor"><defs><linearGradient id="halfStarGradient"><stop offset="50%" stop-color="currentColor"/><stop offset="50%" stop-color="transparent"/></linearGradient></defs><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="url(#halfStarGradient)"/></svg>';
+
+  private static readonly EMPTY_STAR_SVG = '<svg class="product-page__rating-star-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
+
+  private static readonly PLACEHOLDER_SIMILAR_SVG = '<svg class="product-page__placeholder-image-similar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>';
+
   protected getDefaultProps(): ProductPageProps {
     return {
       ...super.getDefaultProps(),
@@ -112,9 +123,13 @@ export class ProductPage extends Component<ProductPageProps> {
 
     // Состояние загрузки
     if (this.state.loading) {
-      const loading = this.createElement('div', {
-        className: 'product-page__loading',
-      }, ['Загрузка...']);
+      const loading = this.createElement(
+        'div',
+        {
+          className: 'product-page__loading',
+        },
+        ['Загрузка...'],
+      );
       innerContainer.appendChild(loading);
       container.appendChild(innerContainer);
       return container;
@@ -136,7 +151,7 @@ export class ProductPage extends Component<ProductPageProps> {
       return container;
     }
 
-    const product = this.state.product;
+    const { product } = this.state;
 
     // Основной контент
     const mainContent = this.createElement('div', {
@@ -154,16 +169,24 @@ export class ProductPage extends Component<ProductPageProps> {
 
     // Категория
     if (product.category) {
-      const category = this.createElement('p', {
-        className: 'product-page__category',
-      }, [this.getCategoryLabel(product.category)]);
+      const category = this.createElement(
+        'p',
+        {
+          className: 'product-page__category',
+        },
+        [this.getCategoryLabel(product.category)],
+      );
       details.appendChild(category);
     }
 
     // Название товара
-    const name = this.createElement('h1', {
-      className: 'product-page__name',
-    }, [product.name]);
+    const name = this.createElement(
+      'h1',
+      {
+        className: 'product-page__name',
+      },
+      [product.name],
+    );
     details.appendChild(name);
 
     // Рейтинг со звёздами
@@ -177,9 +200,15 @@ export class ProductPage extends Component<ProductPageProps> {
     details.appendChild(priceContainer);
 
     // Наличие на складе
-    const stock = this.createElement('p', {
-      className: `product-page__stock ${product.inStock ? 'product-page__stock--available' : 'product-page__stock--unavailable'}`,
-    }, [product.inStock ? 'В наличии' : 'Нет в наличии']);
+    const stock = this.createElement(
+      'p',
+      {
+        className: `product-page__stock ${
+          product.inStock ? 'product-page__stock--available' : 'product-page__stock--unavailable'
+        }`,
+      },
+      [product.inStock ? 'В наличии' : 'Нет в наличии'],
+    );
     details.appendChild(stock);
 
     // Характеристики
@@ -244,7 +273,11 @@ export class ProductPage extends Component<ProductPageProps> {
     } else {
       const placeholder = this.createElement('div', {
         className: 'product-page__image-placeholder',
-      }, ['📷']);
+      });
+      const placeholderSvg = this.createSVGFromString(ProductPage.PLACEHOLDER_IMAGE_SVG);
+      if (placeholderSvg) {
+        placeholder.appendChild(placeholderSvg);
+      }
       imageWrapper.appendChild(placeholder);
     }
 
@@ -269,13 +302,22 @@ export class ProductPage extends Component<ProductPageProps> {
       });
 
       if (i <= fullStars) {
-        star.textContent = '★';
+        const filledStar = this.createSVGFromString(ProductPage.FILLED_STAR_SVG);
+        if (filledStar) {
+          star.appendChild(filledStar);
+        }
         star.classList.add('product-page__rating-star--filled');
       } else if (i === fullStars + 1 && hasHalfStar) {
-        star.textContent = '★';
+        const halfStar = this.createSVGFromString(ProductPage.HALF_STAR_SVG);
+        if (halfStar) {
+          star.appendChild(halfStar);
+        }
         star.classList.add('product-page__rating-star--half');
       } else {
-        star.textContent = '☆';
+        const emptyStar = this.createSVGFromString(ProductPage.EMPTY_STAR_SVG);
+        if (emptyStar) {
+          star.appendChild(emptyStar);
+        }
       }
 
       ratingContainer.appendChild(star);
@@ -309,25 +351,41 @@ export class ProductPage extends Component<ProductPageProps> {
     });
 
     if (product.discountPercent && product.discountPercent > 0) {
-      const oldPrice = this.createElement('span', {
-        className: 'product-page__price-old',
-      }, [`${product.price.toLocaleString('ru-RU')} ₽`]);
+      const oldPrice = this.createElement(
+        'span',
+        {
+          className: 'product-page__price-old',
+        },
+        [`${product.price.toLocaleString('ru-RU')} ₽`],
+      );
       priceContainer.appendChild(oldPrice);
 
       const newPrice = product.price * (1 - product.discountPercent / 100);
-      const newPriceEl = this.createElement('span', {
-        className: 'product-page__price-new',
-      }, [`${Math.round(newPrice).toLocaleString('ru-RU')} ₽`]);
+      const newPriceEl = this.createElement(
+        'span',
+        {
+          className: 'product-page__price-new',
+        },
+        [`${Math.round(newPrice).toLocaleString('ru-RU')} ₽`],
+      );
       priceContainer.appendChild(newPriceEl);
 
-      const discount = this.createElement('span', {
-        className: 'product-page__discount',
-      }, [`-${product.discountPercent}%`]);
+      const discount = this.createElement(
+        'span',
+        {
+          className: 'product-page__discount',
+        },
+        [`-${product.discountPercent}%`],
+      );
       priceContainer.appendChild(discount);
     } else {
-      const price = this.createElement('span', {
-        className: 'product-page__price',
-      }, [`${product.price.toLocaleString('ru-RU')} ₽`]);
+      const price = this.createElement(
+        'span',
+        {
+          className: 'product-page__price',
+        },
+        [`${product.price.toLocaleString('ru-RU')} ₽`],
+      );
       priceContainer.appendChild(price);
     }
 
@@ -342,9 +400,13 @@ export class ProductPage extends Component<ProductPageProps> {
       className: 'product-page__characteristics',
     });
 
-    const title = this.createElement('h3', {
-      className: 'product-page__characteristics-title',
-    }, ['Характеристики']);
+    const title = this.createElement(
+      'h3',
+      {
+        className: 'product-page__characteristics-title',
+      },
+      ['Характеристики'],
+    );
     characteristics.appendChild(title);
 
     const list = this.createElement('ul', {
@@ -355,7 +417,23 @@ export class ProductPage extends Component<ProductPageProps> {
     const categoryItem = this.createElement('li', {
       className: 'product-page__characteristics-item',
     });
-    categoryItem.innerHTML = `<span class="product-page__characteristics-label">Категория:</span> <span class="product-page__characteristics-value">${this.getCategoryLabel(product.category)}</span>`;
+    const categoryLabel = this.createElement(
+      'span',
+      {
+        className: 'product-page__characteristics-label',
+      },
+      ['Категория:'],
+    );
+    const categoryValue = this.createElement(
+      'span',
+      {
+        className: 'product-page__characteristics-value',
+      },
+      [this.getCategoryLabel(product.category)],
+    );
+    categoryItem.appendChild(categoryLabel);
+    categoryItem.appendChild(document.createTextNode(' '));
+    categoryItem.appendChild(categoryValue);
     list.appendChild(categoryItem);
 
     // Бренд (если есть в названии или можно добавить поле)
@@ -365,7 +443,23 @@ export class ProductPage extends Component<ProductPageProps> {
     const stockItem = this.createElement('li', {
       className: 'product-page__characteristics-item',
     });
-    stockItem.innerHTML = `<span class="product-page__characteristics-label">Доступность:</span> <span class="product-page__characteristics-value">${product.inStock ? 'В наличии' : 'Нет в наличии'}</span>`;
+    const stockLabel = this.createElement(
+      'span',
+      {
+        className: 'product-page__characteristics-label',
+      },
+      ['Доступность:'],
+    );
+    const stockValue = this.createElement(
+      'span',
+      {
+        className: 'product-page__characteristics-value',
+      },
+      [product.inStock ? 'В наличии' : 'Нет в наличии'],
+    );
+    stockItem.appendChild(stockLabel);
+    stockItem.appendChild(document.createTextNode(' '));
+    stockItem.appendChild(stockValue);
     list.appendChild(stockItem);
 
     // Если есть рейтинг
@@ -373,7 +467,23 @@ export class ProductPage extends Component<ProductPageProps> {
       const ratingItem = this.createElement('li', {
         className: 'product-page__characteristics-item',
       });
-      ratingItem.innerHTML = `<span class="product-page__characteristics-label">Рейтинг:</span> <span class="product-page__characteristics-value">${product.rating.toFixed(1)} / 5.0</span>`;
+      const ratingLabel = this.createElement(
+        'span',
+        {
+          className: 'product-page__characteristics-label',
+        },
+        ['Рейтинг:'],
+      );
+      const ratingValue = this.createElement(
+        'span',
+        {
+          className: 'product-page__characteristics-value',
+        },
+        [`${product.rating.toFixed(1)} / 5.0`],
+      );
+      ratingItem.appendChild(ratingLabel);
+      ratingItem.appendChild(document.createTextNode(' '));
+      ratingItem.appendChild(ratingValue);
       list.appendChild(ratingItem);
     }
 
@@ -389,14 +499,22 @@ export class ProductPage extends Component<ProductPageProps> {
       className: 'product-page__description-section',
     });
 
-    const descriptionTitle = this.createElement('h3', {
-      className: 'product-page__description-title',
-    }, ['Описание']);
+    const descriptionTitle = this.createElement(
+      'h3',
+      {
+        className: 'product-page__description-title',
+      },
+      ['Описание'],
+    );
     descriptionSection.appendChild(descriptionTitle);
 
-    const desc = this.createElement('p', {
-      className: 'product-page__description',
-    }, [description]);
+    const desc = this.createElement(
+      'p',
+      {
+        className: 'product-page__description',
+      },
+      [description],
+    );
     descriptionSection.appendChild(desc);
 
     return descriptionSection;
@@ -434,9 +552,13 @@ export class ProductPage extends Component<ProductPageProps> {
       className: 'product-page__similar-section',
     });
 
-    const similarTitle = this.createElement('h2', {
-      className: 'product-page__similar-title',
-    }, ['Похожие товары']);
+    const similarTitle = this.createElement(
+      'h2',
+      {
+        className: 'product-page__similar-title',
+      },
+      ['Похожие товары'],
+    );
     similarSection.appendChild(similarTitle);
 
     const similarGrid = this.createElement('div', {
@@ -445,9 +567,13 @@ export class ProductPage extends Component<ProductPageProps> {
 
     // Если загрузка похожих товаров
     if (this.state.loadingSimilar) {
-      const loadingSimilar = this.createElement('p', {
-        className: 'product-page__similar-loading',
-      }, ['Загрузка похожих товаров...']);
+      const loadingSimilar = this.createElement(
+        'p',
+        {
+          className: 'product-page__similar-loading',
+        },
+        ['Загрузка похожих товаров...'],
+      );
       similarGrid.appendChild(loadingSimilar);
     } else if (this.state.similarProducts.length > 0) {
       // Отрисовка карточек похожих товаров
@@ -456,9 +582,13 @@ export class ProductPage extends Component<ProductPageProps> {
         similarGrid.appendChild(card);
       });
     } else {
-      const placeholder = this.createElement('p', {
-        className: 'product-page__similar-placeholder',
-      }, ['Похожие товары не найдены']);
+      const placeholder = this.createElement(
+        'p',
+        {
+          className: 'product-page__similar-placeholder',
+        },
+        ['Похожие товары не найдены'],
+      );
       similarGrid.appendChild(placeholder);
     }
 
@@ -490,14 +620,25 @@ export class ProductPage extends Component<ProductPageProps> {
       };
       imageWrapper.appendChild(image);
     } else {
-      imageWrapper.textContent = '📷';
+      const placeholder = this.createElement('div', {
+        className: 'product-page__similar-placeholder-image',
+      });
+      const placeholderSvg = this.createSVGFromString(ProductPage.PLACEHOLDER_SIMILAR_SVG);
+      if (placeholderSvg) {
+        placeholder.appendChild(placeholderSvg);
+      }
+      imageWrapper.appendChild(placeholder);
     }
     card.appendChild(imageWrapper);
 
     // Название
-    const title = this.createElement('h3', {
-      className: 'product-page__similar-name',
-    }, [product.name]);
+    const title = this.createElement(
+      'h3',
+      {
+        className: 'product-page__similar-name',
+      },
+      [product.name],
+    );
     card.appendChild(title);
 
     // Цена
@@ -506,15 +647,23 @@ export class ProductPage extends Component<ProductPageProps> {
     });
 
     if (product.discountPercent && product.discountPercent > 0) {
-      const oldPrice = this.createElement('span', {
-        className: 'product-page__similar-price-old',
-      }, [`${product.price.toLocaleString('ru-RU')} ₽`]);
+      const oldPrice = this.createElement(
+        'span',
+        {
+          className: 'product-page__similar-price-old',
+        },
+        [`${product.price.toLocaleString('ru-RU')} ₽`],
+      );
       price.appendChild(oldPrice);
 
       const newPrice = product.price * (1 - product.discountPercent / 100);
-      const newPriceEl = this.createElement('span', {
-        className: 'product-page__similar-price-new',
-      }, [`${Math.round(newPrice).toLocaleString('ru-RU')} ₽`]);
+      const newPriceEl = this.createElement(
+        'span',
+        {
+          className: 'product-page__similar-price-new',
+        },
+        [`${Math.round(newPrice).toLocaleString('ru-RU')} ₽`],
+      );
       price.appendChild(newPriceEl);
     } else {
       price.textContent = `${product.price.toLocaleString('ru-RU')} ₽`;
@@ -538,9 +687,13 @@ export class ProductPage extends Component<ProductPageProps> {
       className: 'product-page__error',
     });
 
-    const errorText = this.createElement('p', {
-      className: 'product-page__error-text',
-    }, [`Ошибка: ${message}`]);
+    const errorText = this.createElement(
+      'p',
+      {
+        className: 'product-page__error-text',
+      },
+      [`Ошибка: ${message}`],
+    );
 
     errorSection.appendChild(errorText);
 
@@ -562,19 +715,31 @@ export class ProductPage extends Component<ProductPageProps> {
       className: 'product-page__not-found',
     });
 
-    const notFoundIcon = this.createElement('div', {
-      className: 'product-page__not-found-icon',
-    }, ['🔍']);
+    const notFoundIcon = this.createElement(
+      'div',
+      {
+        className: 'product-page__not-found-icon',
+      },
+      ['🔍'],
+    );
     notFoundSection.appendChild(notFoundIcon);
 
-    const notFoundText = this.createElement('h2', {
-      className: 'product-page__not-found-title',
-    }, ['Товар не найден']);
+    const notFoundText = this.createElement(
+      'h2',
+      {
+        className: 'product-page__not-found-title',
+      },
+      ['Товар не найден'],
+    );
     notFoundSection.appendChild(notFoundText);
 
-    const notFoundDesc = this.createElement('p', {
-      className: 'product-page__not-found-description',
-    }, ['Запрашиваемый товар не существует или был удалён']);
+    const notFoundDesc = this.createElement(
+      'p',
+      {
+        className: 'product-page__not-found-description',
+      },
+      ['Запрашиваемый товар не существует или был удалён'],
+    );
     notFoundSection.appendChild(notFoundDesc);
 
     const backButton = new Button({
@@ -650,12 +815,12 @@ export class ProductPage extends Component<ProductPageProps> {
 
     try {
       // Получаем товары той же категории
-      const products = await api.get<Product[]>(`/api/products?category=${encodeURIComponent(category)}`);
+      const products = await api.get<Product[]>(
+        `/api/products?category=${encodeURIComponent(category)}`,
+      );
 
       // Фильтруем: исключаем текущий товар и ограничиваем до 4 штук
-      const similarProducts = products
-        .filter((p) => p.id !== currentProductId)
-        .slice(0, 4);
+      const similarProducts = products.filter((p) => p.id !== currentProductId).slice(0, 4);
 
       this.state.similarProducts = similarProducts;
       this.state.loadingSimilar = false;
@@ -715,7 +880,7 @@ export class ProductPage extends Component<ProductPageProps> {
       const cartButton = document.querySelector('[data-testid="header-cart-btn"]');
       if (cartButton) {
         // Удаляем старый счётчик
-        const existingBadge = cartButton.querySelector('.cart-count-badge');
+        const existingBadge = cartButton.querySelector('.header__cart-badge');
         if (existingBadge) {
           existingBadge.remove();
         }
@@ -723,7 +888,7 @@ export class ProductPage extends Component<ProductPageProps> {
         // Добавляем новый счётчик
         if (count > 0) {
           const badge = document.createElement('span');
-          badge.className = 'cart-count-badge';
+          badge.className = 'header__cart-badge';
           badge.textContent = count > 9 ? '9+' : String(count);
           cartButton.appendChild(badge);
         }

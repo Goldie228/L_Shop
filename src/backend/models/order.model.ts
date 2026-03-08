@@ -10,8 +10,10 @@ export interface OrderItem {
   productId: string;
   /** Название продукта на момент заказа */
   name: string;
-  /** Цена на момент заказа */
+  /** Цена на момент заказа (BYN) */
   price: number;
+  /** Валюта (BYN) */
+  currency: string;
   /** Количество */
   quantity: number;
   /** Скидка на момент заказа */
@@ -41,6 +43,8 @@ export interface Order {
   id: string;
   /** ID пользователя */
   userId: string;
+  /** Имя получателя */
+  firstName: string;
   /** Элементы заказа */
   items: OrderItem[];
   /** Адрес доставки */
@@ -57,7 +61,9 @@ export interface Order {
   comment?: string;
   /** Статус заказа */
   status: OrderStatus;
-  /** Общая сумма */
+  /** Валюта (BYN) */
+  currency: string;
+  /** Общая сумма (BYN) */
   totalSum: number;
   /** Дата создания */
   createdAt: string;
@@ -69,6 +75,7 @@ export interface Order {
  * Данные для создания заказа
  */
 export interface CreateOrderData {
+  firstName: string;
   deliveryAddress: string;
   phone: string;
   email: string;

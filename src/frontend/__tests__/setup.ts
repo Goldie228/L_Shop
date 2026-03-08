@@ -1,6 +1,6 @@
 /**
  * Настройка тестового окружения для фронтенда
- * 
+ *
  * Этот файл запускается перед каждым тестовым файлом.
  * Здесь можно настроить моки, глобальные переменные и расширить Jest.
  */
@@ -74,13 +74,13 @@ Object.defineProperty(global, 'importMeta', {
 afterEach(() => {
   // Очистить localStorage
   localStorageMock.clear();
-  
+
   // Очистить мок fetch
   (global.fetch as jest.Mock).mockClear();
-  
+
   // Очистить DOM
   document.body.innerHTML = '';
-  
+
   // Очистить классы с document.documentElement
   document.documentElement.className = '';
 });
@@ -99,7 +99,7 @@ expect.extend({
           : `expected element to be in the document`,
     };
   },
-  
+
   toHaveClass(received: Element | null, className: string) {
     const pass = received !== null && received.classList.contains(className);
     return {
@@ -110,7 +110,7 @@ expect.extend({
           : `expected element to have class "${className}"`,
     };
   },
-  
+
   toHaveAttribute(received: Element | null, attr: string, value?: string) {
     const attrValue = received?.getAttribute(attr);
     const pass = value !== undefined ? attrValue === value : attrValue !== null;

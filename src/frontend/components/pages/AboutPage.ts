@@ -8,18 +8,40 @@ import { Component, ComponentProps } from '../base/Component';
 /**
  * Пропсы страницы "О нас"
  */
-export interface AboutPageProps extends ComponentProps {
-  // Пока нет пропсов
-}
+export type AboutPageProps = ComponentProps;
 
 /**
  * SVG иконки для преимуществ
  */
 const BENEFIT_ICONS = {
-  delivery: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>`,
-  quality: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>`,
-  support: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>`,
-  price: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>`,
+  delivery: [
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"',
+    '  stroke-linecap="round" stroke-linejoin="round">',
+    '  <rect x="1" y="3" width="15" height="13"></rect>',
+    '  <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>',
+    '  <circle cx="5.5" cy="18.5" r="2.5"></circle>',
+    '  <circle cx="18.5" cy="18.5" r="2.5"></circle>',
+    '</svg>',
+  ].join('\n'),
+  quality: [
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"',
+    '  stroke-linecap="round" stroke-linejoin="round">',
+    '  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>',
+    '</svg>',
+  ].join('\n'),
+  support: [
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"',
+    '  stroke-linecap="round" stroke-linejoin="round">',
+    '  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>',
+    '</svg>',
+  ].join('\n'),
+  price: [
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"',
+    '  stroke-linecap="round" stroke-linejoin="round">',
+    '  <line x1="12" y1="1" x2="12" y2="23"></line>',
+    '  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>',
+    '</svg>',
+  ].join('\n'),
 };
 
 /**
@@ -29,48 +51,66 @@ const BENEFITS = [
   {
     icon: BENEFIT_ICONS.delivery,
     title: 'Быстрая доставка',
-    description: 'Доставляем заказы по всей Беларуси в кратчайшие сроки. Самовывоз из магазина в день заказа.',
+    description:
+      'Доставляем заказы по всей Беларуси в кратчайшие сроки. Самовывоз из магазина в день заказа.',
   },
   {
     icon: BENEFIT_ICONS.quality,
     title: 'Гарантия качества',
-    description: 'Все товары проходят строгий контроль качества. Официальная гарантия на весь ассортимент.',
+    description:
+      'Все товары проходят строгий контроль качества. Официальная гарантия на весь ассортимент.',
   },
   {
     icon: BENEFIT_ICONS.support,
     title: 'Поддержка 24/7',
-    description: 'Наша команда поддержки всегда готова помочь. Ответим на все ваши вопросы в любое время.',
+    description:
+      'Наша команда поддержки всегда готова помочь. Ответим на все ваши вопросы в любое время.',
   },
   {
     icon: BENEFIT_ICONS.price,
     title: 'Честные цены',
-    description: 'Прозрачное ценообразование без скрытых наценок. Регулярные акции и скидки для клиентов.',
+    description:
+      'Прозрачное ценообразование без скрытых наценок. Регулярные акции и скидки для клиентов.',
   },
 ];
 
 /**
- * Данные для секции команды
+ * Интерфейс для элемента команды
  */
-const TEAM = [
+interface TeamMember {
+  name: string;
+  role: string;
+  variant: string;
+  description: string;
+}
+
+/**
+ * Данные для секции команды (из документации проекта)
+ */
+const TEAM: TeamMember[] = [
   {
-    name: 'Александр Иванов',
-    role: 'Генеральный директор',
-    description: 'Основатель компании с 2024 года',
+    name: 'Глеб',
+    role: 'Тимлид',
+    variant: '8',
+    description: 'Отвечает за инфраструктуру, аутентификацию и интеграцию модулей',
   },
   {
-    name: 'Елена Петрова',
-    role: 'Руководитель отдела продаж',
-    description: '10 лет опыта в e-commerce',
+    name: 'Никита П.',
+    role: 'Backend/Frontend разработчик',
+    variant: '17',
+    description: 'Разрабатывает модуль продуктов и каталог',
   },
   {
-    name: 'Михаил Сидоров',
-    role: 'Технический директор',
-    description: 'Эксперт в области IT-решений',
+    name: 'Тимофей',
+    role: 'Backend/Frontend разработчик',
+    variant: '21',
+    description: 'Отвечает за модуль корзины и оформление заказов',
   },
   {
-    name: 'Анна Козлова',
-    role: 'Менеджер по работе с клиентами',
-    description: 'Забота о каждом клиенте',
+    name: 'Никита Т.',
+    role: 'Backend/Frontend разработчик',
+    variant: '24',
+    description: 'Разрабатывает модуль заказов и доставки',
   },
 ];
 
@@ -109,22 +149,26 @@ export class AboutPage extends Component<AboutPageProps> {
     });
 
     // Заголовок
-    const title = this.createElement('h1', {
-      className: 'page-title',
-    }, ['О нас']);
+    const title = this.createElement(
+      'h1',
+      {
+        className: 'page-title',
+      },
+      ['О нас'],
+    );
     innerContainer.appendChild(title);
 
     // Миссия
     const missionSection = this.createSection(
       'Наша миссия',
-      'L_Shop — это современный интернет-магазин, который стремится сделать онлайн-шопинг максимально удобным и приятным. Мы предлагаем широкий ассортимент качественных товаров по доступным ценам. Наша цель — создать пространство, где каждый покупатель найдёт именно то, что ищет, получит удовольствие от процесса покупки и станет нашим постоянным клиентом.'
+      'L_Shop — это прототип интернет-магазина, разработанный с целью создания функционального и удобного веб-приложения с полной системой аутентификации, каталогом товаров с фильтрацией, корзиной покупок и оформлением заказов. Мы стремимся показать, как можно эффективно разрабатывать TypeScript-приложения, соблюдая лучшие практики чистой архитектуры, SOLID-принципов и стандартов кодирования.',
     );
     innerContainer.appendChild(missionSection);
 
     // История
     const historySection = this.createSection(
-      'Наша история',
-      'Компания была основана в 2024 году с целью создания простого и понятного интернет-магазина. За время работы мы заслужили доверие тысяч покупателей и продолжаем развиваться, улучшая сервис и расширяя ассортимент. Мы начинали с небольшого ассортимента, а сегодня предлагаем более 5000 товаров в различных категориях.'
+      'О проекте',
+      'L_Shop — это учебный проект, созданный для демонстрации современных подходов к full-stack разработке. Проект использует стек технологий: Node.js + Express для бэкенда и чистый TypeScript с Vite для фронтенда. Данные хранятся в JSON-файлах, что позволяет быстро запускать и тестировать приложение без необходимости настройки внешних баз данных. Проект активно развивается командой из 4 разработчиков с чётким разделением ответственности.',
     );
     innerContainer.appendChild(historySection);
 
@@ -161,14 +205,22 @@ export class AboutPage extends Component<AboutPageProps> {
       className: 'about-page__section',
     });
 
-    const titleEl = this.createElement('h2', {
-      className: 'about-page__section-title',
-    }, [title]);
+    const titleEl = this.createElement(
+      'h2',
+      {
+        className: 'about-page__section-title',
+      },
+      [title],
+    );
     section.appendChild(titleEl);
 
-    const textEl = this.createElement('p', {
-      className: 'about-page__text',
-    }, [text]);
+    const textEl = this.createElement(
+      'p',
+      {
+        className: 'about-page__text',
+      },
+      [text],
+    );
     section.appendChild(textEl);
 
     return section;
@@ -182,16 +234,20 @@ export class AboutPage extends Component<AboutPageProps> {
       className: 'about-page__section about-page__benefits',
     });
 
-    const titleEl = this.createElement('h2', {
-      className: 'about-page__section-title',
-    }, ['Почему выбирают нас']);
+    const titleEl = this.createElement(
+      'h2',
+      {
+        className: 'about-page__section-title',
+      },
+      ['Почему выбирают нас'],
+    );
     section.appendChild(titleEl);
 
     const grid = this.createElement('div', {
       className: 'about-page__benefits-grid',
     });
 
-    BENEFITS.forEach(benefit => {
+    BENEFITS.forEach((benefit) => {
       const card = this.createElement('div', {
         className: 'about-page__benefit-card',
       });
@@ -202,14 +258,22 @@ export class AboutPage extends Component<AboutPageProps> {
       iconDiv.innerHTML = benefit.icon;
       card.appendChild(iconDiv);
 
-      const cardTitle = this.createElement('h3', {
-        className: 'about-page__benefit-title',
-      }, [benefit.title]);
+      const cardTitle = this.createElement(
+        'h3',
+        {
+          className: 'about-page__benefit-title',
+        },
+        [benefit.title],
+      );
       card.appendChild(cardTitle);
 
-      const cardDesc = this.createElement('p', {
-        className: 'about-page__benefit-description',
-      }, [benefit.description]);
+      const cardDesc = this.createElement(
+        'p',
+        {
+          className: 'about-page__benefit-description',
+        },
+        [benefit.description],
+      );
       card.appendChild(cardDesc);
 
       grid.appendChild(card);
@@ -227,28 +291,40 @@ export class AboutPage extends Component<AboutPageProps> {
       className: 'about-page__section about-page__stats',
     });
 
-    const titleEl = this.createElement('h2', {
-      className: 'about-page__section-title',
-    }, ['Наши достижения']);
+    const titleEl = this.createElement(
+      'h2',
+      {
+        className: 'about-page__section-title',
+      },
+      ['Наши достижения'],
+    );
     section.appendChild(titleEl);
 
     const statsGrid = this.createElement('div', {
       className: 'about-page__stats-grid',
     });
 
-    STATS.forEach(stat => {
+    STATS.forEach((stat) => {
       const statItem = this.createElement('div', {
         className: 'about-page__stat-item',
       });
 
-      const value = this.createElement('div', {
-        className: 'about-page__stat-value',
-      }, [stat.value]);
+      const value = this.createElement(
+        'div',
+        {
+          className: 'about-page__stat-value',
+        },
+        [stat.value],
+      );
       statItem.appendChild(value);
 
-      const label = this.createElement('div', {
-        className: 'about-page__stat-label',
-      }, [stat.label]);
+      const label = this.createElement(
+        'div',
+        {
+          className: 'about-page__stat-label',
+        },
+        [stat.label],
+      );
       statItem.appendChild(label);
 
       statsGrid.appendChild(statItem);
@@ -266,21 +342,31 @@ export class AboutPage extends Component<AboutPageProps> {
       className: 'about-page__section about-page__team',
     });
 
-    const titleEl = this.createElement('h2', {
-      className: 'about-page__section-title',
-    }, ['Наша команда']);
+    const titleEl = this.createElement(
+      'h2',
+      {
+        className: 'about-page__section-title',
+      },
+      ['Наша команда'],
+    );
     section.appendChild(titleEl);
 
-    const introText = this.createElement('p', {
-      className: 'about-page__text about-page__team-intro',
-    }, ['Мы — команда профессионалов, объединённых общей целью: сделать покупки в интернете максимально удобными и приятными. Каждый из нас вносит свой вклад в развитие L_Shop.']);
+    const introText = this.createElement(
+      'p',
+      {
+        className: 'about-page__text about-page__team-intro',
+      },
+      [
+        'Мы — команда профессионалов, объединённых общей целью: сделать покупки в интернете максимально удобными и приятными. Каждый из нас вносит свой вклад в развитие L_Shop.',
+      ],
+    );
     section.appendChild(introText);
 
     const teamGrid = this.createElement('div', {
       className: 'about-page__team-grid',
     });
 
-    TEAM.forEach(member => {
+    TEAM.forEach((member) => {
       const card = this.createElement('div', {
         className: 'about-page__team-card',
       });
@@ -289,23 +375,48 @@ export class AboutPage extends Component<AboutPageProps> {
         className: 'about-page__team-avatar',
       });
       // Используем первые буквы имени для аватарки
-      const initials = member.name.split(' ').map(n => n[0]).join('');
+      const initials = member.name
+        .split(' ')
+        .map((n) => n[0])
+        .join('');
       avatar.textContent = initials;
       card.appendChild(avatar);
 
-      const name = this.createElement('h3', {
-        className: 'about-page__team-name',
-      }, [member.name]);
+      const name = this.createElement(
+        'h3',
+        {
+          className: 'about-page__team-name',
+        },
+        [member.name],
+      );
       card.appendChild(name);
 
-      const role = this.createElement('div', {
-        className: 'about-page__team-role',
-      }, [member.role]);
+      const role = this.createElement(
+        'div',
+        {
+          className: 'about-page__team-role',
+        },
+        [member.role],
+      );
       card.appendChild(role);
 
-      const desc = this.createElement('p', {
-        className: 'about-page__team-desc',
-      }, [member.description]);
+      // Отображаем вариант разработчика
+      const variant = this.createElement(
+        'div',
+        {
+          className: 'about-page__team-variant',
+        },
+        [`Вариант ${member.variant}`],
+      );
+      card.appendChild(variant);
+
+      const desc = this.createElement(
+        'p',
+        {
+          className: 'about-page__team-desc',
+        },
+        [member.description],
+      );
       card.appendChild(desc);
 
       teamGrid.appendChild(card);
@@ -323,9 +434,13 @@ export class AboutPage extends Component<AboutPageProps> {
       className: 'about-page__section',
     });
 
-    const titleEl = this.createElement('h2', {
-      className: 'about-page__section-title',
-    }, ['Наши ценности']);
+    const titleEl = this.createElement(
+      'h2',
+      {
+        className: 'about-page__section-title',
+      },
+      ['Наши ценности'],
+    );
     section.appendChild(titleEl);
 
     const valuesList = this.createElement('ul', {
@@ -339,10 +454,14 @@ export class AboutPage extends Component<AboutPageProps> {
       'Уважение — мы ценим каждого клиента',
     ];
 
-    values.forEach(value => {
-      const li = this.createElement('li', {
-        className: 'about-page__value-item',
-      }, [value]);
+    values.forEach((value) => {
+      const li = this.createElement(
+        'li',
+        {
+          className: 'about-page__value-item',
+        },
+        [value],
+      );
       valuesList.appendChild(li);
     });
 
@@ -358,9 +477,13 @@ export class AboutPage extends Component<AboutPageProps> {
       className: 'about-page__contact-card',
     });
 
-    const contactCardTitle = this.createElement('h3', {
-      className: 'about-page__contact-card-title',
-    }, ['📞 Свяжитесь с нами']);
+    const contactCardTitle = this.createElement(
+      'h3',
+      {
+        className: 'about-page__contact-card-title',
+      },
+      ['📞 Свяжитесь с нами'],
+    );
     contactCard.appendChild(contactCardTitle);
 
     const contactContent = this.createElement('div', {
@@ -380,7 +503,10 @@ export class AboutPage extends Component<AboutPageProps> {
     contactContent.appendChild(emailItem);
 
     // Время работы
-    const hoursItem = this.createContactItem('Время работы', 'Пн–Пт: 9:00–21:00, Сб–Вс: 10:00–20:00');
+    const hoursItem = this.createContactItem(
+      'Время работы',
+      'Пн–Пт: 9:00–21:00, Сб–Вс: 10:00–20:00',
+    );
     contactContent.appendChild(hoursItem);
 
     contactCard.appendChild(contactContent);
@@ -395,14 +521,22 @@ export class AboutPage extends Component<AboutPageProps> {
       className: 'about-page__contact-item',
     });
 
-    const labelEl = this.createElement('span', {
-      className: 'about-page__contact-label',
-    }, [label]);
+    const labelEl = this.createElement(
+      'span',
+      {
+        className: 'about-page__contact-label',
+      },
+      [label],
+    );
     item.appendChild(labelEl);
 
-    const valueEl = this.createElement('span', {
-      className: 'about-page__contact-value',
-    }, [value]);
+    const valueEl = this.createElement(
+      'span',
+      {
+        className: 'about-page__contact-value',
+      },
+      [value],
+    );
     item.appendChild(valueEl);
 
     return item;

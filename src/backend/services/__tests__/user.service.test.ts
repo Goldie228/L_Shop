@@ -29,6 +29,7 @@ describe('Тесты UserService', () => {
         {
           id: '1',
           name: 'Тест',
+          firstName: 'Тест',
           email: 'test@example.com',
           login: 'test',
           phone: '+1234567890',
@@ -53,6 +54,7 @@ describe('Тесты UserService', () => {
         {
           id: 'user-1',
           name: 'Тест',
+          firstName: 'Тест',
           email: 'test@example.com',
           login: 'test',
           phone: '+1234567890',
@@ -84,6 +86,7 @@ describe('Тесты UserService', () => {
         {
           id: '1',
           name: 'Тест',
+          firstName: 'Тест',
           email: 'test@example.com',
           login: 'test',
           phone: '+1234567890',
@@ -105,6 +108,7 @@ describe('Тесты UserService', () => {
         {
           id: '1',
           name: 'Тест',
+          firstName: 'Тест',
           email: 'test@example.com',
           login: 'testuser',
           phone: '+1234567890',
@@ -136,6 +140,7 @@ describe('Тесты UserService', () => {
         {
           id: '1',
           name: 'Тест',
+          firstName: 'Тест',
           email: 'test@example.com',
           login: 'testuser',
           phone: '+1234567890',
@@ -188,6 +193,7 @@ describe('Тесты UserService', () => {
         {
           id: 'user-1',
           name: 'Старое Имя',
+          firstName: 'Старое Имя',
           email: 'test@example.com',
           login: 'testuser',
           phone: '+1234567890',

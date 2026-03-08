@@ -4,8 +4,8 @@
  */
 
 import { store } from './store/store.js';
-import { router, APP_ROUTES } from './router/router.js';
-import { AuthService, AuthEventEmitter } from './services/auth.service.js';
+import { router, APP_ROUTES, Route } from './router/router.js';
+import { AuthService } from './services/auth.service.js';
 import { Layout } from './components/layout/Layout.js';
 import { AuthModal } from './components/auth/AuthModal.js';
 import { ProfilePage } from './components/pages/ProfilePage.js';
@@ -19,18 +19,19 @@ import { ProductPage } from './components/pages/ProductPage.js';
 import { AboutPage } from './components/pages/AboutPage.js';
 import { ContactsPage } from './components/pages/ContactsPage.js';
 import { AdminPage } from './components/pages/AdminPage.js';
-import { Route } from './router/router.js';
 
 // Импорт стилей страниц
 import './styles/pages/delivery.css';
 import './styles/pages/main-page.css';
-import './styles/pages/profile.css';
+import './styles/pages/profile-page.css';
 import './styles/components/product-card.css';
 import './styles/pages/product-page.css';
 import './styles/pages/about-page.css';
 import './styles/pages/contacts-page.css';
 import './styles/pages/orders-page.css';
 import './styles/pages/admin-page.css';
+// Импорт стилей UI компонентов
+import './styles/components/toast.css';
 
 // Тема по умолчанию
 const THEME_KEY = 'lshop-theme';
@@ -83,35 +84,31 @@ class App {
    * Инициализировать приложение
    */
   public async init(): Promise<void> {
-    console.log('L_Shop Frontend: Инициализация...');
-    
     // Получить контейнер приложения
     this.appContainer = document.getElementById('app');
-    
+
     if (!this.appContainer) {
-      console.error('Контейнер приложения не найден');
+      // Контейнер приложения не найден
       return;
     }
-    
+
     // Очистить состояние загрузки
     this.appContainer.innerHTML = '';
-    
+
     try {
       // Проверить статус аутентификации
       await this.checkAuth();
-      
+
       // Настроить роутер
       this.setupRouter();
-      
+
       // Отрендерить макет приложения
       this.renderLayout();
-      
+
       // Инициализировать роутер
       router.init();
-      
-      console.log('L_Shop Frontend: Инициализировано успешно');
     } catch (error) {
-      console.error('L_Shop Frontend: Ошибка инициализации', error);
+      // Ошибка инициализации приложения (обрабатывается в catch)
       this.showError('Ошибка инициализации приложения');
     }
   }
@@ -121,7 +118,7 @@ class App {
    */
   private async checkAuth(): Promise<void> {
     store.setLoading(true);
-    
+
     try {
       const user = await AuthService.getCurrentUser();
       if (user) {
@@ -130,7 +127,7 @@ class App {
         store.setUser(null);
       }
     } catch (error) {
-      console.error('Ошибка проверки аутентификации:', error);
+      // Ошибка проверки аутентификации (обрабатывается в catch)
       store.setUser(null);
     }
   }
@@ -141,7 +138,7 @@ class App {
   private setupRouter(): void {
     // Зарегистрировать маршруты
     router.registerRoutes(APP_ROUTES);
-    
+
     // Подписаться на изменения маршрутов
     router.subscribe((route: Route) => {
       this.handleRouteChange(route);
@@ -153,13 +150,13 @@ class App {
    */
   private renderLayout(): void {
     if (!this.appContainer) return;
-    
+
     // Создать и инициализировать модальное окно аутентификации
     this.authModal = new AuthModal({
       onAuth: () => this.handleAuthSuccess(),
     });
     document.body.appendChild(this.authModal.render());
-    
+
     // Создать макет с Header, основной областью контента и Footer
     this.layout = new Layout({
       onLoginClick: () => this.openAuthModal(),
@@ -172,7 +169,7 @@ class App {
    */
   private handleAuthSuccess(): void {
     // Обновить UI после успешной авторизации
-    console.log('Авторизация успешна');
+    // Логирование удалено (только для отладки)
   }
 
   /**
@@ -274,7 +271,7 @@ class App {
     mainContent.innerHTML = '';
     const mainPage = new MainPage({
       onAddToCart: (productId) => {
-        console.log('Добавлен в корзину:', productId);
+        // Логирование удалено (только для отладки)
       },
     });
     mainContent.appendChild(mainPage.render());
@@ -285,10 +282,10 @@ class App {
    */
   private renderNotFoundPage(): void {
     if (!this.layout) return;
-    
+
     const mainContent = this.layout.getMainContent();
     if (!mainContent) return;
-    
+
     mainContent.innerHTML = '';
     const notFoundPage = new NotFoundPage();
     mainContent.appendChild(notFoundPage.render());
@@ -364,7 +361,7 @@ class App {
     const productPage = new ProductPage({ productId });
     mainContent.appendChild(productPage.render());
     // Вызвать init для загрузки данных
-    productPage.init().catch(error => {
+    productPage.init().catch((error) => {
       console.error('Ошибка загрузки товара:', error);
     });
   }
@@ -408,7 +405,7 @@ class App {
 
     mainContent.innerHTML = '';
     const adminPage = new AdminPage();
-    adminPage.mount(mainContent).catch(error => {
+    adminPage.mount(mainContent).catch((error) => {
       console.error('Ошибка монтирования админ-панели:', error);
     });
   }
@@ -428,7 +425,7 @@ class App {
    */
   private showError(message: string): void {
     if (!this.appContainer) return;
-    
+
     this.appContainer.innerHTML = `
       <div class="app-error">
         <div class="layout__content text-center">
@@ -447,7 +444,7 @@ class App {
 document.addEventListener('DOMContentLoaded', () => {
   // Инициализировать тему
   initTheme();
-  
+
   const app = new App();
   app.init();
 });

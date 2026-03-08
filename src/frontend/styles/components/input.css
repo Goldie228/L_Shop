@@ -1,39 +1,49 @@
 /**
  * Стили компонента поля ввода - L_Shop
- * Текстовые поля, textarea, select с состояниями валидации
+ * Полностью обновлённый компонент Input с поддержкой всех состояний и вариантов
  *
  * @see src/frontend/styles/design-tokens.css - источник токенов
  * @see docs/DESIGN_SYSTEM.md - документация дизайн-системы
  */
 
-/* ====== Группа формы ====== */
-.form-group {
-  margin-bottom: var(--spacing-4);
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  width: 100%;
+  max-width: 100%;
+  font-family: var(--font-family-primary);
 }
 
-.form-group:last-child {
-  margin-bottom: 0;
+.form-field--full-width {
+  width: 100%;
 }
 
-/* ====== Метка ====== */
-.form-label {
+.form-field__label {
   display: block;
-  margin-bottom: var(--spacing-1);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-primary);
+  margin-bottom: var(--spacing-1);
+  transition: color var(--transition-fast);
 }
 
-.form-label--required::after {
+.form-field__label--required::after {
   content: ' *';
   color: var(--color-error);
 }
 
-/* ====== Базовое поле ввода ====== */
-.input {
-  display: block;
+.form-field__input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
   width: 100%;
-  padding: var(--spacing-2) var(--spacing-4);
+}
+
+.form-field__input {
+  flex: 1;
+  width: 100%;
+  padding: var(--spacing-3) var(--spacing-4);
   font-family: var(--font-family-primary);
   font-size: var(--font-size-base);
   line-height: var(--line-height-normal);
@@ -41,496 +51,245 @@
   background-color: var(--color-bg-primary);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  transition: border-color var(--transition-input), box-shadow var(--transition-input),
-    background-color var(--transition-input);
+  transition: border-color var(--transition-input), 
+              box-shadow var(--transition-input),
+              background-color var(--transition-input);
+  min-height: 44px; /* Минимум для touch-устройств */
+  box-sizing: border-box;
 }
 
-.input::placeholder {
+/* Placeholder */
+.form-field__input::placeholder {
   color: var(--color-text-muted);
   opacity: 1;
+  transition: color var(--transition-fast);
 }
 
-.input:hover:not(:disabled):not(:focus) {
+
+/* Маленький */
+.form-field__input--small {
+  padding: var(--spacing-2) var(--spacing-3);
+  font-size: var(--font-size-sm);
+  border-radius: var(--radius-sm);
+  min-height: 36px;
+}
+
+/* Большой */
+.form-field__input--large {
+  padding: var(--spacing-4) var(--spacing-5);
+  font-size: var(--font-size-lg);
+  border-radius: var(--radius-lg);
+  min-height: 52px;
+}
+
+
+/* Outlined (по умолчанию) */
+.form-field--outlined .form-field__input {
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg-primary);
+}
+
+.form-field--outlined .form-field__input:hover:not(:disabled):not(:focus) {
   border-color: var(--color-border-hover);
 }
 
-.input:focus {
+.form-field--outlined .form-field__input:focus {
   outline: none;
   border-color: var(--color-focus);
   box-shadow: var(--shadow-focus);
 }
 
-.input:disabled {
+/* Filled (заполненный) */
+.form-field--filled .form-field__input {
+  border: 1px solid transparent;
+  background-color: var(--color-bg-secondary);
+  border-bottom: 2px solid var(--color-border);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+.form-field--filled .form-field__input:hover:not(:disabled):not(:focus) {
+  background-color: var(--color-bg-tertiary);
+  border-bottom-color: var(--color-border-hover);
+}
+
+.form-field--filled .form-field__input:focus {
+  outline: none;
+  background-color: var(--color-bg-primary);
+  border-bottom-color: var(--color-focus);
+  box-shadow: var(--shadow-focus);
+}
+
+/* Underlined (подчёркнутый) */
+.form-field--underlined .form-field__input {
+  border: none;
+  border-bottom: 2px solid var(--color-border);
+  border-radius: 0;
+  padding-left: 0;
+  padding-right: 0;
+  background-color: transparent;
+}
+
+.form-field--underlined .form-field__input--small {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.form-field--underlined .form-field__input--large {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.form-field--underlined .form-field__input:hover:not(:disabled):not(:focus) {
+  border-bottom-color: var(--color-border-hover);
+}
+
+.form-field--underlined .form-field__input:focus {
+  outline: none;
+  border-bottom-color: var(--color-focus);
+  box-shadow: var(--shadow-focus);
+}
+
+
+/* Hover */
+.form-field--hover .form-field__input:not(:disabled):not(:focus) {
+  border-color: var(--color-border-hover);
+}
+
+.form-field--underlined.form-field--hover .form-field__input:not(:disabled):not(:focus) {
+  border-bottom-color: var(--color-border-hover);
+}
+
+.form-field--filled.form-field--hover .form-field__input:not(:disabled):not(:focus) {
+  border-bottom-color: var(--color-border-hover);
+}
+
+/* Focus (дополнительные стили для фокуса) */
+.form-field--focus .form-field__input {
+  border-color: var(--color-focus);
+}
+
+.form-field--underlined.form-field--focus .form-field__input {
+  border-bottom-color: var(--color-focus);
+}
+
+.form-field--filled.form-field--focus .form-field__input {
+  border-bottom-color: var(--color-focus);
+}
+
+/* Disabled */
+.form-field__input:disabled {
   background-color: var(--color-bg-tertiary);
   color: var(--color-text-muted);
   cursor: not-allowed;
+  opacity: 0.6;
 }
 
-/* ====== Input States ====== */
+/* Readonly */
+.form-field__input[readonly] {
+  background-color: var(--color-bg-secondary);
+  cursor: default;
+}
 
-/* Состояние ошибки */
-.input--error {
+.form-field--error .form-field__input {
   border-color: var(--color-error);
 }
 
-.input--error:hover:not(:disabled):not(:focus) {
+.form-field--error .form-field__input:hover:not(:disabled):not(:focus) {
   border-color: var(--color-error-hover);
 }
 
-.input--error:focus {
+.form-field--error .form-field__input:focus {
   border-color: var(--color-error);
   box-shadow: var(--shadow-focus-error);
 }
 
-/* Состояние успеха */
-.input--success {
+.form-field--error .form-field__input::placeholder {
+  color: var(--color-error);
+}
+
+/* Underlined variant error */
+.form-field--underlined.form-field--error .form-field__input {
+  border-bottom-color: var(--color-error);
+}
+
+.form-field--underlined.form-field--error .form-field__input:hover:not(:disabled):not(:focus) {
+  border-bottom-color: var(--color-error-hover);
+}
+
+.form-field--underlined.form-field--error .form-field__input:focus {
+  border-bottom-color: var(--color-error);
+}
+
+/* Filled variant error */
+.form-field--filled.form-field--error .form-field__input {
+  border-bottom-color: var(--color-error);
+}
+
+.form-field--filled.form-field--error .form-field__input:hover:not(:disabled):not(:focus) {
+  border-bottom-color: var(--color-error-hover);
+}
+
+.form-field--filled.form-field--error .form-field__input:focus {
+  border-bottom-color: var(--color-error);
+}
+
+.form-field--success .form-field__input {
   border-color: var(--color-success);
 }
 
-.input--success:focus {
+.form-field--success .form-field__input:focus {
   border-color: var(--color-success);
   box-shadow: var(--shadow-focus-success);
 }
 
-/* ====== Input Sizes ====== */
-
-/* Маленькое */
-.input--sm {
-  padding: var(--spacing-1) var(--spacing-2);
-  font-size: var(--font-size-sm);
-  border-radius: var(--radius-sm);
+.form-field--underlined.form-field--success .form-field__input {
+  border-bottom-color: var(--color-success);
 }
 
-/* Большое */
-.input--lg {
-  padding: var(--spacing-4) var(--spacing-6);
-  font-size: var(--font-size-lg);
-  border-radius: var(--radius-lg);
+.form-field--filled.form-field--success .form-field__input {
+  border-bottom-color: var(--color-success);
 }
 
-/* ====== Input with Icon ====== */
-.input-wrapper {
-  position: relative;
-  display: block;
+.form-field__input--has-left-icon {
+  padding-left: calc(var(--spacing-10) + var(--spacing-2));
 }
 
-.input-wrapper .input {
-  padding-left: 2.5rem;
+.form-field__input--has-right-icon {
+  padding-right: calc(var(--spacing-10) + var(--spacing-2));
 }
 
-.input-wrapper .input--icon-right {
-  padding-left: var(--spacing-4);
-  padding-right: 2.5rem;
-}
-
-.input-icon {
+.form-field__icon {
   position: absolute;
-  left: var(--spacing-4);
-  top: 50%;
-  transform: translateY(-50%);
-  width: 18px;
-  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
   color: var(--color-text-muted);
   pointer-events: none;
   transition: color var(--transition-fast);
-}
-
-.input-icon--right {
-  left: auto;
-  right: var(--spacing-4);
-}
-
-/* ====== Textarea ====== */
-.textarea {
-  min-height: 100px;
-  resize: vertical;
-}
-
-.textarea--no-resize {
-  resize: none;
-}
-
-/* ====== Select ====== */
-.select {
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right var(--spacing-2) center;
-  background-size: 16px;
-  padding-right: 2.5rem;
-}
-
-.select::-ms-expand {
-  display: none;
-}
-
-/* ====== Checkbox & Radio ====== */
-.checkbox,
-.radio {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-2);
-  cursor: pointer;
-  user-select: none;
-}
-
-.checkbox__input,
-.radio__input {
-  appearance: none;
-  width: 18px;
-  height: 18px;
-  border: 2px solid var(--color-border);
-  background-color: var(--color-bg-primary);
-  cursor: pointer;
-  transition: background-color var(--transition-fast), border-color var(--transition-fast),
-    box-shadow var(--transition-fast);
   flex-shrink: 0;
 }
 
-.checkbox__input {
-  border-radius: var(--radius-sm);
+.form-field__icon--left {
+  left: var(--spacing-3);
 }
 
-.radio__input {
-  border-radius: 50%;
-}
-
-.checkbox__input:hover,
-.radio__input:hover {
-  border-color: var(--color-focus);
-}
-
-.checkbox__input:focus,
-.radio__input:focus {
-  outline: none;
-  border-color: var(--color-focus);
-  box-shadow: var(--shadow-focus);
-}
-
-.checkbox__input:checked,
-.radio__input:checked {
-  background-color: var(--color-primary);
-  border-color: var(--color-primary);
-}
-
-.checkbox__input:checked::after {
-  content: '';
-  display: block;
-  width: 5px;
-  height: 9px;
-  border: solid var(--color-text-inverse);
-  border-width: 0 2px 2px 0;
-  transform: translate(5px, 2px) rotate(45deg);
-}
-
-.radio__input:checked::after {
-  content: '';
-  display: block;
-  width: 8px;
-  height: 8px;
-  background-color: var(--color-text-inverse);
-  border-radius: 50%;
-  transform: translate(3px, 3px);
-}
-
-.checkbox__input:disabled,
-.radio__input:disabled {
-  background-color: var(--color-bg-tertiary);
-  border-color: var(--color-border);
-  cursor: not-allowed;
-}
-
-.checkbox__label,
-.radio__label {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-primary);
-}
-
-/* ====== Helper Text ====== */
-.form-helper {
-  margin-top: var(--spacing-1);
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
-}
-
-.form-helper--error {
-  color: var(--color-error);
-}
-
-.form-helper--success {
-  color: var(--color-success);
-}
-
-/* ====== Input with Button ====== */
-.input-group {
-  display: flex;
-  width: 100%;
-}
-
-.input-group .input {
-  flex: 1;
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-}
-
-.input-group .btn {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-  margin-left: -1px;
-}
-
-.input-group--reversed {
-  flex-direction: row-reverse;
-}
-
-.input-group--reversed .input {
-  border-radius: var(--radius-md);
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-}
-
-.input-group--reversed .btn {
-  border-radius: var(--radius-md);
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-  margin-left: 0;
-  margin-right: -1px;
-}
-
-/* ====== Password Toggle ====== */
-.password-toggle {
-  position: absolute;
-  right: var(--spacing-2);
-  top: 50%;
-  transform: translateY(-50%);
-  padding: var(--spacing-1);
-  background: none;
-  border: none;
-  color: var(--color-text-muted);
-  cursor: pointer;
-  transition: color var(--transition-fast);
-}
-
-.password-toggle:hover {
-  color: var(--color-text-primary);
-}
-
-.password-toggle:focus-visible {
-  outline: none;
-  box-shadow: var(--shadow-focus);
-  border-radius: var(--radius-sm);
-  background-color: var(--state-focus-bg-dark);
-}
-
-/* ====== Responsive ====== */
-@media (max-width: 480px) {
-  .input {
-    font-size: 16px; /* Предотвратить зум на iOS */
-  }
-
-  .input-group {
-    flex-direction: column;
-  }
-
-  .input-group .input,
-  .input-group .btn {
-    border-radius: var(--radius-md);
-    margin-left: 0;
-    margin-right: 0;
-    margin-top: -1px;
-  }
-
-  .input-group .input:first-child {
-    border-radius: var(--radius-md);
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-  }
-
-  .input-group .btn:last-child {
-    border-radius: var(--radius-md);
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-  }
-}
-
-/* ====== Dark Theme ====== */
-:root.dark-theme .form-label {
-  color: var(--color-text-primary-dark);
-}
-
-:root.dark-theme .input {
-  color: var(--color-text-primary-dark);
-  background-color: var(--color-bg-secondary-dark);
-  border-color: var(--color-border-primary-dark);
-}
-
-:root.dark-theme .input::placeholder {
-  color: var(--color-text-muted-dark);
-}
-
-:root.dark-theme .input:hover:not(:disabled):not(:focus) {
-  border-color: var(--color-border-secondary-dark);
-}
-
-:root.dark-theme .input:focus {
-  border-color: var(--color-accent-primary-dark);
-  box-shadow: var(--shadow-glow-accent-dark);
-}
-
-:root.dark-theme .input:disabled {
-  background-color: var(--color-bg-tertiary-dark);
-  color: var(--color-text-muted-dark);
-}
-
-:root.dark-theme .input--error {
-  border-color: var(--color-error-primary-dark);
-}
-
-:root.dark-theme .input--error:hover:not(:disabled):not(:focus) {
-  border-color: var(--color-error-hover-dark);
-}
-
-:root.dark-theme .input--error:focus {
-  border-color: var(--color-error-primary-dark);
-  box-shadow: var(--shadow-glow-error-dark);
-}
-
-:root.dark-theme .input--success {
-  border-color: var(--color-success-primary-dark);
-}
-
-:root.dark-theme .input--success:focus {
-  border-color: var(--color-success-primary-dark);
-  box-shadow: var(--shadow-glow-success-dark);
-}
-
-:root.dark-theme .input-icon {
-  color: var(--color-text-muted-dark);
-}
-
-:root.dark-theme .checkbox__input,
-:root.dark-theme .radio__input {
-  background-color: var(--color-bg-secondary-dark);
-  border-color: var(--color-border-primary-dark);
-}
-
-:root.dark-theme .checkbox__input:hover,
-:root.dark-theme .radio__input:hover {
-  border-color: var(--color-accent-primary-dark);
-}
-
-:root.dark-theme .checkbox__input:focus,
-:root.dark-theme .radio__input:focus {
-  border-color: var(--color-accent-primary-dark);
-  box-shadow: var(--shadow-glow-accent-dark);
-}
-
-:root.dark-theme .checkbox__input:checked,
-:root.dark-theme .radio__input:checked {
-  background-color: var(--color-accent-primary-dark);
-  border-color: var(--color-accent-primary-dark);
-}
-
-:root.dark-theme .checkbox__input:disabled,
-:root.dark-theme .radio__input:disabled {
-  background-color: var(--color-bg-tertiary-dark);
-  border-color: var(--color-border-primary-dark);
-}
-
-:root.dark-theme .checkbox__label,
-:root.dark-theme .radio__label {
-  color: var(--color-text-primary-dark);
-}
-
-:root.dark-theme .form-helper {
-  color: var(--color-text-secondary-dark);
-}
-
-:root.dark-theme .form-helper--error {
-  color: var(--color-error-primary-dark);
-}
-
-:root.dark-theme .form-helper--success {
-  color: var(--color-success-primary-dark);
-}
-
-:root.dark-theme .password-toggle {
-  color: var(--color-text-muted-dark);
-}
-
-:root.dark-theme .password-toggle:hover {
-  color: var(--color-text-primary-dark);
-}
-
-/* ====== Password Toggle Button (from Input component) ====== */
-.form-field__toggle-password {
-  position: absolute;
+.form-field__icon--right {
   right: var(--spacing-3);
-  top: 50%;
-  transform: translateY(-50%);
-  width: 32px;
-  height: 32px;
-  padding: var(--spacing-1);
-  background: none;
-  border: none;
-  border-radius: var(--radius-md);
-  color: var(--color-text-muted);
-  cursor: pointer;
-  transition: color var(--transition-fast), background-color var(--transition-fast);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1;
 }
 
-.form-field__toggle-password:hover {
-  color: var(--color-text-primary);
-  background-color: var(--color-bg-secondary);
-}
-
-.form-field__toggle-password:focus-visible {
-  outline: none;
-  box-shadow: var(--shadow-focus);
-}
-
-.form-field__toggle-password svg {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-}
-
-/* Positioning for password input wrapper */
-.form-field--password .form-field__input-wrapper {
-  position: relative;
-}
-
-/* Adjust input padding for toggle button */
-.form-field--password .form-field__input {
-  padding-right: 2.75rem;
-}
-
-/* ====== Dark Theme for Password Toggle ====== */
-:root.dark-theme .form-field__toggle-password {
-  color: var(--color-text-muted-dark);
-}
-
-:root.dark-theme .form-field__toggle-password:hover {
-  color: var(--color-text-primary-dark);
-  background-color: var(--color-bg-secondary-dark);
-}
-
-/* ====== Success Icon ====== */
+/* Иконка успеха (галочка) */
 .form-field__success-icon {
   position: absolute;
   right: var(--spacing-3);
-  top: 50%;
-  transform: translateY(-50%);
   width: 20px;
   height: 20px;
   color: var(--color-success);
   display: flex;
   align-items: center;
   justify-content: center;
+  pointer-events: none;
 }
 
 .form-field__success-icon svg {
@@ -538,19 +297,191 @@
   height: 100%;
 }
 
-/* Adjust input padding when success icon is shown */
-.form-field--success .form-field__input {
-  padding-right: 2.75rem;
+/* Кнопка переключения пароля */
+.form-field__toggle-password {
+  position: absolute;
+  right: var(--spacing-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast), background-color var(--transition-fast);
 }
 
-/* ====== Error Icon ====== */
-.form-field__error-icon {
-  width: 14px;
-  height: 14px;
-  flex-shrink: 0;
+.form-field__toggle-password:hover {
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-tertiary);
+}
+
+.form-field__toggle-password:focus {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.form-field__toggle-password svg {
+  width: 20px;
+  height: 20px;
+}
+
+.form-field__error {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  margin-top: var(--spacing-1);
+  font-size: var(--font-size-sm);
   color: var(--color-error);
 }
 
+.form-field__error-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.form-field__error-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
 .form-field__error-text {
-  font-size: var(--font-size-xs);
+  flex: 1;
+}
+
+.form-field__helper {
+  margin-top: var(--spacing-1);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 320px) {
+  .form-field__input {
+    min-height: 44px;
+    padding: var(--spacing-3) var(--spacing-3);
+    font-size: var(--font-size-base);
+  }
+  
+  .form-field__input--small {
+    min-height: 40px;
+    padding: var(--spacing-2) var(--spacing-3);
+  }
+  
+  .form-field__input--large {
+    min-height: 52px;
+    padding: var(--spacing-4) var(--spacing-4);
+  }
+  
+  .form-field__icon {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .form-field__icon--left {
+    left: var(--spacing-2);
+  }
+  
+  .form-field__icon--right {
+    right: var(--spacing-2);
+  }
+  
+  .form-field__input--has-left-icon {
+    padding-left: calc(var(--spacing-10) + var(--spacing-1));
+  }
+  
+  .form-field__input--has-right-icon {
+    padding-right: calc(var(--spacing-10) + var(--spacing-1));
+  }
+  
+  .form-field__toggle-password {
+    width: 44px;
+    height: 44px;
+    right: var(--spacing-2);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .form-field__input,
+  .form-field__icon,
+  .form-field__toggle-password,
+  .form-field__label {
+    transition: none;
+  }
+}
+
+:root.dark-theme .form-field__input {
+  background-color: var(--color-neutral-800);
+  color: var(--color-neutral-100);
+  border-color: var(--color-neutral-600);
+}
+
+:root.dark-theme .form-field__input::placeholder {
+  color: var(--color-neutral-400);
+}
+
+:root.dark-theme .form-field__input:hover:not(:disabled):not(:focus) {
+  border-color: var(--color-neutral-500);
+}
+
+:root.dark-theme .form-field__input:focus {
+  background-color: var(--color-neutral-700);
+}
+
+:root.dark-theme .form-field__input:disabled {
+  background-color: var(--color-neutral-900);
+  color: var(--color-neutral-500);
+}
+
+:root.dark-theme .form-field__input[readonly] {
+  background-color: var(--color-neutral-800);
+}
+
+:root.dark-theme .form-field__label {
+  color: var(--color-neutral-200);
+}
+
+:root.dark-theme .form-field__icon {
+  color: var(--color-neutral-400);
+}
+
+:root.dark-theme .form-field__toggle-password:hover {
+  color: var(--color-neutral-200);
+  background-color: var(--color-neutral-700);
+}
+
+/* Filled variant dark theme */
+:root.dark-theme .form-field--filled .form-field__input {
+  background-color: var(--color-neutral-700);
+  border-bottom-color: var(--color-neutral-600);
+}
+
+:root.dark-theme .form-field--filled .form-field__input:hover:not(:disabled):not(:focus) {
+  background-color: var(--color-neutral-600);
+  border-bottom-color: var(--color-neutral-500);
+}
+
+:root.dark-theme .form-field--filled .form-field__input:focus {
+  background-color: var(--color-neutral-800);
+  border-bottom-color: var(--color-focus);
+}
+
+/* Underlined variant dark theme */
+:root.dark-theme .form-field--underlined .form-field__input {
+  border-bottom-color: var(--color-neutral-600);
+}
+
+:root.dark-theme .form-field--underlined .form-field__input:hover:not(:disabled):not(:focus) {
+  border-bottom-color: var(--color-neutral-500);
+}
+
+:root.dark-theme .form-field--underlined .form-field__input:focus {
+  border-bottom-color: var(--color-focus);
 }

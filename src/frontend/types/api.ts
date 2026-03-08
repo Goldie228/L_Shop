@@ -81,8 +81,10 @@ export type ApiErrorType =
 export class ApiError extends Error {
   /** HTTP статус код */
   public readonly statusCode: number;
+
   /** Тип ошибки */
   public readonly type: ApiErrorType;
+
   /** Ошибки валидации (если есть) */
   public readonly errors: ValidationError[];
 
@@ -145,7 +147,7 @@ export class ApiError extends Error {
  * Сетевая ошибка (когда fetch завершился неудачей)
  */
 export class NetworkError extends Error {
-  constructor(message: string = 'Ошибка сети. Проверьте подключение к интернету.') {
+  constructor(message = 'Ошибка сети. Проверьте подключение к интернету.') {
     super(message);
     this.name = 'NetworkError';
     Object.setPrototypeOf(this, NetworkError.prototype);

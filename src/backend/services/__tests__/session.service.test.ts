@@ -3,6 +3,7 @@
  */
 
 import { SessionService } from '../session.service';
+import { UserService } from '../user.service';
 import { readJsonFile, modifyJsonFile } from '../../utils/file.utils';
 import { Session } from '../../models/session.model';
 import { User } from '../../models/user.model';
@@ -14,10 +15,14 @@ const mockModifyJsonFile = modifyJsonFile as jest.MockedFunction<typeof modifyJs
 
 describe('Тесты SessionService', () => {
   let sessionService: SessionService;
+  let mockUserService: { getUserById: jest.MockedFunction<(id: string) => Promise<User | null>> };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    sessionService = new SessionService();
+    mockUserService = {
+      getUserById: jest.fn() as jest.MockedFunction<(id: string) => Promise<User | null>>,
+    };
+    sessionService = new SessionService(mockUserService as unknown as UserService);
   });
 
   describe('Создание сессии', () => {
@@ -25,6 +30,7 @@ describe('Тесты SessionService', () => {
       const mockUser: User = {
         id: 'user-1',
         name: 'Тест',
+        firstName: 'Тест',
         email: 'test@example.com',
         login: 'test',
         phone: '+1234567890',
@@ -40,10 +46,7 @@ describe('Тесты SessionService', () => {
       });
 
       // Мокаем getUserById чтобы возвращать mockUser
-      const mockGetUserById = jest.fn().mockResolvedValue(mockUser);
-      (sessionService as unknown as { userService: { getUserById: typeof mockGetUserById } }).userService = {
-        getUserById: mockGetUserById,
-      } as never;
+      mockUserService.getUserById.mockResolvedValue(mockUser);
 
       const token = await sessionService.createSession('user-1');
 

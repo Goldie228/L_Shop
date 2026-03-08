@@ -6,7 +6,11 @@
 import { Component, ComponentProps } from '../base/Component.js';
 import { Input } from '../ui/Input.js';
 import { Button } from '../ui/Button.js';
-import { ProductFilters as ProductFiltersType, PRODUCT_CATEGORIES, SORT_OPTIONS } from '../../types/product.js';
+import {
+  ProductFilters as ProductFiltersType,
+  PRODUCT_CATEGORIES,
+  SORT_OPTIONS,
+} from '../../types/product.js';
 
 /**
  * Интерфейс пропсов для ProductFilters
@@ -33,14 +37,19 @@ export interface ProductFiltersProps extends ComponentProps {
 export class ProductFilters extends Component<ProductFiltersProps> {
   /** Поле поиска */
   private searchInput: Input | null = null;
+
   /** Поле минимального рейтинга */
   private ratingInput: Input | null = null;
+
   /** Select сортировки */
   private sortSelect: HTMLSelectElement | null = null;
+
   /** Select категории */
   private categorySelect: HTMLSelectElement | null = null;
+
   /** Чекбокс наличия */
   private inStockCheckbox: HTMLInputElement | null = null;
+
   /** Таймер debounce для поиска */
   private searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -164,7 +173,7 @@ export class ProductFilters extends Component<ProductFiltersProps> {
       if (option.value === (this.props.filters.sort || '')) {
         optionElement.setAttribute('selected', 'true');
       }
-      this.sortSelect!.appendChild(optionElement);
+      this.sortSelect?.appendChild(optionElement);
     });
 
     this.addEventListener(this.sortSelect, 'change', this.handleSortChange);
@@ -208,7 +217,7 @@ export class ProductFilters extends Component<ProductFiltersProps> {
       if (option.value === this.props.filters.category) {
         optionElement.setAttribute('selected', 'true');
       }
-      this.categorySelect!.appendChild(optionElement);
+      this.categorySelect?.appendChild(optionElement);
     });
 
     this.addEventListener(this.categorySelect, 'change', this.handleCategoryChange);

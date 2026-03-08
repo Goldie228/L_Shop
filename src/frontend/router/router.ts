@@ -31,24 +31,24 @@ export type RouteChangeListener = (route: Route) => void;
 /**
  * Класс Router для клиентской навигации
  * Использует History API для навигации без перезагрузки страницы
- * 
+ *
  * @example
  * ```typescript
  * const router = new Router();
- * 
+ *
  * // Простой способ регистрации
  * router.register('/', () => {
  *   console.log('Главная страница');
  * });
- * 
+ *
  * // Или через конфигурацию
  * router.registerRoutes([
  *   { path: '/', component: 'HomePage', handler: () => {} },
  *   { path: '*', component: 'NotFoundPage', handler: () => {} }
  * ]);
- * 
+ *
  * router.init();
- * 
+ *
  * // Программная навигация
  * router.navigate('/');
  * ```
@@ -88,7 +88,7 @@ export class Router {
    * @param routes - Массив конфигураций маршрутов
    */
   public registerRoutes(routes: Route[]): void {
-    routes.forEach(route => {
+    routes.forEach((route) => {
       this.routes.set(route.path, route);
     });
   }
@@ -157,7 +157,7 @@ export class Router {
    * Обработать событие popstate (навигация браузера)
    * @param event - Событие PopStateEvent
    */
-  private handlePopState(event: PopStateEvent): void {
+  private handlePopState(_event: PopStateEvent): void {
     this.handleRoute(window.location.pathname);
   }
 
@@ -170,17 +170,17 @@ export class Router {
   private matchPattern(pattern: string, path: string): Record<string, string> | null {
     const patternParts = pattern.split('/');
     const pathParts = path.split('/');
-    
+
     if (patternParts.length !== pathParts.length) {
       return null;
     }
-    
+
     const params: Record<string, string> = {};
-    
+
     for (let i = 0; i < patternParts.length; i++) {
       const patternPart = patternParts[i];
       const pathPart = pathParts[i];
-      
+
       if (patternPart.startsWith(':')) {
         const paramName = patternPart.substring(1);
         if (!pathPart) {
@@ -191,7 +191,7 @@ export class Router {
         return null;
       }
     }
-    
+
     return params;
   }
 
@@ -210,7 +210,7 @@ export class Router {
     // Проверить шаблонные маршруты (например, /product/:id)
     for (const [routePath, route] of this.routes) {
       if (routePath === '*' || routePath === path) continue;
-      
+
       if (routePath.includes(':')) {
         const params = this.matchPattern(routePath, path);
         if (params) {
@@ -258,7 +258,7 @@ export class Router {
    */
   private notifyListeners(): void {
     if (this.currentRoute) {
-      this.listeners.forEach(listener => {
+      this.listeners.forEach((listener) => {
         try {
           listener(this.currentRoute!);
         } catch (error) {
@@ -276,16 +276,40 @@ export const APP_ROUTES: Route[] = [
   { path: '/', component: 'HomePage', title: 'Главная' },
   { path: '/catalog', component: 'HomePage', title: 'Каталог' }, // Redirect to HomePage (catalog)
   { path: '/product/:id', component: 'ProductPage', title: 'Товар' },
-  { path: '/profile', component: 'ProfilePage', title: 'Профиль', requiresAuth: true, authRedirect: '/' },
+  {
+    path: '/profile',
+    component: 'ProfilePage',
+    title: 'Профиль',
+    requiresAuth: true,
+    authRedirect: '/',
+  },
   { path: '/cart', component: 'CartPage', title: 'Корзина' },
-  { path: '/delivery', component: 'DeliveryPage', title: 'Оформление заказа', requiresAuth: true, authRedirect: '/cart' },
-  { path: '/orders', component: 'OrdersPage', title: 'Мои заказы', requiresAuth: true, authRedirect: '/' },
-  { path: '/admin', component: 'AdminPage', title: 'Админ-панель', requiresAuth: true, authRedirect: '/' },
+  {
+    path: '/delivery',
+    component: 'DeliveryPage',
+    title: 'Оформление заказа',
+    requiresAuth: true,
+    authRedirect: '/cart',
+  },
+  {
+    path: '/orders',
+    component: 'OrdersPage',
+    title: 'Мои заказы',
+    requiresAuth: true,
+    authRedirect: '/',
+  },
+  {
+    path: '/admin',
+    component: 'AdminPage',
+    title: 'Админ-панель',
+    requiresAuth: true,
+    authRedirect: '/',
+  },
   { path: '/about', component: 'AboutPage', title: 'О нас' },
   { path: '/contacts', component: 'ContactsPage', title: 'Контакты' },
   { path: '/playground', component: 'PlaygroundPage', title: 'Playground' },
   { path: '/playground/:component', component: 'PlaygroundPage', title: 'Playground' },
-  { path: '*', component: 'NotFoundPage', title: 'Страница не найдена' }
+  { path: '*', component: 'NotFoundPage', title: 'Страница не найдена' },
 ];
 
 /**

@@ -16,6 +16,8 @@ export interface User {
   id: string;
   /** Отображаемое имя пользователя */
   name: string;
+  /** Имя пользователя (извлекается из email при регистрации) */
+  firstName: string;
   /** Логин пользователя */
   login: string;
   /** Адрес электронной почты */
@@ -91,16 +93,16 @@ export function getUserDisplayInfo(user: User): UserDisplayInfo {
   const nameParts = user.name.trim().split(/\s+/);
   const initials = nameParts
     .slice(0, 2)
-    .map(part => part.charAt(0).toUpperCase())
+    .map((part) => part.charAt(0).toUpperCase())
     .join('');
-  
-  const displayName = user.name.length > 20 
-    ? `${user.name.substring(0, 17)}...` 
+
+  const displayName = user.name.length > 20
+    ? `${user.name.substring(0, 17)}...`
     : user.name;
-  
+
   return {
     initials: initials || user.login.charAt(0).toUpperCase(),
-    displayName
+    displayName,
   };
 }
 
@@ -121,15 +123,15 @@ export interface ValidationResult {
  */
 export function validateEmail(email: string): ValidationResult {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  
+
   if (!email.trim()) {
     return { isValid: false, error: 'Email обязателен' };
   }
-  
+
   if (!emailRegex.test(email)) {
     return { isValid: false, error: 'Неверный формат email' };
   }
-  
+
   return { isValid: true, error: null };
 }
 
@@ -142,22 +144,22 @@ export function validateLogin(loginOrEmail: string): ValidationResult {
   if (!loginOrEmail.trim()) {
     return { isValid: false, error: 'Логин или email обязателен' };
   }
-  
+
   // Проверяем, является ли ввод email
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (emailRegex.test(loginOrEmail)) {
     return { isValid: true, error: null };
   }
-  
+
   // Иначе проверяем как логин
   if (loginOrEmail.length < 3) {
     return { isValid: false, error: 'Логин должен содержать минимум 3 символа' };
   }
-  
+
   if (loginOrEmail.length > 30) {
     return { isValid: false, error: 'Логин должен содержать максимум 30 символов' };
   }
-  
+
   return { isValid: true, error: null };
 }
 
@@ -170,15 +172,15 @@ export function validatePassword(password: string): ValidationResult {
   if (!password) {
     return { isValid: false, error: 'Пароль обязателен' };
   }
-  
+
   if (password.length < 6) {
     return { isValid: false, error: 'Пароль должен содержать минимум 6 символов' };
   }
-  
+
   if (password.length > 100) {
     return { isValid: false, error: 'Пароль слишком длинный' };
   }
-  
+
   return { isValid: true, error: null };
 }
 
@@ -189,15 +191,15 @@ export function validatePassword(password: string): ValidationResult {
  */
 export function validatePhone(phone: string): ValidationResult {
   const phoneRegex = /^\+\d{10,15}$/;
-  
+
   if (!phone.trim()) {
     return { isValid: false, error: 'Номер телефона обязателен' };
   }
-  
+
   if (!phoneRegex.test(phone)) {
     return { isValid: false, error: 'Телефон должен быть в формате +1234567890' };
   }
-  
+
   return { isValid: true, error: null };
 }
 
@@ -210,15 +212,15 @@ export function validateName(name: string): ValidationResult {
   if (!name.trim()) {
     return { isValid: false, error: 'Имя обязательно' };
   }
-  
+
   if (name.length < 2) {
     return { isValid: false, error: 'Имя должно содержать минимум 2 символа' };
   }
-  
+
   if (name.length > 50) {
     return { isValid: false, error: 'Имя должно содержать максимум 50 символов' };
   }
-  
+
   return { isValid: true, error: null };
 }
 
@@ -229,16 +231,16 @@ export function validateName(name: string): ValidationResult {
  * @returns Результат валидации
  */
 export function validatePasswordConfirmation(
-  password: string, 
-  confirmPassword: string
+  password: string,
+  confirmPassword: string,
 ): ValidationResult {
   if (!confirmPassword) {
     return { isValid: false, error: 'Подтверждение пароля обязательно' };
   }
-  
+
   if (password !== confirmPassword) {
     return { isValid: false, error: 'Пароли не совпадают' };
   }
-  
+
   return { isValid: true, error: null };
 }

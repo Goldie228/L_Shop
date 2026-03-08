@@ -6,6 +6,8 @@
 import { Component, ComponentProps } from '../base/Component.js';
 import { Button } from '../ui/Button.js';
 import { Modal } from '../ui/Modal.js';
+import { Toast } from '../ui/Toast.js';
+import { ConfirmModal } from '../ui/ConfirmModal.js';
 import { adminService } from '../../services/admin.service.js';
 import { store } from '../../store/store.js';
 import { Product } from '../../types/product.js';
@@ -21,9 +23,7 @@ export type AdminTab = 'products' | 'orders' | 'users';
 /**
  * Интерфейс пропсов страницы админ-панели
  */
-export interface AdminPageProps extends ComponentProps {
-  // Дополнительные пропсы при необходимости
-}
+export type AdminPageProps = ComponentProps;
 
 /**
  * Страница админ-панели
@@ -31,23 +31,33 @@ export interface AdminPageProps extends ComponentProps {
  */
 export class AdminPage extends Component<AdminPageProps> {
   private tabsContainer: HTMLElement | null = null;
+
   private contentContainer: HTMLElement | null = null;
+
   private addProductButton: Button | null = null;
+
   private productModal: Modal | null = null;
+
+  private toast: Toast | null = null;
+
+  private confirmModal: ConfirmModal | null = null;
 
   // Состояние компонента (заменяет this.state)
   private activeTab: AdminTab = 'products';
-  private products: Product[] = [];
-  private orders: Order[] = [];
-  private users: User[] = [];
-  private loading = false;
-  private error: string | null = null;
-  private editingProductId: string | null = null;
-  private showProductModal = false;
 
-  constructor(props: Partial<AdminPageProps> = {}) {
-    super(props);
-  }
+  private products: Product[] = [];
+
+  private orders: Order[] = [];
+
+  private users: User[] = [];
+
+  private loading = false;
+
+  private error: string | null = null;
+
+  private editingProductId: string | null = null;
+
+  // Конструктор не требуется - используем getDefaultProps()
 
   /**
    * Проверка прав доступа при монтировании
@@ -57,7 +67,7 @@ export class AdminPage extends Component<AdminPageProps> {
 
     // Проверка что пользователь авторизован и имеет роль admin
     if (!user || user.role !== 'admin') {
-      console.warn('[AdminPage] Доступ запрещён: пользователь не admin');
+      // Доступ запрещён: пользователь не admin (перенаправление на главную)
       router.navigate('/');
       return;
     }
@@ -72,9 +82,13 @@ export class AdminPage extends Component<AdminPageProps> {
     });
 
     // Заголовок
-    const title = this.createElement('h1', {
-      className: 'admin-page__title',
-    }, ['Админ-панель']);
+    const title = this.createElement(
+      'h1',
+      {
+        className: 'admin-page__title',
+      },
+      ['Админ-панель'],
+    );
     container.appendChild(title);
 
     // Навигация по вкладкам
@@ -108,13 +122,30 @@ export class AdminPage extends Component<AdminPageProps> {
     // Модальное окно товара
     this.productModal = new Modal({
       title: this.editingProductId ? 'Редактирование товара' : 'Добавление товара',
-      size: 'lg',
+      size: 'large',
       animation: 'scale',
-      closeOnBackdrop: true,
+      closeOnOverlayClick: true,
       closeOnEscape: true,
       onClose: () => this.closeProductModal(),
     });
     container.appendChild(this.productModal.render());
+
+    // Инициализация Toast
+    this.toast = new Toast({
+      type: 'info',
+      duration: 5000,
+      showCloseButton: true,
+    });
+
+    // Инициализация ConfirmModal
+    this.confirmModal = new ConfirmModal({
+      title: 'Подтверждение',
+      confirmText: 'Подтвердить',
+      cancelText: 'Отмена',
+    });
+
+    container.appendChild(this.toast.render());
+    container.appendChild(this.confirmModal.render());
 
     this.element = container;
     return container;
@@ -134,14 +165,18 @@ export class AdminPage extends Component<AdminPageProps> {
       { id: 'users', label: 'Пользователи' },
     ];
 
-    tabs.forEach(tab => {
-      const tabButton = this.createElement('button', {
-        className: `admin-page__tab ${this.activeTab === tab.id ? 'active' : ''}`,
-        'data-tab': tab.id,
-      }, [tab.label]);
+    tabs.forEach((tab) => {
+      const tabButton = this.createElement(
+        'button',
+        {
+          className: `admin-page__tab ${this.activeTab === tab.id ? 'active' : ''}`,
+          'data-tab': tab.id,
+        },
+        [tab.label],
+      );
 
       this.addEventListener(tabButton, 'click', () => this.switchTab(tab.id));
-      this.tabsContainer!.appendChild(tabButton);
+      this.tabsContainer?.appendChild(tabButton);
     });
   }
 
@@ -154,17 +189,25 @@ export class AdminPage extends Component<AdminPageProps> {
     this.contentContainer.innerHTML = '';
 
     if (this.loading) {
-      const loading = this.createElement('div', {
-        className: 'admin-page__loading',
-      }, ['Загрузка...']);
+      const loading = this.createElement(
+        'div',
+        {
+          className: 'admin-page__loading',
+        },
+        ['Загрузка...'],
+      );
       this.contentContainer.appendChild(loading);
       return;
     }
 
     if (this.error) {
-      const error = this.createElement('div', {
-        className: 'admin-page__error',
-      }, [this.error]);
+      const error = this.createElement(
+        'div',
+        {
+          className: 'admin-page__error',
+        },
+        [this.error],
+      );
       this.contentContainer.appendChild(error);
       return;
     }
@@ -179,6 +222,12 @@ export class AdminPage extends Component<AdminPageProps> {
       case 'users':
         this.contentContainer.appendChild(this.renderUsersTable());
         break;
+      default: {
+        // Неизвестная вкладка
+        const error = this.createElement('div', {}, ['Неизвестная вкладка']);
+        this.contentContainer?.appendChild(error);
+        break;
+      }
     }
   }
 
@@ -193,7 +242,7 @@ export class AdminPage extends Component<AdminPageProps> {
     // Заголовок таблицы
     const thead = this.createElement('thead');
     const headerRow = this.createElement('tr');
-    ['ID', 'Название', 'Цена', 'Категория', 'Наличие', 'Действия'].forEach(headerText => {
+    ['ID', 'Название', 'Цена', 'Категория', 'Наличие', 'Действия'].forEach((headerText) => {
       const th = this.createElement('th', {}, [headerText]);
       headerRow.appendChild(th);
     });
@@ -205,10 +254,14 @@ export class AdminPage extends Component<AdminPageProps> {
 
     if (this.products.length === 0) {
       const emptyRow = this.createElement('tr');
-      const emptyCell = this.createElement('td', {
-        colSpan: 6,
-        className: 'admin-table__empty',
-      }, ['Нет товаров']);
+      const emptyCell = this.createElement(
+        'td',
+        {
+          colSpan: 6,
+          className: 'admin-table__empty',
+        },
+        ['Нет товаров'],
+      );
       emptyRow.appendChild(emptyCell);
       tbody.appendChild(emptyRow);
     } else {
@@ -229,9 +282,13 @@ export class AdminPage extends Component<AdminPageProps> {
         row.appendChild(this.createElement('td', {}, [product.category]));
 
         // Наличие
-        const inStock = this.createElement('td', {
-          className: product.inStock ? 'status-active' : 'status-inactive',
-        }, [product.inStock ? 'В наличии' : 'Нет в наличии']);
+        const inStock = this.createElement(
+          'td',
+          {
+            className: product.inStock ? 'status-active' : 'status-inactive',
+          },
+          [product.inStock ? 'В наличии' : 'Нет в наличии'],
+        );
         row.appendChild(inStock);
 
         // Действия
@@ -239,17 +296,25 @@ export class AdminPage extends Component<AdminPageProps> {
           className: 'admin-table__actions',
         });
 
-        const editBtn = this.createElement('button', {
-          className: 'admin-table__action-btn edit',
-          'data-action': 'edit',
-          'data-id': product.id,
-        }, ['✏️']);
+        const editBtn = this.createElement(
+          'button',
+          {
+            className: 'admin-table__action-btn edit',
+            'data-action': 'edit',
+            'data-id': product.id,
+          },
+          ['✏️'],
+        );
 
-        const deleteBtn = this.createElement('button', {
-          className: 'admin-table__action-btn delete',
-          'data-action': 'delete',
-          'data-id': product.id,
-        }, ['🗑️']);
+        const deleteBtn = this.createElement(
+          'button',
+          {
+            className: 'admin-table__action-btn delete',
+            'data-action': 'delete',
+            'data-id': product.id,
+          },
+          ['🗑️'],
+        );
 
         this.addEventListener(editBtn, 'click', () => this.editProduct(product.id));
         this.addEventListener(deleteBtn, 'click', () => this.deleteProduct(product.id));
@@ -277,7 +342,7 @@ export class AdminPage extends Component<AdminPageProps> {
     // Заголовок таблицы
     const thead = this.createElement('thead');
     const headerRow = this.createElement('tr');
-    ['ID', 'Пользователь', 'Сумма', 'Статус', 'Дата', 'Действия'].forEach(headerText => {
+    ['ID', 'Пользователь', 'Сумма', 'Статус', 'Дата', 'Действия'].forEach((headerText) => {
       const th = this.createElement('th', {}, [headerText]);
       headerRow.appendChild(th);
     });
@@ -289,10 +354,14 @@ export class AdminPage extends Component<AdminPageProps> {
 
     if (this.orders.length === 0) {
       const emptyRow = this.createElement('tr');
-      const emptyCell = this.createElement('td', {
-        colSpan: 6,
-        className: 'admin-table__empty',
-      }, ['Нет заказов']);
+      const emptyCell = this.createElement(
+        'td',
+        {
+          colSpan: 6,
+          className: 'admin-table__empty',
+        },
+        ['Нет заказов'],
+      );
       emptyRow.appendChild(emptyCell);
       tbody.appendChild(emptyRow);
     } else {
@@ -303,15 +372,21 @@ export class AdminPage extends Component<AdminPageProps> {
         row.appendChild(this.createElement('td', {}, [order.id.substring(0, 8)]));
 
         // Пользователь
-        row.appendChild(this.createElement('td', {}, [order.userId ? order.userId.substring(0, 8) : 'Гость']));
+        row.appendChild(
+          this.createElement('td', {}, [order.userId ? order.userId.substring(0, 8) : 'Гость']),
+        );
 
         // Сумма
         row.appendChild(this.createElement('td', {}, [`${order.totalSum} ₽`]));
 
         // Статус
-        const status = this.createElement('td', {
-          className: `status-${order.status}`,
-        }, [this.getStatusLabel(order.status)]);
+        const status = this.createElement(
+          'td',
+          {
+            className: `status-${order.status}`,
+          },
+          [this.getStatusLabel(order.status)],
+        );
         row.appendChild(status);
 
         // Дата
@@ -323,17 +398,25 @@ export class AdminPage extends Component<AdminPageProps> {
           className: 'admin-table__actions',
         });
 
-        const statusBtn = this.createElement('button', {
-          className: 'admin-table__action-btn status',
-          'data-action': 'status',
-          'data-id': order.id,
-        }, ['📋']);
+        const statusBtn = this.createElement(
+          'button',
+          {
+            className: 'admin-table__action-btn status',
+            'data-action': 'status',
+            'data-id': order.id,
+          },
+          ['📋'],
+        );
 
-        const deleteBtn = this.createElement('button', {
-          className: 'admin-table__action-btn delete',
-          'data-action': 'delete',
-          'data-id': order.id,
-        }, ['🗑️']);
+        const deleteBtn = this.createElement(
+          'button',
+          {
+            className: 'admin-table__action-btn delete',
+            'data-action': 'delete',
+            'data-id': order.id,
+          },
+          ['🗑️'],
+        );
 
         this.addEventListener(statusBtn, 'click', () => this.changeOrderStatus(order.id));
         this.addEventListener(deleteBtn, 'click', () => this.deleteOrder(order.id));
@@ -361,7 +444,7 @@ export class AdminPage extends Component<AdminPageProps> {
     // Заголовок таблицы
     const thead = this.createElement('thead');
     const headerRow = this.createElement('tr');
-    ['ID', 'Имя', 'Email', 'Роль', 'Статус', 'Действия'].forEach(headerText => {
+    ['ID', 'Имя', 'Email', 'Роль', 'Статус', 'Действия'].forEach((headerText) => {
       const th = this.createElement('th', {}, [headerText]);
       headerRow.appendChild(th);
     });
@@ -373,10 +456,14 @@ export class AdminPage extends Component<AdminPageProps> {
 
     if (this.users.length === 0) {
       const emptyRow = this.createElement('tr');
-      const emptyCell = this.createElement('td', {
-        colSpan: 6,
-        className: 'admin-table__empty',
-      }, ['Нет пользователей']);
+      const emptyCell = this.createElement(
+        'td',
+        {
+          colSpan: 6,
+          className: 'admin-table__empty',
+        },
+        ['Нет пользователей'],
+      );
       emptyRow.appendChild(emptyCell);
       tbody.appendChild(emptyRow);
     } else {
@@ -393,9 +480,13 @@ export class AdminPage extends Component<AdminPageProps> {
         row.appendChild(this.createElement('td', {}, [user.email || '-']));
 
         // Роль
-        const role = this.createElement('td', {
-          className: user.role === 'admin' ? 'role-admin' : 'role-user',
-        }, [user.role === 'admin' ? 'Админ' : 'Пользователь']);
+        const role = this.createElement(
+          'td',
+          {
+            className: user.role === 'admin' ? 'role-admin' : 'role-user',
+          },
+          [user.role === 'admin' ? 'Админ' : 'Пользователь'],
+        );
         row.appendChild(role);
 
         // Статус (блокировка - добавим когда будет поле isBlocked)
@@ -407,17 +498,25 @@ export class AdminPage extends Component<AdminPageProps> {
           className: 'admin-table__actions',
         });
 
-        const roleBtn = this.createElement('button', {
-          className: 'admin-table__action-btn role',
-          'data-action': 'role',
-          'data-id': user.id,
-        }, ['👤']);
+        const roleBtn = this.createElement(
+          'button',
+          {
+            className: 'admin-table__action-btn role',
+            'data-action': 'role',
+            'data-id': user.id,
+          },
+          ['👤'],
+        );
 
-        const blockBtn = this.createElement('button', {
-          className: 'admin-table__action-btn block',
-          'data-action': 'block',
-          'data-id': user.id,
-        }, ['🚫']);
+        const blockBtn = this.createElement(
+          'button',
+          {
+            className: 'admin-table__action-btn block',
+            'data-action': 'block',
+            'data-id': user.id,
+          },
+          ['🚫'],
+        );
 
         this.addEventListener(roleBtn, 'click', () => this.changeUserRole(user.id));
         this.addEventListener(blockBtn, 'click', () => this.toggleUserBlock(user.id));
@@ -451,15 +550,11 @@ export class AdminPage extends Component<AdminPageProps> {
     this.error = null;
 
     try {
-      await Promise.all([
-        this.loadProducts(),
-        this.loadOrders(),
-        this.loadUsers(),
-      ]);
+      await Promise.all([this.loadProducts(), this.loadOrders(), this.loadUsers()]);
     } catch (error) {
-      console.error('[AdminPage] Ошибка загрузки данных:', error);
       this.loading = false;
       this.error = 'Ошибка загрузки данных';
+      this.showToast('Ошибка загрузки данных', 'error');
     }
   }
 
@@ -472,7 +567,8 @@ export class AdminPage extends Component<AdminPageProps> {
       this.loading = false;
       this.renderContent();
     } catch (error) {
-      console.error('[AdminPage] Ошибка загрузки товаров:', error);
+      this.loading = false;
+      this.showToast('Ошибка загрузки товаров', 'error');
     }
   }
 
@@ -485,7 +581,8 @@ export class AdminPage extends Component<AdminPageProps> {
       this.loading = false;
       this.renderContent();
     } catch (error) {
-      console.error('[AdminPage] Ошибка загрузки заказов:', error);
+      this.loading = false;
+      this.showToast('Ошибка загрузки заказов', 'error');
     }
   }
 
@@ -498,7 +595,8 @@ export class AdminPage extends Component<AdminPageProps> {
       this.loading = false;
       this.renderContent();
     } catch (error) {
-      console.error('[AdminPage] Ошибка загрузки пользователей:', error);
+      this.loading = false;
+      this.showToast('Ошибка загрузки пользователей', 'error');
     }
   }
 
@@ -507,7 +605,6 @@ export class AdminPage extends Component<AdminPageProps> {
    */
   private openProductModal(): void {
     this.editingProductId = null;
-    this.showProductModal = true;
     this.showProductForm();
   }
 
@@ -516,7 +613,6 @@ export class AdminPage extends Component<AdminPageProps> {
    */
   private editProduct(id: string): void {
     this.editingProductId = id;
-    this.showProductModal = true;
     this.showProductForm();
   }
 
@@ -527,7 +623,7 @@ export class AdminPage extends Component<AdminPageProps> {
     if (!this.productModal) return;
 
     const product = this.editingProductId
-      ? this.products.find(p => p.id === this.editingProductId)
+      ? this.products.find((p) => p.id === this.editingProductId)
       : null;
 
     const form = this.createProductForm(product);
@@ -545,25 +641,73 @@ export class AdminPage extends Component<AdminPageProps> {
 
     // Поля формы
     const fields = [
-      { name: 'name', label: 'Название', type: 'text', required: true, value: product?.name || '' },
-      { name: 'description', label: 'Описание', type: 'textarea', required: true, value: product?.description || '' },
-      { name: 'price', label: 'Цена', type: 'number', required: true, value: product?.price?.toString() || '' },
-      { name: 'category', label: 'Категория', type: 'text', required: true, value: product?.category || '' },
-      { name: 'imageUrl', label: 'URL изображения', type: 'text', required: false, value: product?.imageUrl || '' },
-      { name: 'discountPercent', label: 'Скидка (%)', type: 'number', required: false, value: product?.discountPercent?.toString() || '0' },
-      { name: 'rating', label: 'Рейтинг', type: 'number', required: false, value: product?.rating?.toString() || '0' },
-      { name: 'reviewsCount', label: 'Количество отзывов', type: 'number', required: false, value: product?.reviewsCount?.toString() || '0' },
+      {
+        name: 'name', label: 'Название', type: 'text', required: true, value: product?.name || '',
+      },
+      {
+        name: 'description',
+        label: 'Описание',
+        type: 'textarea',
+        required: true,
+        value: product?.description || '',
+      },
+      {
+        name: 'price',
+        label: 'Цена',
+        type: 'number',
+        required: true,
+        value: product?.price?.toString() || '',
+      },
+      {
+        name: 'category',
+        label: 'Категория',
+        type: 'text',
+        required: true,
+        value: product?.category || '',
+      },
+      {
+        name: 'imageUrl',
+        label: 'URL изображения',
+        type: 'text',
+        required: false,
+        value: product?.imageUrl || '',
+      },
+      {
+        name: 'discountPercent',
+        label: 'Скидка (%)',
+        type: 'number',
+        required: false,
+        value: product?.discountPercent?.toString() || '0',
+      },
+      {
+        name: 'rating',
+        label: 'Рейтинг',
+        type: 'number',
+        required: false,
+        value: product?.rating?.toString() || '0',
+      },
+      {
+        name: 'reviewsCount',
+        label: 'Количество отзывов',
+        type: 'number',
+        required: false,
+        value: product?.reviewsCount?.toString() || '0',
+      },
     ];
 
-    fields.forEach(field => {
+    fields.forEach((field) => {
       const fieldWrapper = this.createElement('div', {
         className: 'admin-form__field',
       });
 
-      const label = this.createElement('label', {
-        className: 'admin-form__label',
-        for: `product-${field.name}`,
-      }, [field.label + (field.required ? ' *' : '')]);
+      const label = this.createElement(
+        'label',
+        {
+          className: 'admin-form__label',
+          for: `product-${field.name}`,
+        },
+        [field.label + (field.required ? ' *' : '')],
+      );
       fieldWrapper.appendChild(label);
 
       let input: HTMLElement;
@@ -616,10 +760,14 @@ export class AdminPage extends Component<AdminPageProps> {
       checked: product?.inStock ?? true,
     });
 
-    const stockLabel = this.createElement('label', {
-      className: 'admin-form__label',
-      for: 'product-inStock',
-    }, ['В наличии']);
+    const stockLabel = this.createElement(
+      'label',
+      {
+        className: 'admin-form__label',
+        for: 'product-inStock',
+      },
+      ['В наличии'],
+    );
 
     stockWrapper.appendChild(stockCheckbox);
     stockWrapper.appendChild(stockLabel);
@@ -663,7 +811,7 @@ export class AdminPage extends Component<AdminPageProps> {
       price: parseFloat(formData.get('price') as string),
       category: formData.get('category') as string,
       inStock: formData.get('inStock') === 'on',
-      imageUrl: formData.get('imageUrl') as string || undefined,
+      imageUrl: (formData.get('imageUrl') as string) || undefined,
       discountPercent: parseFloat(formData.get('discountPercent') as string) || 0,
       rating: parseFloat(formData.get('rating') as string) || 0,
       reviewsCount: parseInt(formData.get('reviewsCount') as string, 10) || 0,
@@ -671,12 +819,12 @@ export class AdminPage extends Component<AdminPageProps> {
 
     // Валидация
     if (!data.name || !data.description || !data.category) {
-      alert('Заполните обязательные поля');
+      this.showToast('Заполните обязательные поля', 'warning');
       return;
     }
 
     if (data.price <= 0) {
-      alert('Цена должна быть больше 0');
+      this.showToast('Цена должна быть больше 0', 'warning');
       return;
     }
 
@@ -689,9 +837,9 @@ export class AdminPage extends Component<AdminPageProps> {
 
       this.closeProductModal();
       await this.loadProducts();
+      this.showToast(this.editingProductId ? 'Товар обновлён' : 'Товар создан', 'success');
     } catch (error) {
-      console.error('[AdminPage] Ошибка сохранения товара:', error);
-      alert('Ошибка сохранения товара');
+      this.showToast('Ошибка сохранения товара', 'error');
     }
   }
 
@@ -700,7 +848,6 @@ export class AdminPage extends Component<AdminPageProps> {
    */
   private closeProductModal(): void {
     this.editingProductId = null;
-    this.showProductModal = false;
     this.productModal?.close();
   }
 
@@ -708,16 +855,16 @@ export class AdminPage extends Component<AdminPageProps> {
    * Удалить товар
    */
   private async deleteProduct(id: string): Promise<void> {
-    if (!confirm('Вы уверены, что хотите удалить этот товар?')) {
+    if (!await this.showConfirm('Вы уверены, что хотите удалить этот товар?')) {
       return;
     }
 
     try {
       await adminService.deleteProduct(id);
       await this.loadProducts();
+      this.showToast('Товар удалён', 'success');
     } catch (error) {
-      console.error('[AdminPage] Ошибка удаления товара:', error);
-      alert('Ошибка удаления товара');
+      this.showToast('Ошибка удаления товара', 'error');
     }
   }
 
@@ -725,27 +872,27 @@ export class AdminPage extends Component<AdminPageProps> {
    * Изменить статус заказа
    */
   private async changeOrderStatus(id: string): Promise<void> {
-    const order = this.orders.find(o => o.id === id);
+    const order = this.orders.find((o) => o.id === id);
     if (!order) return;
 
     const statuses: { value: string; label: string }[] = [
       { value: 'pending', label: 'Ожидает' },
-      { value: 'confirmed', label: 'Подтверждён' },
+      { value: 'processing', label: 'В обработке' },
       { value: 'shipped', label: 'Отправлен' },
       { value: 'delivered', label: 'Доставлен' },
       { value: 'cancelled', label: 'Отменён' },
     ];
 
-    const currentIndex = statuses.findIndex(s => s.value === order.status);
+    const currentIndex = statuses.findIndex((s) => s.value === order.status);
     const nextIndex = (currentIndex + 1) % statuses.length;
     const newStatus = statuses[nextIndex].value as Order['status'];
 
     try {
       await adminService.updateOrderStatus(id, newStatus);
       await this.loadOrders();
+      this.showToast('Статус заказа обновлён', 'success');
     } catch (error) {
-      console.error('[AdminPage] Ошибка изменения статуса заказа:', error);
-      alert('Ошибка изменения статуса заказа');
+      this.showToast('Ошибка изменения статуса заказа', 'error');
     }
   }
 
@@ -753,16 +900,16 @@ export class AdminPage extends Component<AdminPageProps> {
    * Удалить заказ
    */
   private async deleteOrder(id: string): Promise<void> {
-    if (!confirm('Вы уверены, что хотите удалить этот заказ?')) {
+    if (!await this.showConfirm('Вы уверены, что хотите удалить этот заказ?')) {
       return;
     }
 
     try {
       await adminService.deleteOrder(id);
       await this.loadOrders();
+      this.showToast('Заказ удалён', 'success');
     } catch (error) {
-      console.error('[AdminPage] Ошибка удаления заказа:', error);
-      alert('Ошибка удаления заказа');
+      this.showToast('Ошибка удаления заказа', 'error');
     }
   }
 
@@ -770,7 +917,7 @@ export class AdminPage extends Component<AdminPageProps> {
    * Изменить роль пользователя
    */
   private async changeUserRole(id: string): Promise<void> {
-    const user = this.users.find(u => u.id === id);
+    const user = this.users.find((u) => u.id === id);
     if (!user) return;
 
     const newRole = user.role === 'admin' ? 'user' : 'admin';
@@ -778,9 +925,12 @@ export class AdminPage extends Component<AdminPageProps> {
     try {
       await adminService.updateUserRole(id, newRole);
       await this.loadUsers();
+      this.showToast(
+        `Роль изменена на ${newRole === 'admin' ? 'Админ' : 'Пользователь'}`,
+        'success',
+      );
     } catch (error) {
-      console.error('[AdminPage] Ошибка изменения роли пользователя:', error);
-      alert('Ошибка изменения роли пользователя');
+      this.showToast('Ошибка изменения роли пользователя', 'error');
     }
   }
 
@@ -788,16 +938,20 @@ export class AdminPage extends Component<AdminPageProps> {
    * Заблокировать/разблокировать пользователя
    */
   private async toggleUserBlock(id: string): Promise<void> {
-    if (!confirm('Вы уверены, что хотите изменить статус блокировки пользователя?')) {
+    if (
+      !await this.showConfirm(
+        'Вы уверены, что хотите изменить статус блокировки пользователя?',
+      )
+    ) {
       return;
     }
 
     try {
       await adminService.toggleUserBlock(id);
       await this.loadUsers();
+      this.showToast('Статус блокировки изменён', 'success');
     } catch (error) {
-      console.error('[AdminPage] Ошибка изменения статуса блокировки:', error);
-      alert('Ошибка изменения статуса блокировки');
+      this.showToast('Ошибка изменения статуса блокировки', 'error');
     }
   }
 
@@ -807,12 +961,41 @@ export class AdminPage extends Component<AdminPageProps> {
   private getStatusLabel(status: Order['status']): string {
     const labels: Record<Order['status'], string> = {
       pending: 'Ожидает',
-      confirmed: 'Подтверждён',
+      processing: 'В обработке',
       shipped: 'Отправлен',
       delivered: 'Доставлен',
       cancelled: 'Отменён',
     };
     return labels[status] || status;
+  }
+
+  /**
+   * Показать toast уведомление
+   * @param message - сообщение
+   * @param type - тип уведомления
+   */
+  private showToast(
+    message: string,
+    type: 'success' | 'error' | 'warning' | 'info' = 'info',
+  ): void {
+    if (this.toast) {
+      this.toast.setProps({ message, type });
+      this.toast.open();
+    }
+  }
+
+  /**
+   * Показать модальное окно подтверждения
+   * @param message - сообщение для подтверждения
+   * @returns Promise<boolean> - true если подтверждено
+   */
+  private async showConfirm(message: string): Promise<boolean> {
+    if (!this.confirmModal) {
+      return false;
+    }
+
+    this.confirmModal.setProps({ message });
+    return this.confirmModal.show();
   }
 
   /**

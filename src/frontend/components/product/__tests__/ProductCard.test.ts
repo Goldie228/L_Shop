@@ -19,6 +19,7 @@ describe('ProductCard', () => {
     rating: 4.5,
     reviewsCount: 128,
     createdAt: '2024-01-01T00:00:00.000Z',
+    currency: 'BYN',
   };
 
   const mockProductWithoutRating: Product = {
@@ -29,6 +30,7 @@ describe('ProductCard', () => {
     category: 'electronics',
     inStock: true,
     createdAt: '2024-01-02T00:00:00.000Z',
+    currency: 'BYN',
   };
 
   const mockProductOutOfStock: Product = {
@@ -41,6 +43,7 @@ describe('ProductCard', () => {
     rating: 3.8,
     reviewsCount: 10,
     createdAt: '2024-01-03T00:00:00.000Z',
+    currency: 'BYN',
   };
 
   beforeEach(() => {

@@ -8,6 +8,7 @@ import { generateId } from '../utils/id.utils';
 import { config } from '../config/constants';
 import { UserService } from './user.service';
 import { createContextLogger } from '../utils/logger';
+import { SessionError } from '../errors/session.error';
 
 const logger = createContextLogger('SessionService');
 const SESSIONS_FILE = 'sessions.json';
@@ -15,13 +16,17 @@ const SESSIONS_FILE = 'sessions.json';
 export class SessionService {
   private userService: UserService;
 
-  constructor() {
-    this.userService = new UserService();
+  constructor(userService?: UserService) {
+    this.userService = userService ?? new UserService();
   }
 
   /**
    * Создаёт новую сессию для пользователя
    * Сохраняет роль пользователя для быстрой проверки
+   * @param userId - ID пользователя
+   * @returns Токен сессии
+   * @throws {SessionError} При ошибке создания сессии
+   * @throws {NotFoundError} Если пользователь не найден (из UserService)
    */
   async createSession(userId: string): Promise<string> {
     try {
@@ -47,13 +52,16 @@ export class SessionService {
       return token;
     } catch (error) {
       logger.error({ error, userId }, 'Ошибка создания сессии');
-      throw new Error('Ошибка создания сессии');
+      throw new SessionError('Не удалось создать сессию для пользователя', { userId });
     }
   }
 
   /**
    * Получает ID пользователя по токену сессии
    * Возвращает null если сессия не найдена или истекла
+   * @param token - Токен сессии
+   * @returns ID пользователя или null
+   * @throws {SessionError} При критической ошибке чтения файла сессий
    */
   async getUserIdByToken(token: string): Promise<string | null> {
     try {
@@ -72,6 +80,9 @@ export class SessionService {
   /**
    * Получает роль пользователя по токену сессии
    * Возвращает null если сессия не найдена или истекла
+   * @param token - Токен сессии
+   * @returns Роль пользователя или null
+   * @throws {SessionError} При критической ошибке чтения файла сессий
    */
   async getRoleByToken(token: string): Promise<string | null> {
     try {
@@ -89,12 +100,12 @@ export class SessionService {
 
   /**
    * Удаляет сессию по токену
+   * @param token - Токен сессии для удаления
+   * @throws {SessionError} При ошибке удаления сессии (не критично, логируется)
    */
   async deleteSession(token: string): Promise<void> {
     try {
-      await modifyJsonFile<Session>(SESSIONS_FILE, (sessions) =>
-        sessions.filter((s) => s.token !== token),
-      );
+      await modifyJsonFile<Session>(SESSIONS_FILE, (sessions) => sessions.filter((s) => s.token !== token));
 
       logger.debug('Сессия удалена');
     } catch (error) {
@@ -105,6 +116,8 @@ export class SessionService {
 
   /**
    * Удаляет все истёкшие сессии
+   * @returns Количество удалённых сессий
+   * @throws {SessionError} При критической ошибке чтения или записи файла сессий
    */
   async cleanExpired(): Promise<number> {
     try {
@@ -130,6 +143,9 @@ export class SessionService {
 
   /**
    * Продлевает сессию (обновляет expiresAt)
+   * @param token - Токен сессии для продления
+   * @returns true если сессия найдена и продлена, false если не найдена
+   * @throws {SessionError} При критической ошибке чтения или записи файла сессий
    */
   async extendSession(token: string): Promise<boolean> {
     try {

@@ -1,116 +1,109 @@
-/**
- * Store - L_Shop Frontend
- * Управление состоянием приложения с подписками и таймером сессии
- */
-
-import { User, UserState } from '../types/user.js';
+import { User } from '../types/user';
 
 /**
- * Длительность сессии по умолчанию (fallback)
- * Реальное значение получается с backend через /api/auth/session-config
+ * Типы модальных окон
  */
-const DEFAULT_SESSION_DURATION_MINUTES = 10;
-
-/** Хранит длительность сессии в минутах */
-let sessionDurationMinutes = DEFAULT_SESSION_DURATION_MINUTES;
+export type ModalType = 'auth' | string;
 
 /**
- * Загрузить конфигурацию сессии с сервера
- * Следует вызвать при инициализации приложения
+ * Состояние модального окна
  */
-export async function loadSessionConfig(): Promise<void> {
-  try {
-    const response = await fetch('/api/auth/session-config');
-    if (response.ok) {
-      const data = await response.json();
-      sessionDurationMinutes = data.sessionDurationMinutes || DEFAULT_SESSION_DURATION_MINUTES;
-      console.log(`[Store] Загружена конфигурация сессии: ${sessionDurationMinutes} минут`);
-    }
-  } catch (error) {
-    console.warn('[Store] Не удалось загрузить конфигурацию сессии, используется значение по умолчанию');
-  }
+interface ModalState {
+  /** Флаг открытия модального окна */
+  isOpen: boolean;
+  /** Тип модального окна */
+  type: ModalType | null;
 }
 
 /**
- * Интерфейс состояния приложения
+ * Состояние пользователя (внутренний интерфейс)
  */
-export interface AppState {
+interface UserState {
+  /** Объект пользователя или null */
+  user: User | null;
+  /** Ошибка аутентификации или null */
+  error: string | null;
+  /** Флаг загрузки */
+  isLoading: boolean;
+  /** Флаг аутентификации */
+  isAuthenticated: boolean;
+}
+
+/**
+ * Глобальное состояние приложения
+ */
+export interface StoreState {
   /** Состояние пользователя */
   user: UserState;
   /** Текущий маршрут */
   route: string;
   /** Состояние модального окна */
-  modal: {
-    /** Открыто ли модальное окно */
-    isOpen: boolean;
-    /** Тип модального окна */
-    type: string | null;
-  };
+  modal: ModalState;
 }
 
 /**
- * Начальное состояние приложения
- */
-const initialState: AppState = {
-  user: {
-    user: null,
-    isAuthenticated: false,
-    isLoading: false,
-    error: null
-  },
-  route: '/',
-  modal: {
-    isOpen: false,
-    type: null
-  }
-};
-
-/**
- * Слушатель изменения состояния
- */
-export type StateListener<T = unknown> = (state: T) => void;
-
-/**
- * Класс Store для управления состоянием приложения
- * Реализует паттерн Singleton
- * 
+ * Класс Store для управления состоянием приложения (Синглтон)
+ *
  * @example
  * ```typescript
- * // Получить состояние
- * const state = store.getState();
- * 
- * // Установить пользователя
+ * const store = Store.getInstance();
  * store.setUser(user);
- * 
- * // Подписаться на изменения
- * const unsubscribe = store.subscribe('user', (state) => {
- *   console.log('User state changed:', state);
- * });
- * 
- * // Таймер сессии
- * store.startSessionTimer();
- * store.resetSessionTimer(); // При активности пользователя
+ * const state = store.getState();
  * ```
  */
 export class Store {
-  /** Текущее состояние */
-  private state: AppState;
-
-  /** Слушатели состояния по ключам */
-  private listeners: Map<keyof AppState, Set<StateListener>> = new Map();
-
-  /** Глобальные слушатели */
-  private globalListeners: Set<StateListener<AppState>> = new Set();
+  /** Единственный экземпляр Store */
+  private static instance: Store | null = null;
 
   /** Таймер сессии */
   private sessionTimer: ReturnType<typeof setTimeout> | null = null;
 
-  /** Единственный экземпляр (Singleton) */
-  private static instance: Store | null = null;
+  /** Время сессии в миллисекундах (15 минут) */
+  private static readonly SESSION_TIMEOUT = 15 * 60 * 1000;
+
+  /** Слушатели изменений для канала 'user' */
+  private userListeners: Array<(state: StoreState) => void> = [];
+
+  /** Слушатели изменений для канала 'route' */
+  private routeListeners: Array<(state: StoreState) => void> = [];
+
+  /** Слушатели изменений для канала 'modal' */
+  private modalListeners: Array<(state: StoreState) => void> = [];
+
+  /** Глобальные слушатели всех изменений */
+  private globalListeners: Array<(state: StoreState) => void> = [];
+
+  /** Текущее состояние */
+  private state: StoreState = {
+    user: {
+      user: null,
+      error: null,
+      isLoading: false,
+      isAuthenticated: false,
+    },
+    route: '/',
+    modal: {
+      isOpen: false,
+      type: null,
+    },
+  };
 
   /**
-   * Получить экземпляр store (Singleton)
-   * @returns Экземпляр store
+   * Приватный конструктор для синглтона
+   */
+  private constructor() {
+    // Инициализация состояния по умолчанию уже выполнена выше
+  }
+
+  /**
+   * Возвращает экземпляр Store (синглтон)
+   *
+   * @returns {Store} Единственный экземпляр Store
+   *
+   * @example
+   * ```typescript
+   * const store = Store.getInstance();
+   * ```
    */
   public static getInstance(): Store {
     if (!Store.instance) {
@@ -120,322 +113,291 @@ export class Store {
   }
 
   /**
-   * Создать экземпляр store
-   * Приватный конструктор для паттерна Singleton
+   * Возвращает глубокую копию текущего состояния
+   *
+   * @returns {StoreState} Глубокий клон состояния
+   *
+   * @example
+   * ```typescript
+   * const state = store.getState();
+   * console.log(state.user.user);
+   * ```
    */
-  private constructor() {
-    this.state = { ...initialState };
-  }
-
-  // =========================================
-  // Получение состояния
-  // =========================================
-
-  /**
-   * Получить текущее состояние приложения
-   * @returns Копия текущего состояния
-   */
-  public getState(): AppState {
-    return { ...this.state };
+  public getState(): StoreState {
+    // Глубокое копирование через JSON
+    return JSON.parse(JSON.stringify(this.state));
   }
 
   /**
-   * Получить конкретный срез состояния
-   * @param key - Ключ состояния
-   * @returns Срез состояния
+   * Устанавливает пользователя и управляет таймером сессии
+   *
+   * @param {User | null} user - Пользователь или null для выхода
+   *
+   * @throws {Error} При ошибке установки пользователя
+   *
+   * @example
+   * ```typescript
+   * store.setUser(mockUser); // Вход
+   * store.setUser(null); // Выход
+   * ```
    */
-  public getSlice<K extends keyof AppState>(key: K): AppState[K] {
-    const value = this.state[key];
-    // Вернуть копию для объектных типов, значение напрямую для примитивов
-    if (typeof value === 'object' && value !== null) {
-      return { ...value } as AppState[K];
+  public setUser(user: User | null): void {
+    // Очищаем предыдущий таймер
+    if (this.sessionTimer) {
+      clearTimeout(this.sessionTimer);
+      this.sessionTimer = null;
     }
-    return value;
+
+    // Обновляем состояние
+    this.state.user.user = user;
+    this.state.user.isAuthenticated = user !== null;
+    this.state.user.error = null;
+
+    // Запускаем таймер сессии для не-null пользователя
+    if (user !== null) {
+      this.sessionTimer = setTimeout(() => {
+        this.setUser(null);
+      }, Store.SESSION_TIMEOUT);
+    }
+
+    // Уведомляем слушателей канала 'user'
+    this.notifyChannel('user');
   }
 
   /**
-   * Получить текущего пользователя
-   * @returns Объект пользователя или null
+   * Возвращает текущего пользователя
+   *
+   * @returns {User | null} Пользователь или null
    */
   public getUser(): User | null {
     return this.state.user.user;
   }
 
   /**
-   * Проверить, аутентифицирован ли пользователь
-   * @returns true если пользователь аутентифицирован
+   * Проверяет, аутентифицирован ли пользователь
+   *
+   * @returns {boolean} true если пользователь аутентифицирован
    */
   public isAuthenticated(): boolean {
     return this.state.user.isAuthenticated;
   }
 
-  // =========================================
-  // Изменение состояния
-  // =========================================
-
   /**
-   * Обновить состояние
-   * @param partial - Частичное состояние для слияния
+   * Подписывается на изменения конкретного канала
+   *
+   * @param {'user' | 'route' | 'modal'} channel - Канал для подписки
+   * @param {(state: StoreState) => void} listener - Функция-слушатель
+   *
+   * @returns {() => void} Функция отписки
+   *
+   * @example
+   * ```typescript
+   * const unsubscribe = store.subscribe('user', (state) => {
+   *   console.log('User changed:', state.user);
+   * });
+   * // Отписаться: unsubscribe();
+   * ```
    */
-  public setState(partial: Partial<AppState>): void {
-    const prevState = { ...this.state };
-    this.state = { ...this.state, ...partial };
+  public subscribe(
+    channel: 'user' | 'route' | 'modal',
+    listener: (state: StoreState) => void,
+  ): () => void {
+    const listenersMap = {
+      user: this.userListeners,
+      route: this.routeListeners,
+      modal: this.modalListeners,
+    };
 
-    // Уведомить конкретных слушателей
-    for (const key of Object.keys(partial) as Array<keyof AppState>) {
-      if (prevState[key] !== this.state[key]) {
-        this.notifyListeners(key);
+    const channelListeners = listenersMap[channel];
+    channelListeners.push(listener);
+
+    // Возвращаем функцию отписки
+    return () => {
+      const index = channelListeners.indexOf(listener);
+      if (index > -1) {
+        channelListeners.splice(index, 1);
       }
-    }
-
-    // Уведомить глобальных слушателей
-    this.notifyGlobalListeners();
+    };
   }
 
   /**
-   * Обновить состояние пользователя
-   * @param partial - Частичное состояние пользователя
+   * Подписывается на все изменения состояния
+   *
+   * @param {(state: StoreState) => void} listener - Функция-слушатель
+   *
+   * @returns {() => void} Функция отписки
+   *
+   * @example
+   * ```typescript
+   * const unsubscribe = store.subscribeAll((state) => {
+   *   console.log('State changed:', state);
+   * });
+   * ```
    */
-  public setUserState(partial: Partial<UserState>): void {
-    this.setState({
-      user: { ...this.state.user, ...partial }
-    });
+  public subscribeAll(listener: (state: StoreState) => void): () => void {
+    this.globalListeners.push(listener);
+
+    // Возвращаем функцию отписки
+    return () => {
+      const index = this.globalListeners.indexOf(listener);
+      if (index > -1) {
+        this.globalListeners.splice(index, 1);
+      }
+    };
   }
 
   /**
-   * Установить текущего пользователя
-   * При установке пользователя автоматически запускается таймер сессии
-   * @param user - Объект пользователя или null
+   * Открывает модальное окно
+   *
+   * @param {ModalType} type - Тип модального окна
+   *
+   * @example
+   * ```typescript
+   * store.openModal('auth');
+   * ```
    */
-  public setUser(user: User | null): void {
-    this.setUserState({
-      user,
-      isAuthenticated: user !== null,
-      isLoading: false,
-      error: null
-    });
-
-    // Управление таймером сессии
-    if (user) {
-      this.startSessionTimer();
-    } else {
-      this.clearSessionTimer();
-    }
+  public openModal(type: ModalType): void {
+    this.state.modal.isOpen = true;
+    this.state.modal.type = type;
+    this.notifyChannel('modal');
   }
 
   /**
-   * Установить состояние загрузки
-   * @param isLoading - Состояние загрузки
-   */
-  public setLoading(isLoading: boolean): void {
-    this.setUserState({ isLoading });
-  }
-
-  /**
-   * Установить состояние ошибки
-   * @param error - Сообщение об ошибке или null
-   */
-  public setError(error: string | null): void {
-    this.setUserState({ error, isLoading: false });
-  }
-
-  /**
-   * Выход пользователя из системы
-   * Очищает данные пользователя и останавливает таймер сессии
-   */
-  public logout(): void {
-    this.clearSessionTimer();
-    this.setUserState({
-      user: null,
-      isAuthenticated: false,
-      isLoading: false,
-      error: null
-    });
-  }
-
-  /**
-   * Установить текущий маршрут
-   * @param route - Путь маршрута
-   */
-  public setRoute(route: string): void {
-    this.setState({ route });
-  }
-
-  /**
-   * Открыть модальное окно
-   * @param type - Тип модального окна
-   */
-  public openModal(type: string): void {
-    this.setState({
-      modal: { isOpen: true, type }
-    });
-  }
-
-  /**
-   * Закрыть модальное окно
+   * Закрывает модальное окно
+   *
+   * @example
+   * ```typescript
+   * store.closeModal();
+   * ```
    */
   public closeModal(): void {
-    this.setState({
-      modal: { isOpen: false, type: null }
-    });
-  }
-
-  // =========================================
-  // Подписка на изменения
-  // =========================================
-
-  /**
-   * Подписаться на изменения конкретного ключа состояния
-   * @param key - Ключ состояния для отслеживания
-   * @param listener - Функция слушателя
-   * @returns Функция отписки
-   */
-  public subscribe<K extends keyof AppState>(
-    key: K,
-    listener: StateListener<AppState[K]>
-  ): () => void {
-    if (!this.listeners.has(key)) {
-      this.listeners.set(key, new Set());
-    }
-
-    const listeners = this.listeners.get(key)!;
-    listeners.add(listener as StateListener);
-
-    // Вернуть функцию отписки
-    return () => {
-      listeners.delete(listener as StateListener);
-    };
+    this.state.modal.isOpen = false;
+    this.state.modal.type = null;
+    this.notifyChannel('modal');
   }
 
   /**
-   * Подписаться на все изменения состояния
-   * @param listener - Функция слушателя
-   * @returns Функция отписки
+   * Устанавливает текущий маршрут
+   *
+   * @param {string} route - Новый маршрут
+   *
+   * @example
+   * ```typescript
+   * store.setRoute('/profile');
+   * ```
    */
-  public subscribeAll(listener: StateListener<AppState>): () => void {
-    this.globalListeners.add(listener);
-
-    return () => {
-      this.globalListeners.delete(listener);
-    };
-  }
-
-  // =========================================
-  // Таймер сессии
-  // =========================================
-
-  /**
-   * Запустить таймер сессии
-   * Автоматически вызывается при setUser с валидным пользователем
-   * По истечении времени пользователь будет разлогинен
-   */
-  public startSessionTimer(): void {
-    this.clearSessionTimer();
-
-    this.sessionTimer = setTimeout(() => {
-      this.handleSessionExpired();
-    }, sessionDurationMinutes * 60 * 1000);
-
-    console.log(
-      `[Store] Таймер сессии запущен на ${sessionDurationMinutes} минут`
-    );
+  public setRoute(route: string): void {
+    this.state.route = route;
+    this.notifyChannel('route');
   }
 
   /**
-   * Сбросить таймер сессии
-   * Вызывается при активности пользователя для продления сессии
+   * Устанавливает ошибку
+   *
+   * @param {string | null} error - Текст ошибки или null для очистки
+   *
+   * @example
+   * ```typescript
+   * store.setError('Ошибка входа');
+   * store.setError(null); // Очистить
+   * ```
    */
-  public resetSessionTimer(): void {
-    if (this.state.user.isAuthenticated) {
-      this.startSessionTimer();
-    }
+  public setError(error: string | null): void {
+    this.state.user.error = error;
+    this.notifyChannel('user');
   }
 
   /**
-   * Очистить таймер сессии
-   * Вызывается при logout или установке null пользователя
+   * Устанавливает состояние загрузки
+   *
+   * @param {boolean} loading - Флаг загрузки
+   *
+   * @example
+   * ```typescript
+   * store.setLoading(true); // Начать загрузку
+   * store.setLoading(false); // Завершить загрузку
+   * ```
    */
-  public clearSessionTimer(): void {
+  public setLoading(loading: boolean): void {
+    this.state.user.isLoading = loading;
+    this.notifyChannel('user');
+  }
+
+  /**
+   * Сбрасывает состояние к начальным значениям
+   *
+   * @example
+   * ```typescript
+   * store.reset();
+   * ```
+   */
+  public reset(): void {
+    // Очищаем таймер
     if (this.sessionTimer) {
       clearTimeout(this.sessionTimer);
       this.sessionTimer = null;
-      console.log('[Store] Таймер сессии очищен');
     }
+
+    // Сбрасываем состояние
+    this.state = {
+      user: {
+        user: null,
+        error: null,
+        isLoading: false,
+        isAuthenticated: false,
+      },
+      route: '/',
+      modal: {
+        isOpen: false,
+        type: null,
+      },
+    };
+
+    // Уведомляем все каналы
+    this.notifyChannel('user');
+    this.notifyChannel('route');
+    this.notifyChannel('modal');
   }
 
   /**
-   * Обработать истечение сессии
-   * Разлогинивает пользователя и показывает сообщение
+   * Уведомляет слушателей конкретного канала
+   *
+   * @private
+   * @param {'user' | 'route' | 'modal'} channel - Канал для уведомления
    */
-  private handleSessionExpired(): void {
-    console.log('[Store] Сессия истекла');
+  private notifyChannel(channel: 'user' | 'route' | 'modal'): void {
+    // Определяем состояние для канала
+    const channelState: StoreState | UserState = channel === 'user' ? JSON.parse(JSON.stringify(this.state.user)) : this.getState();
 
-    // Очистить таймер
-    this.sessionTimer = null;
+    const listenersMap = {
+      user: this.userListeners,
+      route: this.routeListeners,
+      modal: this.modalListeners,
+    };
 
-    // Разлогинить пользователя
-    this.setUserState({
-      user: null,
-      isAuthenticated: false,
-      isLoading: false,
-      error: 'Сессия истекла. Пожалуйста, войдите снова.'
-    });
-
-    // Можно добавить редирект на страницу входа или открытие модального окна
-    // Это будет реализовано в app.ts через подписку на изменения
-  }
-
-  // =========================================
-  // Приватные методы
-  // =========================================
-
-  /**
-   * Уведомить слушателей для конкретного ключа
-   * @param key - Ключ состояния
-   */
-  private notifyListeners(key: keyof AppState): void {
-    const listeners = this.listeners.get(key);
-    if (listeners) {
-      const slice = this.getSlice(key);
-      listeners.forEach(listener => {
-        try {
-          listener(slice);
-        } catch (error) {
-          console.error(`[Store] Ошибка слушателя для ${key}:`, error);
-        }
-      });
-    }
-  }
-
-  /**
-   * Уведомить глобальных слушателей
-   */
-  private notifyGlobalListeners(): void {
-    const state = this.getState();
-    this.globalListeners.forEach(listener => {
+    // Вызываем канальные listeners
+    listenersMap[channel].forEach((listener) => {
       try {
-        listener(state);
+        // Приводим тип для user канала
+        listener(channelState as StoreState);
       } catch (error) {
-        console.error('[Store] Ошибка глобального слушателя:', error);
+        console.error(`Ошибка в слушателе канала ${channel}:`, error);
       }
     });
-  }
 
-  /**
-   * Сбросить состояние к начальному
-   */
-  public reset(): void {
-    this.clearSessionTimer();
-    this.state = { ...initialState };
-    this.notifyGlobalListeners();
-
-    for (const key of Object.keys(initialState) as Array<keyof AppState>) {
-      this.notifyListeners(key);
-    }
+    // Глобальные listeners всегда получают полное состояние
+    const fullState = this.getState();
+    this.globalListeners.forEach((listener) => {
+      try {
+        listener(fullState);
+      } catch (error) {
+        console.error('Ошибка в глобальном слушателе:', error);
+      }
+    });
   }
 }
 
 /**
- * Экземпляр store (Singleton)
+ * Экспортированный синглтон Store
  */
 export const store = Store.getInstance();
