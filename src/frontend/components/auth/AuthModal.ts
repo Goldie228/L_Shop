@@ -14,6 +14,12 @@ import { RegisterForm } from './RegisterForm.js';
 import { store } from '../../store/store.js';
 
 /**
+ * Константы таймаутов анимации (в миллисекундах)
+ */
+const ANIMATION_EXIT_DURATION = 150;
+const ANIMATION_ENTER_DURATION = 200;
+
+/**
  * Режим модального окна аутентификации
  */
 export type AuthMode = 'login' | 'register';
@@ -321,8 +327,8 @@ export class AuthModal extends Component<AuthModalProps> {
       setTimeout(() => {
         container.classList.remove('auth-modal__form-container--enter');
         this.isAnimating = false;
-      }, 200);
-    }, 150);
+      }, ANIMATION_ENTER_DURATION);
+    }, ANIMATION_EXIT_DURATION);
   }
 
   /**

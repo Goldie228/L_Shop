@@ -1,14 +1,17 @@
 /**
  * Главная страница - L_Shop Frontend
- * Каталог продуктов с фильтрацией
+ * Приветственная страница с популярными товарами и акциями
  */
 
 import { Component, ComponentProps } from '../base/Component.js';
-import { ProductList } from '../product/ProductList.js';
-import { ProductFilters } from '../product/ProductFilters.js';
-import { Product, ProductFilters as ProductFiltersType } from '../../types/product.js';
+import { ProductCard } from '../product/ProductCard.js';
+import { Button } from '../ui/Button.js';
+import { Toast } from '../ui/Toast.js';
+import { Icon } from '../ui/Icon.js';
+import { Product } from '../../types/product.js';
 import { api } from '../../services/api.js';
 import { store } from '../../store/store.js';
+import { router } from '../../router/router.js';
 
 /**
  * Интерфейс пропсов для MainPage
@@ -19,20 +22,33 @@ export interface MainPageProps extends ComponentProps {
 }
 
 /**
- * Главная страница с каталогом продуктов
+ * Интерфейс ответа API продуктов
+ */
+interface ProductsApiResponse {
+  products: Product[];
+  pagination: {
+    total: number;
+    limit: number;
+    offset: number;
+    hasMore: boolean;
+  };
+}
+
+/**
+ * Главная страница с приветствием и популярными товарами
  */
 export class MainPage extends Component<MainPageProps> {
-  /** Компонент фильтров */
-  private filtersComponent: ProductFilters | null = null;
-
-  /** Компонент списка продуктов */
-  private productListComponent: ProductList | null = null;
-
-  /** Текущие фильтры */
-  private currentFilters: ProductFiltersType = {};
+  /** Карточки популярных товаров */
+  private productCards: ProductCard[] = [];
 
   /** Загруженные продукты */
   private products: Product[] = [];
+
+  /** Состояние загрузки */
+  private isLoading = false;
+
+  /** Контейнер для популярных товаров */
+  private productsContainer: HTMLElement | null = null;
 
   /**
    * Получить пропсы по умолчанию
@@ -50,7 +66,7 @@ export class MainPage extends Component<MainPageProps> {
     const { className } = this.props;
 
     // Построить классы
-    const classes = ['page', 'main-page'];
+    const classes = ['page', 'main-page', 'home-page'];
     if (className) {
       classes.push(className);
     }
@@ -60,216 +76,373 @@ export class MainPage extends Component<MainPageProps> {
       className: classes.join(' '),
     });
 
-    // Заголовок страницы
-    const header = this.renderHeader();
-    this.element.appendChild(header);
+    // Hero секция (баннер)
+    const hero = this.renderHero();
+    this.element.appendChild(hero);
 
-    // Контейнер с фильтрами и списком
-    const content = this.createElement('div', {
-      className: 'main-page__content',
-    });
+    // Секция преимуществ
+    const features = this.renderFeatures();
+    this.element.appendChild(features);
 
-    // Панель фильтров
-    const filtersContainer = this.renderFilters();
-    content.appendChild(filtersContainer);
+    // Секция популярных товаров
+    const popularSection = this.renderPopularSection();
+    this.element.appendChild(popularSection);
 
-    // Список продуктов
-    const listContainer = this.renderProductList();
-    content.appendChild(listContainer);
-
-    this.element.appendChild(content);
-
-    // Загрузить продукты
-    this.loadProducts();
+    // Загрузить популярные товары
+    this.loadPopularProducts();
 
     return this.element;
   }
 
   /**
-   * Отрендерить заголовок страницы
+   * Отрендерить Hero секцию (баннер приветствия)
    */
-  private renderHeader(): HTMLElement {
-    const header = this.createElement('div', {
-      className: 'main-page__header',
+  private renderHero(): HTMLElement {
+    const hero = this.createElement('section', {
+      className: 'hero',
     });
 
     const container = this.createElement('div', {
       className: 'container',
     });
 
-    const title = this.createElement('h1', {
-      className: 'page__title',
+    const content = this.createElement('div', {
+      className: 'hero__content',
     });
-    title.textContent = 'Каталог товаров';
+
+    // Заголовок
+    const title = this.createElement('h1', {
+      className: 'hero__title',
+    });
+    title.textContent = 'Добро пожаловать в L_Shop';
+    content.appendChild(title);
+
+    // Подзаголовок
+    const subtitle = this.createElement('p', {
+      className: 'hero__subtitle',
+    });
+    subtitle.textContent = 'Лучшие товары по выгодным ценам. Качество, проверенное временем.';
+    content.appendChild(subtitle);
+
+    // Кнопки действий
+    const actions = this.createElement('div', {
+      className: 'hero__actions',
+    });
+
+    const catalogBtn = new Button({
+      text: 'Перейти в каталог',
+      variant: 'primary',
+      size: 'lg',
+      testId: 'hero-catalog-btn',
+      onClick: () => router.navigate('/catalog'),
+    });
+    actions.appendChild(catalogBtn.render());
+
+    content.appendChild(actions);
+    container.appendChild(content);
+    hero.appendChild(container);
+
+    return hero;
+  }
+
+  /**
+   * Отрендерить секцию преимуществ
+   */
+  private renderFeatures(): HTMLElement {
+    const features = this.createElement('section', {
+      className: 'features',
+    });
+
+    const container = this.createElement('div', {
+      className: 'container',
+    });
+
+    const title = this.createElement('h2', {
+      className: 'features__title',
+    });
+    title.textContent = 'Почему выбирают нас';
     container.appendChild(title);
 
-    header.appendChild(container);
+    const grid = this.createElement('div', {
+      className: 'features__grid',
+    });
 
-    return header;
+    // Преимущество 1
+    const feature1 = this.createFeatureItem(
+      'truck',
+      'Быстрая доставка',
+      'Доставляем по всей стране за 1-3 дня',
+    );
+    grid.appendChild(feature1);
+
+    // Преимущество 2
+    const feature2 = this.createFeatureItem(
+      'check',
+      'Гарантия качества',
+      'Весь товар сертифицирован и проверен',
+    );
+    grid.appendChild(feature2);
+
+    // Преимущество 3
+    const feature3 = this.createFeatureItem(
+      'money',
+      'Лучшие цены',
+      'Регулярные акции и скидки для клиентов',
+    );
+    grid.appendChild(feature3);
+
+    // Преимущество 4
+    const feature4 = this.createFeatureItem(
+      'headphones',
+      'Поддержка 24/7',
+      'Всегда на связи и готовы помочь',
+    );
+    grid.appendChild(feature4);
+
+    container.appendChild(grid);
+    features.appendChild(container);
+
+    return features;
   }
 
   /**
-   * Отрендерить панель фильтров
+   * Создать элемент преимущества
    */
-  private renderFilters(): HTMLElement {
-    const container = this.createElement('aside', {
-      className: 'main-page__filters',
+  private createFeatureItem(iconName: string, title: string, description: string): HTMLElement {
+    const item = this.createElement('div', {
+      className: 'feature-item',
     });
 
-    this.filtersComponent = new ProductFilters({
-      filters: this.currentFilters,
-      onFilterChange: (filters) => this.handleFilterChange(filters),
+    const iconWrapper = this.createElement('div', {
+      className: 'feature-item__icon',
     });
+    const icon = new Icon({ name: iconName as any, size: 32 });
+    iconWrapper.appendChild(icon.render());
+    item.appendChild(iconWrapper);
 
-    this.filtersComponent.mount(container);
-    this.addChild(this.filtersComponent);
+    const titleEl = this.createElement('h3', {
+      className: 'feature-item__title',
+    });
+    titleEl.textContent = title;
+    item.appendChild(titleEl);
 
-    return container;
+    const descEl = this.createElement('p', {
+      className: 'feature-item__description',
+    });
+    descEl.textContent = description;
+    item.appendChild(descEl);
+
+    return item;
   }
 
   /**
-   * Отрендерить список продуктов
+   * Отрендерить секцию популярных товаров
    */
-  private renderProductList(): HTMLElement {
-    const container = this.createElement('main', {
-      className: 'main-page__products',
+  private renderPopularSection(): HTMLElement {
+    const section = this.createElement('section', {
+      className: 'popular-products',
     });
 
-    const isAuthenticated = store.isAuthenticated();
-
-    this.productListComponent = new ProductList({
-      products: [],
-      isAuthenticated,
-      onAddToCart: (productId) => this.handleAddToCart(productId),
-      loading: true,
+    const container = this.createElement('div', {
+      className: 'container',
     });
 
-    this.productListComponent.mount(container);
-    this.addChild(this.productListComponent);
+    const header = this.createElement('div', {
+      className: 'popular-products__header',
+    });
 
-    return container;
+    const title = this.createElement('h2', {
+      className: 'popular-products__title',
+    });
+    title.textContent = 'Популярные товары';
+    header.appendChild(title);
+
+    const viewAllBtn = new Button({
+      text: 'Смотреть все',
+      variant: 'ghost',
+      size: 'sm',
+      testId: 'view-all-btn',
+      onClick: () => router.navigate('/catalog'),
+    });
+    header.appendChild(viewAllBtn.render());
+
+    container.appendChild(header);
+
+    // Контейнер для товаров (скелетон или товары)
+    this.productsContainer = this.createElement('div', {
+      className: 'popular-products__grid',
+    });
+    container.appendChild(this.productsContainer);
+
+    // Показываем скелетон загрузки
+    this.renderLoading();
+
+    section.appendChild(container);
+
+    return section;
   }
 
   /**
-   * Загрузить продукты с сервера
+   * Отрендерить состояние загрузки
    */
-  private async loadProducts(): Promise<void> {
-    if (!this.productListComponent) {
-      // productListComponent не готов - пропускаем загрузку
+  private renderLoading(): void {
+    if (!this.productsContainer) return;
+
+    this.productsContainer.innerHTML = '';
+
+    for (let i = 0; i < 4; i++) {
+      const skeleton = this.createElement('div', {
+        className: 'product-skeleton',
+      });
+
+      const imageSkeleton = this.createElement('div', {
+        className: 'product-skeleton__image',
+      });
+      skeleton.appendChild(imageSkeleton);
+
+      const titleSkeleton = this.createElement('div', {
+        className: 'product-skeleton__title',
+      });
+      skeleton.appendChild(titleSkeleton);
+
+      const priceSkeleton = this.createElement('div', {
+        className: 'product-skeleton__price',
+      });
+      skeleton.appendChild(priceSkeleton);
+
+      this.productsContainer.appendChild(skeleton);
+    }
+  }
+
+  /**
+   * Загрузить популярные товары
+   */
+  private async loadPopularProducts(): Promise<void> {
+    if (this.isLoading) return;
+    this.isLoading = true;
+
+    try {
+      const response = await api.get<ProductsApiResponse>('/api/products', {
+        limit: '4',
+        offset: '0',
+      });
+
+      this.products = response.products || [];
+      this.renderProducts();
+    } catch (error) {
+      console.error('Ошибка загрузки товаров:', error);
+      this.renderError();
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  /**
+   * Отрендерить загруженные товары
+   */
+  private renderProducts(): void {
+    if (!this.productsContainer) return;
+
+    this.productsContainer.innerHTML = '';
+
+    // Очищаем предыдущие карточки
+    this.productCards.forEach((card) => card.destroy());
+    this.productCards = [];
+
+    if (this.products.length === 0) {
+      const emptyMessage = this.createElement('p', {
+        className: 'popular-products__empty',
+      });
+      emptyMessage.textContent = 'Товары не найдены';
+      this.productsContainer.appendChild(emptyMessage);
       return;
     }
 
-    this.productListComponent.setLoading(true);
-    this.productListComponent.setError(null);
+    // Рендерим карточки товаров
+    this.products.forEach((product) => {
+      const card = new ProductCard({
+        product,
+        isAuthenticated: store.isAuthenticated(),
+        onAddToCart: () => this.handleAddToCart(product),
+      });
 
-    try {
-      // Преобразовать фильтры в query-параметры
-      const params: Record<string, string> = {};
-      if (this.currentFilters.search) {
-        params.search = this.currentFilters.search;
-      }
-      if (this.currentFilters.sort) {
-        params.sort = this.currentFilters.sort;
-      }
-      if (this.currentFilters.category) {
-        params.category = this.currentFilters.category;
-      }
-      if (this.currentFilters.inStock !== undefined) {
-        params.inStock = String(this.currentFilters.inStock);
-      }
-      if (this.currentFilters.minRating !== undefined) {
-        params.minRating = String(this.currentFilters.minRating);
-      }
-
-      this.products = await api.get<Product[]>('/api/products', params);
-      // Устанавливаем продукты И сбрасываем загрузку одновременно
-      this.productListComponent.setProps({ products: this.products, loading: false });
-      this.productListComponent.update();
-    } catch (error) {
-      // Ошибка загрузки продуктов (обрабатывается в catch)
-
-      // Определяем тип ошибки для более информативного сообщения
-      let errorMessage = 'Не удалось загрузить товары. Попробуйте позже.';
-      if (error instanceof Error) {
-        if (
-          error.message.includes('network')
-          || error.message.includes('Network')
-          || error.name === 'TypeError'
-        ) {
-          errorMessage = 'Сервер недоступен. Проверьте подключение или перезагрузите страницу.';
+      // Добавляем обработчик клика для перехода на страницу товара
+      const cardElement = card.render();
+      cardElement.style.cursor = 'pointer';
+      cardElement.addEventListener('click', (e) => {
+        // Не переходим если клик был по кнопке "В корзину"
+        if ((e.target as HTMLElement).closest('.product-card__add-button')) {
+          return;
         }
-      }
+        router.navigate(`/product/${product.id}`);
+      });
 
-      this.productListComponent.setProps({ error: errorMessage, loading: false });
-      this.productListComponent.update();
-    }
+      this.productsContainer!.appendChild(cardElement);
+      this.productCards.push(card);
+    });
   }
 
   /**
-   * Обработать изменение фильтров
+   * Отрендерить ошибку загрузки
    */
-  private handleFilterChange(filters: ProductFiltersType): void {
-    this.currentFilters = filters;
-    this.loadProducts();
+  private renderError(): void {
+    if (!this.productsContainer) return;
+
+    this.productsContainer.innerHTML = '';
+
+    const errorMessage = this.createElement('div', {
+      className: 'popular-products__error',
+    });
+
+    const text = this.createElement('p', {}, ['Не удалось загрузить товары']);
+    errorMessage.appendChild(text);
+
+    const retryBtn = new Button({
+      text: 'Попробовать снова',
+      variant: 'secondary',
+      size: 'sm',
+      onClick: () => this.loadPopularProducts(),
+    });
+
+    errorMessage.appendChild(retryBtn.render());
+    this.productsContainer.appendChild(errorMessage);
   }
 
   /**
    * Обработать добавление в корзину
    */
-  private async handleAddToCart(productId: string): Promise<void> {
+  private async handleAddToCart(product: Product): Promise<void> {
+    if (!store.isAuthenticated()) {
+      // Открыть модальное окно авторизации
+      document.dispatchEvent(new CustomEvent('openAuthModal'));
+      Toast.showWarning('Войдите, чтобы добавить товар в корзину');
+      return;
+    }
+
     try {
-      // Добавить товар в корзину через API
-      await api.post('/api/cart/items', { productId, quantity: 1 });
-
-      // Показать уведомление об успехе
-      this.showNotification('Товар добавлен в корзину', 'success');
-
-      // Вызвать внешний callback если есть
-      this.props.onAddToCart?.(productId);
-    } catch (error) {
-      console.error('[MainPage] Ошибка добавления в корзину:', error);
-
-      // Показать уведомление об ошибке
-      const message = error instanceof Error ? error.message : 'Не удалось добавить товар';
-      this.showNotification(message, 'error');
-    }
-  }
-
-  /**
-   * Показать уведомление
-   */
-  private showNotification(message: string, type: 'success' | 'error' | 'info'): void {
-    // Создать элемент уведомления
-    const notification = this.createElement('div', {
-      className: `notification notification--${type}`,
-      role: 'alert',
-    });
-    notification.textContent = message;
-
-    // Добавить на страницу
-    document.body.appendChild(notification);
-
-    // Анимация появления
-    requestAnimationFrame(() => {
-      notification.classList.add('notification--visible');
-    });
-
-    // Удалить через 3 секунды
-    setTimeout(() => {
-      notification.classList.remove('notification--visible');
-      setTimeout(() => notification.remove(), 300);
-    }, 3000);
-  }
-
-  /**
-   * Обновить состояние авторизации
-   */
-  public updateAuthState(): void {
-    if (this.productListComponent) {
-      this.productListComponent.setProps({
-        isAuthenticated: store.isAuthenticated(),
+      await api.post('/api/cart/items', {
+        productId: product.id,
+        quantity: 1,
       });
-      this.productListComponent.update();
+
+      Toast.showSuccess(`${product.name} добавлен в корзину`);
+
+      // Обновляем счётчик корзины
+      const cart = await api.get<{ items: unknown[]; totalSum: number }>('/api/cart');
+      if (cart && cart.items) {
+        store.setCartState(cart.items.length, cart.totalSum || 0);
+      }
+    } catch (error) {
+      console.error('Ошибка добавления в корзину:', error);
+      Toast.showError('Не удалось добавить товар в корзину');
     }
+  }
+
+  /**
+   * Очистка при уничтожении компонента
+   */
+  protected onDestroy(): void {
+    this.productCards.forEach((card) => card.destroy());
+    this.productCards = [];
   }
 }

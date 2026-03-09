@@ -1,0 +1,119 @@
+/**
+ * Стили для компонента Breadcrumbs - L_Shop
+ * Хлебные крошки для навигации
+ */
+
+.breadcrumbs {
+  padding: var(--spacing-sm) 0;
+  margin-bottom: var(--spacing-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.breadcrumbs__list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-xs);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.breadcrumbs__item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.breadcrumbs__link {
+  display: flex;
+  align-items: center;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  transition: color var(--transition-fast) ease;
+  padding: 2px 4px;
+  border-radius: var(--radius-sm);
+}
+
+.breadcrumbs__link:hover {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+.breadcrumbs__link:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.breadcrumbs__home {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.breadcrumbs__home-icon {
+  width: 16px;
+  height: 16px;
+  color: currentColor;
+}
+
+.breadcrumbs__current {
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-medium);
+  padding: 2px 0;
+}
+
+.breadcrumbs__separator {
+  display: flex;
+  align-items: center;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+
+.breadcrumbs__separator-icon {
+  width: 14px;
+  height: 14px;
+  color: var(--color-text-muted);
+}
+
+/* Адаптивность */
+@media (max-width: 639px) {
+  .breadcrumbs {
+    font-size: var(--font-size-xs);
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .breadcrumbs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .breadcrumbs__list {
+    flex-wrap: nowrap;
+  }
+}
+
+/* Dark theme */
+:root.dark-theme .breadcrumbs {
+  color: var(--color-text-secondary-dark);
+}
+
+:root.dark-theme .breadcrumbs__link {
+  color: var(--color-text-secondary-dark);
+}
+
+:root.dark-theme .breadcrumbs__link:hover {
+  color: var(--color-accent-primary-dark);
+}
+
+:root.dark-theme .breadcrumbs__current {
+  color: var(--color-text-primary-dark);
+}
+
+:root.dark-theme .breadcrumbs__separator {
+  color: var(--color-text-muted-dark);
+}

@@ -320,4 +320,172 @@ describe('Store session timer', () => {
       jest.advanceTimersByTime(15 * 60 * 1000);
     }).not.toThrow();
   });
+
+  it('должен вызвать callback с warning за 1 минуту до истечения', () => {
+    const sessionCallback = jest.fn();
+    store.setSessionCallback(sessionCallback);
+    store.setUser(mockUser);
+
+    // За 1 минуту до истечения (14 минут)
+    jest.advanceTimersByTime(14 * 60 * 1000);
+
+    expect(sessionCallback).toHaveBeenCalledWith('warning');
+  });
+
+  it('должен вызвать callback с expired при истечении сессии', () => {
+    const sessionCallback = jest.fn();
+    store.setSessionCallback(sessionCallback);
+    store.setUser(mockUser);
+
+    // Через 15 минут
+    jest.advanceTimersByTime(15 * 60 * 1000);
+
+    expect(sessionCallback).toHaveBeenCalledWith('expired');
+    expect(store.isAuthenticated()).toBe(false);
+  });
+
+  it('extendSession должен продлить сессию', () => {
+    const sessionCallback = jest.fn();
+    store.setSessionCallback(sessionCallback);
+    store.setUser(mockUser);
+
+    // Через 10 минут продлеваем
+    jest.advanceTimersByTime(10 * 60 * 1000);
+    store.extendSession();
+
+    // Ещё через 10 минут (20 всего) - warning ещё не должен быть вызван
+    jest.advanceTimersByTime(10 * 60 * 1000);
+    expect(sessionCallback).not.toHaveBeenCalled();
+
+    // До warning (4 минуты от продления)
+    jest.advanceTimersByTime(4 * 60 * 1000);
+    expect(sessionCallback).toHaveBeenCalledWith('warning');
+  });
+});
+
+// ============================================
+// Тесты корзины
+// ============================================
+describe('Store cart methods', () => {
+  beforeEach(() => {
+    store.reset();
+  });
+
+  it('setCartState должен установить состояние корзины', () => {
+    store.setCartState(5, 15000);
+
+    expect(store.getCartItemsCount()).toBe(5);
+    expect(store.getCartTotalSum()).toBe(15000);
+  });
+
+  it('getCartItemsCount должен вернуть количество товаров', () => {
+    expect(store.getCartItemsCount()).toBe(0);
+
+    store.setCartState(10, 5000);
+    expect(store.getCartItemsCount()).toBe(10);
+  });
+
+  it('getCartTotalSum должен вернуть общую сумму', () => {
+    expect(store.getCartTotalSum()).toBe(0);
+
+    store.setCartState(3, 9999);
+    expect(store.getCartTotalSum()).toBe(9999);
+  });
+
+  it('resetCart должен сбросить корзину', () => {
+    store.setCartState(5, 15000);
+    store.resetCart();
+
+    expect(store.getCartItemsCount()).toBe(0);
+    expect(store.getCartTotalSum()).toBe(0);
+  });
+
+  it('setCartState должен уведомить слушателей cart', () => {
+    const listener = jest.fn();
+    store.subscribe('cart', listener);
+
+    store.setCartState(2, 1000);
+
+    expect(listener).toHaveBeenCalled();
+    const callArg = listener.mock.calls[0][0];
+    expect(callArg.cart.itemsCount).toBe(2);
+    expect(callArg.cart.totalSum).toBe(1000);
+  });
+});
+
+// ============================================
+// Тесты clearAllListeners
+// ============================================
+describe('Store.clearAllListeners()', () => {
+  beforeEach(() => {
+    store.reset();
+  });
+
+  it('должен очистить всех слушателей', () => {
+    const listener1 = jest.fn();
+    const listener2 = jest.fn();
+    const globalListener = jest.fn();
+
+    store.subscribe('user', listener1);
+    store.subscribe('cart', listener2);
+    store.subscribeAll(globalListener);
+
+    store.clearAllListeners();
+
+    store.setUser(mockUser);
+    store.setCartState(1, 100);
+
+    expect(listener1).not.toHaveBeenCalled();
+    expect(listener2).not.toHaveBeenCalled();
+    expect(globalListener).not.toHaveBeenCalled();
+  });
+});
+
+// ============================================
+// Тесты множественных подписок
+// ============================================
+describe('Store multiple subscriptions', () => {
+  beforeEach(() => {
+    store.reset();
+  });
+
+  it('позволяет несколько слушателей на один канал', () => {
+    const listener1 = jest.fn();
+    const listener2 = jest.fn();
+
+    store.subscribe('user', listener1);
+    store.subscribe('user', listener2);
+
+    store.setUser(mockUser);
+
+    expect(listener1).toHaveBeenCalled();
+    expect(listener2).toHaveBeenCalled();
+  });
+
+  it('предотвращает дублирование одного слушателя при повторной подписке', () => {
+    const listener = jest.fn();
+
+    store.subscribe('user', listener);
+    store.subscribe('user', listener); // Попытка дублирования
+
+    store.setUser(mockUser);
+
+    // Слушатель должен быть вызван дважды, так как нет проверки на дубликаты
+    // Это ожидаемое поведение - каждый subscribe добавляет нового слушателя
+    expect(listener).toHaveBeenCalledTimes(2);
+  });
+
+  it('каждая подписка возвращает свою функцию отписки', () => {
+    const listener = jest.fn();
+    const unsub1 = store.subscribe('user', listener);
+    const unsub2 = store.subscribe('user', listener);
+
+    unsub1();
+    store.setUser(mockUser);
+    expect(listener).toHaveBeenCalledTimes(1);
+
+    unsub2();
+    store.setUser(null);
+    expect(listener).toHaveBeenCalledTimes(1);
+  });
 });

@@ -5,6 +5,7 @@
 
 import { Component, ComponentProps } from '../base/Component';
 import { Button } from '../ui/Button';
+import { Icon } from '../ui/Icon';
 import { router } from '../../router/router';
 
 /**
@@ -14,11 +15,6 @@ export interface NotFoundPageProps extends ComponentProps {
   /** Дополнительный класс */
   className?: string;
 }
-
-/**
- * SVG Иконка для страницы 404 (знак вопроса в круге)
- */
-const NOT_FOUND_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>';
 
 /**
  * Страница "404 - Страница не найдена"
@@ -48,11 +44,16 @@ export class NotFoundPage extends Component<NotFoundPageProps> {
       className: 'container',
     });
 
-    // Иконка
+    // Иконка (используем компонент Icon)
     const iconContainer = this.createElement('div', {
       className: 'not-found-page__icon',
     });
-    iconContainer.innerHTML = NOT_FOUND_ICON;
+    const icon = new Icon({
+      name: 'question-circle',
+      size: 80,
+      className: 'not-found-page__icon-svg',
+    });
+    iconContainer.appendChild(icon.render());
     innerContainer.appendChild(iconContainer);
 
     // Код ошибки

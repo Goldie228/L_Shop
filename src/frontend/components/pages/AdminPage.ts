@@ -8,12 +8,11 @@ import { Button } from '../ui/Button.js';
 import { Modal } from '../ui/Modal.js';
 import { Toast } from '../ui/Toast.js';
 import { ConfirmModal } from '../ui/ConfirmModal.js';
+import { Icon } from '../ui/Icon.js';
 import { adminService } from '../../services/admin.service.js';
-import { store } from '../../store/store.js';
 import { Product } from '../../types/product.js';
 import { Order } from '../../types/order.js';
 import { User } from '../../types/user.js';
-import { router } from '../../router/router.js';
 
 /**
  * Типы вкладок админ-панели
@@ -60,20 +59,12 @@ export class AdminPage extends Component<AdminPageProps> {
   // Конструктор не требуется - используем getDefaultProps()
 
   /**
-   * Проверка прав доступа при монтировании
+   * Вызывается после монтирования компонента
    */
-  public async mount(parent: HTMLElement): Promise<void> {
-    const user = store.getUser();
-
-    // Проверка что пользователь авторизован и имеет роль admin
-    if (!user || user.role !== 'admin') {
-      // Доступ запрещён: пользователь не admin (перенаправление на главную)
-      router.navigate('/');
-      return;
-    }
-
-    await super.mount(parent);
-    await this.loadData();
+  protected onMount(): void {
+    // Проверка прав уже выполнена в app.ts
+    // Загружаем данные после монтирования
+    this.loadData();
   }
 
   public render(): HTMLElement {
@@ -169,7 +160,7 @@ export class AdminPage extends Component<AdminPageProps> {
       const tabButton = this.createElement(
         'button',
         {
-          className: `admin-page__tab ${this.activeTab === tab.id ? 'active' : ''}`,
+          className: `admin-page__tab ${this.activeTab === tab.id ? 'admin-page__tab--active' : ''}`,
           'data-tab': tab.id,
         },
         [tab.label],
@@ -181,6 +172,18 @@ export class AdminPage extends Component<AdminPageProps> {
   }
 
   /**
+   * Получить заголовок раздела по вкладке
+   */
+  private getSectionTitle(tab: AdminTab): string {
+    const titles: Record<AdminTab, string> = {
+      products: 'Управление товарами',
+      orders: 'Управление заказами',
+      users: 'Управление пользователями',
+    };
+    return titles[tab] || '';
+  }
+
+  /**
    * Отрисовка контента вкладки
    */
   private renderContent(): void {
@@ -189,13 +192,18 @@ export class AdminPage extends Component<AdminPageProps> {
     this.contentContainer.innerHTML = '';
 
     if (this.loading) {
-      const loading = this.createElement(
-        'div',
-        {
-          className: 'admin-page__loading',
-        },
-        ['Загрузка...'],
-      );
+      const loading = this.createElement('div', {
+        className: 'admin-page__loading',
+      });
+      
+      const spinner = this.createElement('div', {
+        className: 'admin-page__loading-spinner',
+      });
+      
+      const loadingText = this.createElement('span', {}, ['Загрузка данных...']);
+      
+      loading.appendChild(spinner);
+      loading.appendChild(loadingText);
       this.contentContainer.appendChild(loading);
       return;
     }
@@ -211,6 +219,16 @@ export class AdminPage extends Component<AdminPageProps> {
       this.contentContainer.appendChild(error);
       return;
     }
+
+    // Заголовок раздела
+    const sectionTitle = this.createElement(
+      'h2',
+      {
+        className: 'admin-page__section-title',
+      },
+      [this.getSectionTitle(this.activeTab)],
+    );
+    this.contentContainer.appendChild(sectionTitle);
 
     switch (this.activeTab) {
       case 'products':
@@ -275,7 +293,7 @@ export class AdminPage extends Component<AdminPageProps> {
         row.appendChild(this.createElement('td', {}, [product.name]));
 
         // Цена
-        const price = this.createElement('td', {}, [`${product.price} ₽`]);
+        const price = this.createElement('td', {}, [`${product.price} BYN`]);
         row.appendChild(price);
 
         // Категория
@@ -296,6 +314,7 @@ export class AdminPage extends Component<AdminPageProps> {
           className: 'admin-table__actions',
         });
 
+        const editIcon = new Icon({ name: 'edit', size: 18, ariaLabel: 'Редактировать' });
         const editBtn = this.createElement(
           'button',
           {
@@ -303,9 +322,10 @@ export class AdminPage extends Component<AdminPageProps> {
             'data-action': 'edit',
             'data-id': product.id,
           },
-          ['✏️'],
+          [editIcon.render()],
         );
 
+        const deleteIcon = new Icon({ name: 'trash', size: 18, ariaLabel: 'Удалить' });
         const deleteBtn = this.createElement(
           'button',
           {
@@ -313,7 +333,7 @@ export class AdminPage extends Component<AdminPageProps> {
             'data-action': 'delete',
             'data-id': product.id,
           },
-          ['🗑️'],
+          [deleteIcon.render()],
         );
 
         this.addEventListener(editBtn, 'click', () => this.editProduct(product.id));
@@ -377,7 +397,7 @@ export class AdminPage extends Component<AdminPageProps> {
         );
 
         // Сумма
-        row.appendChild(this.createElement('td', {}, [`${order.totalSum} ₽`]));
+        row.appendChild(this.createElement('td', {}, [`${order.totalSum} BYN`]));
 
         // Статус
         const status = this.createElement(
@@ -398,6 +418,7 @@ export class AdminPage extends Component<AdminPageProps> {
           className: 'admin-table__actions',
         });
 
+        const statusIcon = new Icon({ name: 'clipboard', size: 18, ariaLabel: 'Изменить статус' });
         const statusBtn = this.createElement(
           'button',
           {
@@ -405,9 +426,10 @@ export class AdminPage extends Component<AdminPageProps> {
             'data-action': 'status',
             'data-id': order.id,
           },
-          ['📋'],
+          [statusIcon.render()],
         );
 
+        const deleteIcon = new Icon({ name: 'trash', size: 18, ariaLabel: 'Удалить' });
         const deleteBtn = this.createElement(
           'button',
           {
@@ -415,7 +437,7 @@ export class AdminPage extends Component<AdminPageProps> {
             'data-action': 'delete',
             'data-id': order.id,
           },
-          ['🗑️'],
+          [deleteIcon.render()],
         );
 
         this.addEventListener(statusBtn, 'click', () => this.changeOrderStatus(order.id));
@@ -498,6 +520,7 @@ export class AdminPage extends Component<AdminPageProps> {
           className: 'admin-table__actions',
         });
 
+        const roleIcon = new Icon({ name: 'user-circle', size: 18, ariaLabel: 'Изменить роль' });
         const roleBtn = this.createElement(
           'button',
           {
@@ -505,9 +528,10 @@ export class AdminPage extends Component<AdminPageProps> {
             'data-action': 'role',
             'data-id': user.id,
           },
-          ['👤'],
+          [roleIcon.render()],
         );
 
+        const blockIcon = new Icon({ name: 'ban', size: 18, ariaLabel: 'Заблокировать' });
         const blockBtn = this.createElement(
           'button',
           {
@@ -515,7 +539,7 @@ export class AdminPage extends Component<AdminPageProps> {
             'data-action': 'block',
             'data-id': user.id,
           },
-          ['🚫'],
+          [blockIcon.render()],
         );
 
         this.addEventListener(roleBtn, 'click', () => this.changeUserRole(user.id));
@@ -548,13 +572,27 @@ export class AdminPage extends Component<AdminPageProps> {
   private async loadData(): Promise<void> {
     this.loading = true;
     this.error = null;
+    this.renderContent();
 
     try {
-      await Promise.all([this.loadProducts(), this.loadOrders(), this.loadUsers()]);
+      // Загружаем все данные параллельно
+      const [products, orders, users] = await Promise.all([
+        adminService.getAllProducts(),
+        adminService.getAllOrders(),
+        adminService.getAllUsers(),
+      ]);
+
+      this.products = products;
+      this.orders = orders;
+      this.users = users;
+      this.loading = false;
+      this.renderContent();
     } catch (error) {
+      console.error('[AdminPage] Ошибка загрузки данных:', error);
       this.loading = false;
       this.error = 'Ошибка загрузки данных';
       this.showToast('Ошибка загрузки данных', 'error');
+      this.renderContent();
     }
   }
 
@@ -564,10 +602,9 @@ export class AdminPage extends Component<AdminPageProps> {
   private async loadProducts(): Promise<void> {
     try {
       this.products = await adminService.getAllProducts();
-      this.loading = false;
       this.renderContent();
     } catch (error) {
-      this.loading = false;
+      console.error('[AdminPage] Ошибка загрузки товаров:', error);
       this.showToast('Ошибка загрузки товаров', 'error');
     }
   }
@@ -578,10 +615,9 @@ export class AdminPage extends Component<AdminPageProps> {
   private async loadOrders(): Promise<void> {
     try {
       this.orders = await adminService.getAllOrders();
-      this.loading = false;
       this.renderContent();
     } catch (error) {
-      this.loading = false;
+      console.error('[AdminPage] Ошибка загрузки заказов:', error);
       this.showToast('Ошибка загрузки заказов', 'error');
     }
   }
@@ -592,10 +628,9 @@ export class AdminPage extends Component<AdminPageProps> {
   private async loadUsers(): Promise<void> {
     try {
       this.users = await adminService.getAllUsers();
-      this.loading = false;
       this.renderContent();
     } catch (error) {
-      this.loading = false;
+      console.error('[AdminPage] Ошибка загрузки пользователей:', error);
       this.showToast('Ошибка загрузки пользователей', 'error');
     }
   }

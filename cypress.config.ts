@@ -2,7 +2,7 @@ import { defineConfig } from 'cypress';
 
 export default defineConfig({
   e2e: {
-    baseUrl: 'http://localhost:3000',
+    baseUrl: 'http://localhost:3002',
     specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
     supportFile: 'cypress/support/e2e.ts',
     // Настройка для разработки
@@ -15,13 +15,5 @@ export default defineConfig({
     screenshotOnRunFailure: true,
     // Видео при падении
     video: true,
-    // Уменьшаем шум в выводе
-    quiet: false,
-  },
-  component: {
-    devServer: {
-      framework: 'react',
-      bundler: 'vite',
-    },
   },
 });

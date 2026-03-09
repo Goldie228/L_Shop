@@ -79,12 +79,13 @@ cp .env.example .env
 | Переменная | По умолчанию | Описание |
 |------------|--------------|----------|
 | `PORT` | `3001` | Порт backend сервера |
-| `FRONTEND_PORT` | `3000` | Порт frontend сервера |
-| `FRONTEND_URL` | `http://localhost:3000` | URL frontend для CORS |
+| `FRONTEND_PORT` | `3002` | Порт frontend сервера (Vite) |
+| `FRONTEND_URL` | `http://localhost:3002` | URL frontend для CORS |
 | `VITE_API_URL` | `http://localhost:3001` | URL API для frontend |
 | `NODE_ENV` | `development` | Режим работы |
 | `SESSION_DURATION_MINUTES` | `10` | Время жизни сессии (минуты) |
 | `DATA_DIR` | `./src/backend/data` | Директория для JSON-файлов |
+| `SESSION_SECRET` | — | Секретный ключ для сессий (обязательно изменить в production) |
 
 ### Запуск в режиме разработки
 
@@ -96,7 +97,7 @@ npm run dev
 
 Эта команда запускает оба сервера параллельно через `concurrently`:
 - Backend: `http://localhost:3001`
-- Frontend: `http://localhost:3000`
+- Frontend: `http://localhost:3002`
 
 **Альтернативные способы:**
 
@@ -192,7 +193,7 @@ npm run test:all
 
 Перед запуском E2E тестов убедитесь, что:
 1. Backend сервер запущен на `http://localhost:3001`
-2. Frontend сервер запущен на `http://localhost:3000`
+2. Frontend сервер запущен на `http://localhost:3002`
 
 ```bash
 # В одном терминале
@@ -336,6 +337,49 @@ interface Order {
 - `main` - защищённая ветка, только через PR
 - `review` - пустая ветка для ревью
 - Feature-ветки: `feature/<модуль>-<имя>`
+
+## Troubleshooting
+
+### Порт занят
+```bash
+# Найти процесс, занимающий порт
+lsof -i :3001  # для backend
+lsof -i :3002  # для frontend
+
+# Убить процесс
+kill -9 <PID>
+```
+
+### Модули не найдены
+```bash
+# Очистить и переустановить зависимости
+rm -rf node_modules package-lock.json
+npm install
+```
+
+### Тесты падают
+- Проверьте, что сервер запущен
+- Проверьте, что seed данные созданы (`npm run seed`)
+- Очистите кэш: `npm test -- --clearCache`
+
+### CSS переменные не работают
+- Убедитесь, что `design-tokens.css` импортирован в `main.css`
+- Проверьте, что стили загружаются в правильном порядке
+
+### Ошибки TypeScript
+```bash
+# Проверка типов
+npm run typecheck
+
+# Если проблемы с кэшем
+rm -rf dist node_modules/.cache
+npm run build
+```
+
+### Проблемы с сессией
+- Проверьте, что `SESSION_SECRET` установлен в `.env`
+- Убедитесь, что cookies не заблокированы в браузере
+- Проверьте время жизни сессии (`SESSION_DURATION_MINUTES`)
 
 ## Документация
 

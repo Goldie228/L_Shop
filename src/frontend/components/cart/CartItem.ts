@@ -7,6 +7,7 @@
 
 import { Component, ComponentProps } from '../base/Component';
 import { Button } from '../ui/Button';
+import { Icon } from '../ui/Icon';
 import { CartItemWithProduct } from '../../types/cart';
 
 /**
@@ -105,7 +106,7 @@ export class CartItem extends Component<CartItemProps> {
         {
           className: 'cart-item__price--old',
         },
-        [`${item.price.toFixed(2)} ₽`],
+        [`${item.price.toFixed(2)} BYN`],
       );
 
       // Новая цена со скидкой
@@ -116,7 +117,7 @@ export class CartItem extends Component<CartItemProps> {
           className: 'cart-item__price--new',
           'data-price': 'basket',
         },
-        [`${newPriceValue.toFixed(2)} ₽`],
+        [`${newPriceValue.toFixed(2)} BYN`],
       );
 
       // Бейдж скидки
@@ -137,7 +138,7 @@ export class CartItem extends Component<CartItemProps> {
           className: 'cart-item__price',
           'data-price': 'basket',
         },
-        [`${item.price.toFixed(2)} ₽`],
+        [`${item.price.toFixed(2)} BYN`],
       );
       priceContainer.appendChild(price);
     }
@@ -148,8 +149,9 @@ export class CartItem extends Component<CartItemProps> {
     });
 
     this.decreaseBtn = new Button({
-      text: '-',
+      text: '−',
       variant: 'secondary',
+      ariaLabel: 'Уменьшить количество',
       onClick: () => this.handleQuantityChange(-1),
     });
 
@@ -157,6 +159,7 @@ export class CartItem extends Component<CartItemProps> {
       'span',
       {
         className: 'cart-item__quantity-value',
+        'aria-live': 'polite',
       },
       [String(item.quantity)],
     );
@@ -164,6 +167,7 @@ export class CartItem extends Component<CartItemProps> {
     this.increaseBtn = new Button({
       text: '+',
       variant: 'secondary',
+      ariaLabel: 'Увеличить количество',
       onClick: () => this.handleQuantityChange(1),
     });
 
@@ -177,40 +181,26 @@ export class CartItem extends Component<CartItemProps> {
       {
         className: 'cart-item__total',
       },
-      [`Итого: ${item.total.toFixed(2)} ₽`],
+      [`Итого: ${item.total.toFixed(2)} BYN`],
     );
 
     // Собираем элемент
     this.element.append(imageContainer, title, priceContainer, quantityControl);
 
-    // Кнопка удаления с SVG иконкой
-    const removeButton = document.createElement('button');
-    removeButton.className = 'cart-item__remove';
-    removeButton.setAttribute('aria-label', 'Удалить товар');
+    // Кнопка удаления с использованием компонента Icon
+    const removeButton = this.createElement('button', {
+      className: 'cart-item__remove',
+      'aria-label': 'Удалить товар',
+    });
 
-    const removeIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    removeIcon.setAttribute('viewBox', '0 0 24 24');
-    removeIcon.setAttribute('fill', 'none');
-    removeIcon.setAttribute('stroke', 'currentColor');
-    removeIcon.setAttribute('stroke-width', '2');
-    removeIcon.setAttribute('stroke-linecap', 'round');
-    removeIcon.setAttribute('stroke-linejoin', 'round');
+    const removeIcon = new Icon({
+      name: 'trash',
+      size: 18,
+      className: 'cart-item__remove-icon',
+    });
+    removeButton.appendChild(removeIcon.render());
 
-    const path1 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path1.setAttribute('d', 'M3 6h18');
-
-    const path2 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path2.setAttribute('d', 'M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6');
-
-    const path3 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path3.setAttribute('d', 'M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2');
-
-    removeIcon.appendChild(path1);
-    removeIcon.appendChild(path2);
-    removeIcon.appendChild(path3);
-    removeButton.appendChild(removeIcon);
-
-    removeButton.addEventListener('click', () => this.props.onRemove?.(item.productId));
+    this.addEventListener(removeButton, 'click', () => this.props.onRemove?.(item.productId));
 
     this.element.appendChild(removeButton);
     this.element.appendChild(total);

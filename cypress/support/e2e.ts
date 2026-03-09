@@ -1,9 +1,6 @@
 // Файл поддержки E2E тестов Cypress
 // Импорты глобальных команд и конфигураций
 
-// Отключаем проверку сертификатов для разработки
-Cypress.config('baseUrl', 'http://localhost:3000');
-
 // Глобальные команды для повторного использования
 Cypress.Commands.add('login', (email: string, password: string) => {
   cy.visit('/');
@@ -50,11 +47,6 @@ Cypress.Commands.add('shouldSeeSuccess', (message?: string) => {
     .and('contain', message || 'Успех');
 });
 
-// Очистка перед каждым тестом
-beforeEach(() => {
-  // Очищаем localStorage и cookies
-  cy.clearLocalStorage();
-  cy.clearCookies();
-  // Переходим на главную страницу
-  cy.visit('/');
-});
+// Примечание: beforeEach удалён отсюда, чтобы избежать дублирования.
+// Очистку localStorage/cookies и cy.visit('/') следует добавлять
+// в отдельных тестовых файлах при необходимости.

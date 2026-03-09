@@ -266,8 +266,18 @@
 
 .footer__social {
   display: flex;
+  flex-direction: column;
   gap: var(--spacing-3);
   margin-top: var(--spacing-2);
+}
+
+.footer__social-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-4);
+  flex-wrap: wrap;
+  padding: var(--spacing-2) 0;
 }
 
 .footer__social-link {
@@ -294,6 +304,31 @@
 .footer__social-link svg {
   width: 18px;
   height: 18px;
+}
+
+/* Icon component styles */
+.icon-container {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.icon-container svg {
+  display: block;
+  fill: currentColor;
+}
+
+.footer__social-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.footer__social-icon svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
 }
 
 .footer__section {

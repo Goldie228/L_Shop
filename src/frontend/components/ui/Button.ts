@@ -53,6 +53,8 @@ export interface ButtonProps extends ComponentProps {
   leftIcon?: string;
   /** Иконка справа от текста */
   rightIcon?: string;
+  /** ARIA label для доступности */
+  ariaLabel?: string;
 }
 
 /**
@@ -156,13 +158,20 @@ export class Button extends Component<ButtonProps> {
     // Устанавливаем data атрибуты для тестирования
     if (dataAttrs && this.buttonElement) {
       Object.entries(dataAttrs).forEach(([key, value]) => {
-        this.buttonElement.dataset[key] = value;
+        if (this.buttonElement) {
+          this.buttonElement.dataset[key] = value;
+        }
       });
     }
 
     // Добавляем testId если указан
     if (this.props.testId) {
       this.buttonElement.setAttribute('data-testid', this.props.testId);
+    }
+
+    // Добавляем aria-label если указан
+    if (this.props.ariaLabel) {
+      this.buttonElement.setAttribute('aria-label', this.props.ariaLabel);
     }
 
     // Рендерим содержимое кнопки

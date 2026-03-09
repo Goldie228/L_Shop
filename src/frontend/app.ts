@@ -12,6 +12,7 @@ import { ProfilePage } from './components/pages/ProfilePage.js';
 import { CartPage } from './components/pages/CartPage.js';
 import { DeliveryPage } from './components/pages/DeliveryPage.js';
 import { MainPage } from './components/pages/MainPage.js';
+import { CatalogPage } from './components/pages/CatalogPage.js';
 import { PlaygroundPage } from './components/pages/PlaygroundPage.js';
 import { NotFoundPage } from './components/pages/NotFoundPage.js';
 import { OrdersPage } from './components/pages/OrdersPage.js';
@@ -30,8 +31,11 @@ import './styles/pages/about-page.css';
 import './styles/pages/contacts-page.css';
 import './styles/pages/orders-page.css';
 import './styles/pages/admin-page.css';
+import './styles/pages/not-found-page.css';
 // Импорт стилей UI компонентов
 import './styles/components/toast.css';
+// Импорт стилей корзины
+import './styles/components/cart.css';
 
 // Тема по умолчанию
 const THEME_KEY = 'lshop-theme';
@@ -80,6 +84,9 @@ class App {
   /** Элемент-контейнер приложения */
   private appContainer: HTMLElement | null = null;
 
+  /** Флаг, что проверка авторизации уже выполнялась */
+  private authChecked = false;
+
   /**
    * Инициализировать приложение
    */
@@ -96,11 +103,11 @@ class App {
     this.appContainer.innerHTML = '';
 
     try {
-      // Проверить статус аутентификации
-      await this.checkAuth();
-
       // Настроить роутер
       this.setupRouter();
+
+      // Проверить авторизацию ДО рендеринга (чтобы избежать моргания)
+      await this.checkAuthLazy();
 
       // Отрендерить макет приложения
       this.renderLayout();
@@ -108,15 +115,22 @@ class App {
       // Инициализировать роутер
       router.init();
     } catch (error) {
-      // Ошибка инициализации приложения (обрабатывается в catch)
+      // Ошибка инициализации приложения
+      if (import.meta.env.DEV) {
+        console.error('[App] Ошибка инициализации:', error);
+      }
       this.showError('Ошибка инициализации приложения');
     }
   }
 
   /**
-   * Проверить текущий статус аутентификации
+   * Отложенная проверка авторизации
+   * Выполняется после загрузки страницы, не блокирует UI
    */
-  private async checkAuth(): Promise<void> {
+  private async checkAuthLazy(): Promise<void> {
+    if (this.authChecked) return;
+    this.authChecked = true;
+
     store.setLoading(true);
 
     try {
@@ -127,8 +141,10 @@ class App {
         store.setUser(null);
       }
     } catch (error) {
-      // Ошибка проверки аутентификации (обрабатывается в catch)
+      // Ошибка проверки аутентификации - пользователь не авторизован
       store.setUser(null);
+    } finally {
+      store.setLoading(false);
     }
   }
 
@@ -156,6 +172,11 @@ class App {
       onAuth: () => this.handleAuthSuccess(),
     });
     document.body.appendChild(this.authModal.render());
+
+    // Слушатель глобального события для открытия модалки авторизации
+    document.addEventListener('openAuthModal', () => {
+      this.openAuthModal();
+    });
 
     // Создать макет с Header, основной областью контента и Footer
     this.layout = new Layout({
@@ -192,6 +213,10 @@ class App {
     switch (route.component) {
       case 'HomePage':
         this.renderHomePage();
+        break;
+
+      case 'CatalogPage':
+        this.renderCatalogPage();
         break;
 
       case 'ProfilePage':
@@ -275,6 +300,20 @@ class App {
       },
     });
     mainContent.appendChild(mainPage.render());
+  }
+
+  /**
+   * Отрендерить страницу каталога
+   */
+  private renderCatalogPage(): void {
+    if (!this.layout) return;
+
+    const mainContent = this.layout.getMainContent();
+    if (!mainContent) return;
+
+    mainContent.innerHTML = '';
+    const catalogPage = new CatalogPage({});
+    mainContent.appendChild(catalogPage.render());
   }
 
   /**
@@ -362,7 +401,9 @@ class App {
     mainContent.appendChild(productPage.render());
     // Вызвать init для загрузки данных
     productPage.init().catch((error) => {
-      console.error('Ошибка загрузки товара:', error);
+      if (import.meta.env.DEV) {
+        console.error('[App] Ошибка загрузки товара:', error);
+      }
     });
   }
 
@@ -403,11 +444,17 @@ class App {
     const mainContent = this.layout.getMainContent();
     if (!mainContent) return;
 
+    // Проверка прав администратора
+    const user = store.getUser();
+    if (!user || user.role !== 'admin') {
+      router.navigate('/');
+      return;
+    }
+
     mainContent.innerHTML = '';
     const adminPage = new AdminPage();
-    adminPage.mount(mainContent).catch((error) => {
-      console.error('Ошибка монтирования админ-панели:', error);
-    });
+    // mount синхронный, данные загружаются в onMount
+    adminPage.mount(mainContent);
   }
 
   /**

@@ -138,13 +138,24 @@ export class LoginForm extends Component<LoginFormProps> {
         'aria-live': 'polite',
         'data-testid': 'login-error-banner',
       },
-      [
-        `<svg class="auth-form__error-banner-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-        </svg>`,
-        this.state.submitError ?? '',
-      ],
     );
+
+    // SVG иконка с aria-hidden
+    const iconSvg = `<svg class="auth-form__error-banner-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+    </svg>`;
+    
+    const iconSpan = this.createElement('span', {
+      className: 'auth-form__error-banner-icon-wrapper',
+    });
+    iconSpan.innerHTML = iconSvg;
+    banner.appendChild(iconSpan);
+
+    const errorText = this.createElement('span', {
+      className: 'auth-form__error-banner-text',
+    });
+    errorText.textContent = this.state.submitError ?? '';
+    banner.appendChild(errorText);
 
     // Add shake animation
     banner.classList.add('auth-form__error-banner--shake');

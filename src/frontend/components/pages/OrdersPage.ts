@@ -30,6 +30,13 @@ export interface OrdersPageState {
 }
 
 /**
+ * Форматировать цену в BYN
+ */
+const formatPrice = (price: number): string => {
+  return `${price.toLocaleString('ru-BY')} BYN`;
+};
+
+/**
  * Отображение статуса заказа на русском
  */
 const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
@@ -61,6 +68,12 @@ export class OrdersPage extends Component<OrdersPageProps> {
     error: null,
     orders: [],
   };
+
+  /** Флаг, что загрузка уже выполняется (для предотвращения повторных запросов) */
+  private isLoadingInProgress = false;
+
+  /** Флаг, что загрузка уже была выполнена */
+  private hasLoaded = false;
 
   /**
    * Получить пропсы по умолчанию
@@ -131,8 +144,8 @@ export class OrdersPage extends Component<OrdersPageProps> {
     container.appendChild(innerContainer);
     this.element = container;
 
-    // Загрузить заказы после рендера
-    if (store.isAuthenticated()) {
+    // Загрузить заказы после рендера (только если ещё не загружали)
+    if (store.isAuthenticated() && !this.hasLoaded && !this.isLoadingInProgress) {
       this.loadOrders();
     }
 
@@ -216,7 +229,10 @@ export class OrdersPage extends Component<OrdersPageProps> {
       },
       ['Попробовать снова'],
     );
-    this.addEventListener(retryButton, 'click', () => this.loadOrders());
+    this.addEventListener(retryButton, 'click', () => {
+      this.hasLoaded = false;
+      this.loadOrders();
+    });
     error.appendChild(retryButton);
 
     return error;
@@ -330,7 +346,7 @@ export class OrdersPage extends Component<OrdersPageProps> {
         {
           className: 'order-card__item-price',
         },
-        [`${item.price * item.quantity} ₽`],
+        [formatPrice(item.price * item.quantity)],
       );
       itemEl.appendChild(price);
 
@@ -359,7 +375,7 @@ export class OrdersPage extends Component<OrdersPageProps> {
       {
         className: 'order-card__total',
       },
-      [`${order.totalSum} ₽`],
+      [formatPrice(order.totalSum)],
     );
     footer.appendChild(total);
 
@@ -465,16 +481,22 @@ export class OrdersPage extends Component<OrdersPageProps> {
    * Загрузить заказы пользователя
    */
   private async loadOrders(): Promise<void> {
+    // Предотвращаем повторную загрузку если уже загружаем или уже загружено
+    if (this.isLoadingInProgress || this.hasLoaded) {
+      return;
+    }
+
     if (!store.isAuthenticated()) {
       this.state = {
         loading: false,
         error: null,
         orders: [],
       };
-      this.update();
+      this.hasLoaded = true;
       return;
     }
 
+    this.isLoadingInProgress = true;
     this.state = {
       ...this.state,
       loading: true,
@@ -489,6 +511,7 @@ export class OrdersPage extends Component<OrdersPageProps> {
         error: null,
         orders,
       };
+      this.hasLoaded = true;
       this.update();
     } catch (error) {
       console.error('[OrdersPage] Ошибка загрузки заказов:', error);
@@ -497,26 +520,25 @@ export class OrdersPage extends Component<OrdersPageProps> {
         error: 'Не удалось загрузить заказы. Попробуйте позже.',
         orders: [],
       };
+      this.hasLoaded = true;
       this.update();
+    } finally {
+      this.isLoadingInProgress = false;
     }
   }
 
   /**
-   * Обновить состояние авторизации
+   * Сбросить состояние и перезагрузить заказы
    */
-  public updateAuthState(): void {
-    if (!store.isAuthenticated()) {
-      this.state = {
-        loading: false,
-        error: null,
-        orders: [],
-      };
-    } else {
-      this.state.loading = true;
-    }
+  public resetAndReload(): void {
+    this.hasLoaded = false;
+    this.isLoadingInProgress = false;
+    this.state = {
+      loading: true,
+      error: null,
+      orders: [],
+    };
     this.update();
-    if (store.isAuthenticated()) {
-      this.loadOrders();
-    }
+    this.loadOrders();
   }
 }

@@ -20,6 +20,40 @@ const CARTS_FILE = 'carts.json';
 const PRODUCTS_FILE = 'products.json';
 
 /**
+ * Параметры для получения списка заказов (админ)
+ */
+export interface GetOrdersParams {
+  status?: Order['status'];
+  userId?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  limit?: number;
+  offset?: number;
+  sort?: 'created_at_desc' | 'created_at_asc' | 'total_desc' | 'total_asc';
+}
+
+/**
+ * Результат получения списка заказов с пагинацией
+ */
+export interface GetOrdersResult {
+  orders: Order[];
+  total: number;
+  limit: number;
+  offset: number;
+  hasMore: boolean;
+}
+
+/**
+ * Статистика заказов
+ */
+export interface OrdersStats {
+  total: number;
+  byStatus: Record<Order['status'], number>;
+  totalRevenue: number;
+  averageOrderValue: number;
+}
+
+/**
  * Сервис для работы с заказами
  */
 export class OrderService {
@@ -40,13 +74,6 @@ export class OrderService {
 
   /**
    * Создать новый заказ из корзины пользователя
-   * @param userId - ID пользователя
-   * @param data - Данные для создания заказа
-   * @returns Созданный заказ
-   * @throws {ValidationError} Если данные невалидны или корзина пуста
-   * @throws {NotFoundError} Если продукты из корзины не найдены в каталоге
-   * @throws {BusinessRuleError} Если продукт отсутствует на складе
-   * @throws {OrderError} При ошибке чтения или записи данных заказа
    */
   async createOrder(userId: string, data: CreateOrderData): Promise<Order> {
     // 1. Валидация входных данных
@@ -137,9 +164,6 @@ export class OrderService {
 
   /**
    * Получить все заказы пользователя
-   * @param userId - ID пользователя
-   * @returns Массив заказов, отсортированный по дате создания (новые первыми)
-   * @throws {OrderError} При ошибке чтения данных заказов
    */
   async getOrders(userId: string): Promise<Order[]> {
     try {
@@ -172,10 +196,6 @@ export class OrderService {
 
   /**
    * Получить конкретный заказ пользователя по ID
-   * @param userId - ID пользователя
-   * @param orderId - ID заказа
-   * @returns Заказ или null, если не найден
-   * @throws {OrderError} При ошибке чтения данных заказов
    */
   async getOrderById(userId: string, orderId: string): Promise<Order | null> {
     try {
@@ -210,11 +230,6 @@ export class OrderService {
 
   /**
    * Обновить статус заказа
-   * @param orderId - ID заказа
-   * @param status - Новый статус
-   * @returns Обновлённый заказ или null если заказ не найден
-   * @throws {OrderError} При ошибке чтения или записи данных заказа
-   * @throws {ValidationError} Если статус невалиден
    */
   async updateOrderStatus(orderId: string, status: Order['status']): Promise<Order | null> {
     // Валидация статуса
@@ -268,8 +283,6 @@ export class OrderService {
 
   /**
    * Получить все заказы (для администратора)
-   * @returns Массив всех заказов, отсортированный по дате создания
-   * @throws {OrderError} При ошибке чтения данных заказов
    */
   async getAllOrders(): Promise<Order[]> {
     try {
@@ -289,7 +302,7 @@ export class OrderService {
         }
       }
 
-      const allOrders = (await OrderService.getOrdersInternal()) ?? [];
+      const allOrders = await OrderService.getOrdersInternal();
 
       // Сортируем по дате создания (новые первыми)
       const sorted = allOrders.sort(
@@ -314,14 +327,11 @@ export class OrderService {
 
   /**
    * Удалить заказ по ID (для администратора)
-   * @param orderId - ID заказа
-   * @returns true если заказ удален, false если не найден
-   * @throws {OrderError} При ошибке чтения или записи данных заказа
    */
   async deleteOrder(orderId: string): Promise<boolean> {
     try {
       // Читаем текущие заказы
-      const orders = (await OrderService.getOrdersInternal()) ?? [];
+      const orders = await OrderService.getOrdersInternal();
 
       // Ищем заказ
       const orderIndex = orders.findIndex((o) => o.id === orderId);
@@ -358,11 +368,6 @@ export class OrderService {
 
   /**
    * Обогатить элементы заказа данными продуктов и проверить наличие
-   * @param items - Элементы корзины
-   * @param products - Список всех продуктов
-   * @returns Элементы заказа с обогащёнными данными
-   * @throws {NotFoundError} Если продукт не найден
-   * @throws {BusinessRuleError} Если продукт отсутствует на складе
    */
   private async enrichOrderItems(items: Cart['items'], products: Product[]): Promise<OrderItem[]> {
     return items.map((item) => {
@@ -391,8 +396,6 @@ export class OrderService {
 
   /**
    * Рассчитать общую сумму заказа с учётом скидок
-   * @param items - Элементы заказа
-   * @returns Общая сумма (BYN, округлённая до 2 знаков)
    */
   private calculateOrderTotal(items: OrderItem[]): number {
     const total = items.reduce((sum, item) => {
@@ -407,26 +410,32 @@ export class OrderService {
 
   /**
    * Получить все заказы из файла (внутренний метод без кэширования)
+   * Выбрасывает OrderError при ошибке чтения файла заказов
    */
   private static async getOrdersInternal(): Promise<Order[]> {
     try {
       const orders = await readJsonFile<Order>(ORDERS_FILE);
 
       if (!Array.isArray(orders)) {
-        logger.warn('Файл заказов содержит не массив, возвращаем пустой массив');
-        return [];
+        logger.error('Файл заказов содержит не массив');
+        throw new OrderError('Файл заказов повреждён');
       }
       return orders;
     } catch (error) {
+      if (error instanceof OrderError) {
+        throw error;
+      }
       logger.error({ error }, 'Ошибка чтения заказов');
-      // Возвращаем пустой массив вместо выбрасывания ошибки,
-      // чтобы вызывающие методы могли обработать эту ситуацию
-      return [];
+      throw new OrderError(
+        `Не удалось прочитать файл заказов: ${error instanceof Error ? error.message : 'Неизвестная ошибка'}`,
+        { originalError: error },
+      );
     }
   }
 
   /**
    * Получить список продуктов с кэшированием
+   * Выбрасывает OrderError при ошибке чтения файла продуктов
    */
   private static async getProducts(): Promise<Product[]> {
     const now = Date.now();
@@ -448,8 +457,10 @@ export class OrderService {
       return productsArray;
     } catch (error) {
       logger.error({ error }, 'Ошибка чтения продуктов');
-      // Возвращаем пустой массив при ошибке
-      return [];
+      throw new OrderError(
+        `Не удалось прочитать файл продуктов: ${error instanceof Error ? error.message : 'Неизвестная ошибка'}`,
+        { originalError: error },
+      );
     }
   }
 
@@ -514,5 +525,169 @@ export class OrderService {
 
     OrderService.orderCache.set(userId, orders);
     OrderService.orderCacheTimestamps.set(userId, Date.now());
+  }
+
+  /**
+   * Получить заказы с пагинацией и фильтрацией (для админа)
+   */
+  async getOrdersWithPagination(params: GetOrdersParams): Promise<GetOrdersResult> {
+    const {
+      status,
+      userId,
+      dateFrom,
+      dateTo,
+      limit = 20,
+      offset = 0,
+      sort = 'created_at_desc',
+    } = params;
+
+    let orders = await this.getAllOrders();
+
+    // Фильтрация по статусу
+    if (status) {
+      orders = orders.filter((o) => o.status === status);
+    }
+
+    // Фильтрация по userId
+    if (userId) {
+      orders = orders.filter((o) => o.userId === userId);
+    }
+
+    // Фильтрация по датам
+    if (dateFrom) {
+      const fromDate = new Date(dateFrom);
+      if (!Number.isNaN(fromDate.getTime())) {
+        orders = orders.filter((o) => new Date(o.createdAt) >= fromDate);
+      }
+    }
+
+    if (dateTo) {
+      const toDate = new Date(dateTo);
+      if (!Number.isNaN(toDate.getTime())) {
+        orders = orders.filter((o) => new Date(o.createdAt) <= toDate);
+      }
+    }
+
+    // Сортировка
+    switch (sort) {
+      case 'created_at_asc':
+        orders.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        break;
+      case 'total_desc':
+        orders.sort((a, b) => b.totalSum - a.totalSum);
+        break;
+      case 'total_asc':
+        orders.sort((a, b) => a.totalSum - b.totalSum);
+        break;
+      case 'created_at_desc':
+      default:
+        orders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        break;
+    }
+
+    const total = orders.length;
+    const paginatedOrders = orders.slice(offset, offset + limit);
+    const hasMore = offset + limit < total;
+
+    return {
+      orders: paginatedOrders,
+      total,
+      limit,
+      offset,
+      hasMore,
+    };
+  }
+
+  /**
+   * Получить заказ по ID (для админа, без проверки userId)
+   */
+  async getOrderByIdAdmin(orderId: string): Promise<Order | null> {
+    const orders = await this.getAllOrders();
+    return orders.find((o) => o.id === orderId) || null;
+  }
+
+  /**
+   * Отменить заказ (пользователем)
+   */
+  async cancelOrder(userId: string, orderId: string): Promise<Order | null> {
+    const order = await this.getOrderById(userId, orderId);
+
+    if (!order) {
+      return null;
+    }
+
+    // Проверяем, можно ли отменить заказ
+    if (order.status !== 'pending') {
+      throw new BusinessRuleError('Невозможно отменить заказ в текущем статусе', {
+        orderId,
+        currentStatus: order.status,
+      });
+    }
+
+    return this.updateOrderStatus(orderId, 'cancelled');
+  }
+
+  /**
+   * Получить статистику заказов
+   */
+  async getOrdersStats(): Promise<OrdersStats> {
+    const orders = await this.getAllOrders();
+
+    const statusCounts: Record<Order['status'], number> = {
+      pending: 0,
+      processing: 0,
+      shipped: 0,
+      delivered: 0,
+      cancelled: 0,
+    };
+
+    let totalRevenue = 0;
+
+    for (const order of orders) {
+      statusCounts[order.status] = (statusCounts[order.status] || 0) + 1;
+      if (order.status !== 'cancelled') {
+        totalRevenue += order.totalSum;
+      }
+    }
+
+    const nonCancelledCount = orders.filter((o) => o.status !== 'cancelled').length;
+
+    return {
+      total: orders.length,
+      byStatus: statusCounts,
+      totalRevenue: Math.round(totalRevenue * 100) / 100,
+      averageOrderValue: nonCancelledCount > 0 
+        ? Math.round((totalRevenue / nonCancelledCount) * 100) / 100 
+        : 0,
+    };
+  }
+
+  /**
+   * Получить заказы пользователя с пагинацией
+   */
+  async getOrdersWithPaginationUser(
+    userId: string,
+    params: { status?: Order['status']; limit?: number; offset?: number },
+  ): Promise<GetOrdersResult> {
+    const { status, limit = 20, offset = 0 } = params;
+
+    let orders = await this.getOrders(userId);
+
+    // Фильтрация по статусу
+    if (status) {
+      orders = orders.filter((o) => o.status === status);
+    }
+
+    const total = orders.length;
+    const paginatedOrders = orders.slice(offset, offset + limit);
+    const hasMore = offset + limit < total;
+
+    return {
+      orders: paginatedOrders,
+      total,
+      limit,
+      offset,
+      hasMore,
+    };
   }
 }

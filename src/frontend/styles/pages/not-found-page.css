@@ -60,8 +60,16 @@
 .not-found-page__actions {
   display: flex;
   justify-content: center;
+  align-items: center;
   gap: var(--spacing-md);
   flex-wrap: wrap;
+  width: 100%;
+  margin-top: var(--spacing-lg);
+}
+
+/* Кнопки внутри действий */
+.not-found-page__actions .btn {
+  min-width: 160px;
 }
 
 /* Иконка (опционально) */

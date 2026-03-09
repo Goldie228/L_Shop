@@ -10,6 +10,16 @@ import { Order, OrderStatus } from '../types/order.js';
 import { User, UserRole } from '../types/user.js';
 
 /**
+ * Данные пагинации
+ */
+export interface Pagination {
+  total: number;
+  limit: number;
+  offset: number;
+  hasMore: boolean;
+}
+
+/**
  * Данные для создания/обновления товара
  */
 export interface CreateProductData {
@@ -49,6 +59,30 @@ interface ToggleUserBlockResponse {
 }
 
 /**
+ * Ответ API со списком товаров
+ */
+interface ProductsResponse {
+  products: Product[];
+  pagination: Pagination;
+}
+
+/**
+ * Ответ API со списком заказов
+ */
+interface OrdersResponse {
+  orders: Order[];
+  pagination: Pagination;
+}
+
+/**
+ * Ответ API со списком пользователей
+ */
+interface UsersResponse {
+  users: User[];
+  pagination: Pagination;
+}
+
+/**
  * Сервис для администрирования магазина
  */
 export class AdminService {
@@ -59,8 +93,8 @@ export class AdminService {
    * @returns Массив товаров
    */
   public static async getAllProducts(): Promise<Product[]> {
-    console.log('[AdminService] Загрузка всех товаров');
-    return api.get<Product[]>(ADMIN_ENDPOINTS.PRODUCTS);
+    const response = await api.get<ProductsResponse>(ADMIN_ENDPOINTS.PRODUCTS);
+    return response.products || [];
   }
 
   /**
@@ -69,7 +103,6 @@ export class AdminService {
    * @returns Созданный товар
    */
   public static async createProduct(product: CreateProductData): Promise<Product> {
-    console.log('[AdminService] Создание товара:', product.name);
     return api.post<Product>(ADMIN_ENDPOINTS.PRODUCTS, product);
   }
 
@@ -80,7 +113,6 @@ export class AdminService {
    * @returns Обновлённый товар
    */
   public static async updateProduct(id: string, product: CreateProductData): Promise<Product> {
-    console.log('[AdminService] Обновление товара:', id);
     return api.put<Product>(`${ADMIN_ENDPOINTS.PRODUCTS}/${id}`, product);
   }
 
@@ -89,7 +121,6 @@ export class AdminService {
    * @param id - ID товара
    */
   public static async deleteProduct(id: string): Promise<void> {
-    console.log('[AdminService] Удаление товара:', id);
     return api.delete<void>(`${ADMIN_ENDPOINTS.PRODUCTS}/${id}`);
   }
 
@@ -100,8 +131,8 @@ export class AdminService {
    * @returns Массив заказов
    */
   public static async getAllOrders(): Promise<Order[]> {
-    console.log('[AdminService] Загрузка всех заказов');
-    return api.get<Order[]>(ADMIN_ENDPOINTS.ORDERS);
+    const response = await api.get<OrdersResponse>(ADMIN_ENDPOINTS.ORDERS);
+    return response.orders || [];
   }
 
   /**
@@ -111,7 +142,6 @@ export class AdminService {
    * @returns Обновлённый заказ
    */
   public static async updateOrderStatus(id: string, status: OrderStatus): Promise<Order> {
-    console.log('[AdminService] Обновление статуса заказа:', id, status);
     const response = await api.put<UpdateOrderStatusResponse>(
       `${ADMIN_ENDPOINTS.ORDERS}/${id}/status`,
       { status },
@@ -124,7 +154,6 @@ export class AdminService {
    * @param id - ID заказа
    */
   public static async deleteOrder(id: string): Promise<void> {
-    console.log('[AdminService] Удаление заказа:', id);
     return api.delete<void>(`${ADMIN_ENDPOINTS.ORDERS}/${id}`);
   }
 
@@ -135,8 +164,8 @@ export class AdminService {
    * @returns Массив пользователей
    */
   public static async getAllUsers(): Promise<User[]> {
-    console.log('[AdminService] Загрузка всех пользователей');
-    return api.get<User[]>(ADMIN_ENDPOINTS.USERS);
+    const response = await api.get<UsersResponse>(ADMIN_ENDPOINTS.USERS);
+    return response.users || [];
   }
 
   /**
@@ -146,7 +175,6 @@ export class AdminService {
    * @returns Обновлённый пользователь
    */
   public static async updateUserRole(id: string, role: UserRole): Promise<User> {
-    console.log('[AdminService] Обновление роли пользователя:', id, role);
     const response = await api.put<UpdateUserRoleResponse>(`${ADMIN_ENDPOINTS.USERS}/${id}/role`, {
       role,
     });
@@ -159,7 +187,6 @@ export class AdminService {
    * @returns Обновлённый пользователь
    */
   public static async toggleUserBlock(id: string): Promise<User> {
-    console.log('[AdminService] Переключение блокировки пользователя:', id);
     const response = await api.put<ToggleUserBlockResponse>(
       `${ADMIN_ENDPOINTS.USERS}/${id}/block`,
       {},

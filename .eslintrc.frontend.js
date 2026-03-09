@@ -13,7 +13,7 @@ module.exports = {
   },
   rules: {
     'import/prefer-default-export': 'off',
-    'max-len': ['error', { code: 100 }],
+    'max-len': ['error', { code: 100, ignoreUrls: true }],
     '@typescript-eslint/no-explicit-any': 'error',
     'no-console': ['warn', { allow: ['warn', 'error'] }],
     'class-methods-use-this': 'off',

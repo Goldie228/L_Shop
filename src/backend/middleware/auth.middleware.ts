@@ -5,7 +5,9 @@
 import { Response, NextFunction } from 'express';
 import { AuthRequest } from './auth-request';
 import { SessionService } from '../services/session.service';
+import { createContextLogger } from '../utils/logger';
 
+const logger = createContextLogger('AuthMiddleware');
 const sessionService = new SessionService();
 
 /**
@@ -47,7 +49,7 @@ export async function authMiddleware(
     req.userId = userId;
     next();
   } catch (error) {
-    console.error('[AuthMiddleware] Ошибка:', error);
+    logger.error({ error }, 'Ошибка при проверке авторизации');
     res.status(500).json({
       message: 'Ошибка при проверке авторизации',
       error: 'AUTH_ERROR',
@@ -77,7 +79,7 @@ export async function optionalAuth(
     next();
   } catch (error) {
     // При ошибке просто продолжаем без userId
-    console.error('[OptionalAuth] Ошибка:', error);
+    logger.error({ error }, 'Ошибка в optionalAuth');
     next();
   }
 }

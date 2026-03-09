@@ -2,14 +2,38 @@
  * Сервис работы с пользователями
  */
 
-import { readJsonFile, modifyJsonFile } from '../utils/file.utils';
+import { readJsonFile, modifyJsonFile, clearCache } from '../utils/file.utils';
 import { User } from '../models/user.model';
 import { generateId } from '../utils/id.utils';
 import { hashPassword } from '../utils/hash.utils';
 import { createContextLogger } from '../utils/logger';
+import { ConflictError } from '../errors';
 
 const logger = createContextLogger('UserService');
 const USERS_FILE = 'users.json';
+
+/**
+ * Параметры для получения списка пользователей
+ */
+export interface GetUsersParams {
+  search?: string;
+  role?: 'user' | 'admin';
+  isBlocked?: boolean;
+  limit?: number;
+  offset?: number;
+  sort?: 'name_asc' | 'name_desc' | 'created_at_asc' | 'created_at_desc';
+}
+
+/**
+ * Результат получения списка пользователей с пагинацией
+ */
+export interface GetUsersResult {
+  users: User[];
+  total: number;
+  limit: number;
+  offset: number;
+  hasMore: boolean;
+}
 
 export class UserService {
   /**
@@ -234,7 +258,7 @@ export class UserService {
 
     if (existingUser) {
       logger.warn({ userId, email }, 'Email уже используется');
-      throw new Error('EMAIL_EXISTS');
+      throw new ConflictError('Email уже используется другим пользователем');
     }
 
     // eslint-disable-next-line no-param-reassign
@@ -298,5 +322,127 @@ export class UserService {
     }
 
     return updatedUser;
+  }
+
+  /**
+   * Получить пользователей с пагинацией, фильтрацией и сортировкой
+   * @param params - Параметры фильтрации и пагинации
+   * @returns Результат с пользователями и метаданными пагинации
+   */
+  async getUsersWithPagination(params: GetUsersParams): Promise<GetUsersResult> {
+    const {
+      search,
+      role,
+      isBlocked,
+      limit = 20,
+      offset = 0,
+      sort = 'created_at_desc',
+    } = params;
+
+    let users = await this.getAllUsers();
+
+    // Фильтрация по поиску
+    if (search) {
+      const searchLower = search.toLowerCase();
+      users = users.filter(
+        (u) =>
+          u.name.toLowerCase().includes(searchLower) ||
+          u.email.toLowerCase().includes(searchLower) ||
+          u.login.toLowerCase().includes(searchLower),
+      );
+    }
+
+    // Фильтрация по роли
+    if (role) {
+      users = users.filter((u) => u.role === role);
+    }
+
+    // Фильтрация по статусу блокировки
+    if (isBlocked !== undefined) {
+      users = users.filter((u) => (u.isBlocked ?? false) === isBlocked);
+    }
+
+    // Сортировка
+    switch (sort) {
+      case 'name_asc':
+        users.sort((a, b) => a.name.localeCompare(b.name, 'ru'));
+        break;
+      case 'name_desc':
+        users.sort((a, b) => b.name.localeCompare(a.name, 'ru'));
+        break;
+      case 'created_at_asc':
+        users.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        break;
+      case 'created_at_desc':
+      default:
+        users.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        break;
+    }
+
+    const total = users.length;
+    const paginatedUsers = users.slice(offset, offset + limit);
+    const hasMore = offset + limit < total;
+
+    return {
+      users: paginatedUsers,
+      total,
+      limit,
+      offset,
+      hasMore,
+    };
+  }
+
+  /**
+   * Удалить пользователя по ID
+   * @param userId - ID пользователя
+   * @returns true если пользователь удалён, false если не найден
+   * @throws {Error} При ошибке записи файла
+   */
+  async deleteUser(userId: string): Promise<boolean> {
+    let deleted = false;
+
+    await modifyJsonFile<User>(USERS_FILE, (users) => {
+      const index = users.findIndex((u) => u.id === userId);
+
+      if (index === -1) {
+        return users;
+      }
+
+      users.splice(index, 1);
+      deleted = true;
+      return users;
+    });
+
+    if (deleted) {
+      // Очищаем кэш пользователей
+      clearCache(USERS_FILE);
+      logger.info({ userId }, 'Пользователь удалён');
+    }
+
+    return deleted;
+  }
+
+  /**
+   * Проверить существование пользователя по ID
+   * @param userId - ID пользователя
+   * @returns true если пользователь существует
+   */
+  async userExists(userId: string): Promise<boolean> {
+    const user = await this.getUserById(userId);
+    return user !== null;
+  }
+
+  /**
+   * Получить количество пользователей по ролям
+   * @returns Объект с количеством пользователей по ролям
+   */
+  async getUsersCount(): Promise<{ total: number; admins: number; blocked: number }> {
+    const users = await this.getAllUsers();
+
+    return {
+      total: users.length,
+      admins: users.filter((u) => u.role === 'admin').length,
+      blocked: users.filter((u) => u.isBlocked === true).length,
+    };
   }
 }

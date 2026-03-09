@@ -6,6 +6,11 @@ import { User } from '../types/user';
 export type ModalType = 'auth' | string;
 
 /**
+ * Тип события сессии для обратного вызова
+ */
+export type SessionEvent = 'warning' | 'expired';
+
+/**
  * Состояние модального окна
  */
 interface ModalState {
@@ -30,6 +35,16 @@ interface UserState {
 }
 
 /**
+ * Состояние корзины
+ */
+interface CartState {
+  /** Количество товаров в корзине */
+  itemsCount: number;
+  /** Общая сумма корзины */
+  totalSum: number;
+}
+
+/**
  * Глобальное состояние приложения
  */
 export interface StoreState {
@@ -39,7 +54,14 @@ export interface StoreState {
   route: string;
   /** Состояние модального окна */
   modal: ModalState;
+  /** Состояние корзины */
+  cart: CartState;
 }
+
+/**
+ * Callback для событий сессии
+ */
+export type SessionCallback = (event: SessionEvent) => void;
 
 /**
  * Класс Store для управления состоянием приложения (Синглтон)
@@ -58,8 +80,17 @@ export class Store {
   /** Таймер сессии */
   private sessionTimer: ReturnType<typeof setTimeout> | null = null;
 
+  /** Таймер предупреждения о сессии */
+  private sessionWarningTimer: ReturnType<typeof setTimeout> | null = null;
+
   /** Время сессии в миллисекундах (15 минут) */
   private static readonly SESSION_TIMEOUT = 15 * 60 * 1000;
+
+  /** Время предупреждения до окончания сессии (1 минута) */
+  private static readonly SESSION_WARNING_TIME = 1 * 60 * 1000;
+
+  /** Callback для событий сессии */
+  private sessionCallback: SessionCallback | null = null;
 
   /** Слушатели изменений для канала 'user' */
   private userListeners: Array<(state: StoreState) => void> = [];
@@ -73,6 +104,9 @@ export class Store {
   /** Глобальные слушатели всех изменений */
   private globalListeners: Array<(state: StoreState) => void> = [];
 
+  /** Слушатели изменений для канала 'cart' */
+  private cartListeners: Array<(state: StoreState) => void> = [];
+
   /** Текущее состояние */
   private state: StoreState = {
     user: {
@@ -85,6 +119,10 @@ export class Store {
     modal: {
       isOpen: false,
       type: null,
+    },
+    cart: {
+      itemsCount: 0,
+      totalSum: 0,
     },
   };
 
@@ -113,6 +151,44 @@ export class Store {
   }
 
   /**
+   * Устанавливает callback для событий сессии
+   *
+   * @param callback - Функция, вызываемая при событиях сессии
+   *
+   * @example
+   * ```typescript
+   * store.setSessionCallback((event) => {
+   *   if (event === 'warning') {
+   *     showSessionWarningModal();
+   *   } else if (event === 'expired') {
+   *     showSessionExpiredMessage();
+   *   }
+   * });
+   * ```
+   */
+  public setSessionCallback(callback: SessionCallback | null): void {
+    this.sessionCallback = callback;
+  }
+
+  /**
+   * Продлевает сессию (сбрасывает таймеры)
+   *
+   * @example
+   * ```typescript
+   * store.extendSession(); // Продлить сессию на 15 минут
+   * ```
+   */
+  public extendSession(): void {
+    if (!this.state.user.isAuthenticated) return;
+
+    // Очищаем предыдущие таймеры
+    this.clearSessionTimers();
+
+    // Запускаем новые таймеры
+    this.startSessionTimers();
+  }
+
+  /**
    * Возвращает глубокую копию текущего состояния
    *
    * @returns {StoreState} Глубокий клон состояния
@@ -124,8 +200,8 @@ export class Store {
    * ```
    */
   public getState(): StoreState {
-    // Глубокое копирование через JSON
-    return JSON.parse(JSON.stringify(this.state));
+    // Используем structuredClone для более эффективного копирования
+    return structuredClone(this.state);
   }
 
   /**
@@ -142,26 +218,60 @@ export class Store {
    * ```
    */
   public setUser(user: User | null): void {
-    // Очищаем предыдущий таймер
-    if (this.sessionTimer) {
-      clearTimeout(this.sessionTimer);
-      this.sessionTimer = null;
-    }
+    // Очищаем предыдущие таймеры
+    this.clearSessionTimers();
 
     // Обновляем состояние
     this.state.user.user = user;
     this.state.user.isAuthenticated = user !== null;
     this.state.user.error = null;
 
-    // Запускаем таймер сессии для не-null пользователя
+    // Запускаем таймеры сессии для не-null пользователя
     if (user !== null) {
-      this.sessionTimer = setTimeout(() => {
-        this.setUser(null);
-      }, Store.SESSION_TIMEOUT);
+      this.startSessionTimers();
     }
 
     // Уведомляем слушателей канала 'user'
     this.notifyChannel('user');
+  }
+
+  /**
+   * Очищает все таймеры сессии
+   *
+   * @private
+   */
+  private clearSessionTimers(): void {
+    if (this.sessionTimer) {
+      clearTimeout(this.sessionTimer);
+      this.sessionTimer = null;
+    }
+    if (this.sessionWarningTimer) {
+      clearTimeout(this.sessionWarningTimer);
+      this.sessionWarningTimer = null;
+    }
+  }
+
+  /**
+   * Запускает таймеры сессии (предупреждение и истечение)
+   *
+   * @private
+   */
+  private startSessionTimers(): void {
+    // Таймер предупреждения (за 1 минуту до истечения)
+    const warningTime = Store.SESSION_TIMEOUT - Store.SESSION_WARNING_TIME;
+    this.sessionWarningTimer = setTimeout(() => {
+      if (this.sessionCallback) {
+        this.sessionCallback('warning');
+      }
+    }, warningTime);
+
+    // Таймер истечения сессии
+    this.sessionTimer = setTimeout(() => {
+      if (this.sessionCallback) {
+        this.sessionCallback('expired');
+      }
+      this.setUser(null);
+    }, Store.SESSION_TIMEOUT);
   }
 
   /**
@@ -185,7 +295,7 @@ export class Store {
   /**
    * Подписывается на изменения конкретного канала
    *
-   * @param {'user' | 'route' | 'modal'} channel - Канал для подписки
+   * @param {'user' | 'route' | 'modal' | 'cart'} channel - Канал для подписки
    * @param {(state: StoreState) => void} listener - Функция-слушатель
    *
    * @returns {() => void} Функция отписки
@@ -199,13 +309,14 @@ export class Store {
    * ```
    */
   public subscribe(
-    channel: 'user' | 'route' | 'modal',
+    channel: 'user' | 'route' | 'modal' | 'cart',
     listener: (state: StoreState) => void,
   ): () => void {
     const listenersMap = {
       user: this.userListeners,
       route: this.routeListeners,
       modal: this.modalListeners,
+      cart: this.cartListeners,
     };
 
     const channelListeners = listenersMap[channel];
@@ -332,11 +443,8 @@ export class Store {
    * ```
    */
   public reset(): void {
-    // Очищаем таймер
-    if (this.sessionTimer) {
-      clearTimeout(this.sessionTimer);
-      this.sessionTimer = null;
-    }
+    // Очищаем все таймеры
+    this.clearSessionTimers();
 
     // Сбрасываем состояние
     this.state = {
@@ -351,47 +459,116 @@ export class Store {
         isOpen: false,
         type: null,
       },
+      cart: {
+        itemsCount: 0,
+        totalSum: 0,
+      },
     };
 
     // Уведомляем все каналы
     this.notifyChannel('user');
     this.notifyChannel('route');
     this.notifyChannel('modal');
+    this.notifyChannel('cart');
+  }
+
+  /**
+   * Устанавливает состояние корзины
+   *
+   * @param itemsCount - Количество товаров
+   * @param totalSum - Общая сумма
+   *
+   * @example
+   * ```typescript
+   * store.setCartState(5, 15000);
+   * ```
+   */
+  public setCartState(itemsCount: number, totalSum: number): void {
+    this.state.cart.itemsCount = itemsCount;
+    this.state.cart.totalSum = totalSum;
+    this.notifyChannel('cart');
+  }
+
+  /**
+   * Возвращает количество товаров в корзине
+   *
+   * @returns Количество товаров
+   */
+  public getCartItemsCount(): number {
+    return this.state.cart.itemsCount;
+  }
+
+  /**
+   * Возвращает общую сумму корзины
+   *
+   * @returns Общая сумма
+   */
+  public getCartTotalSum(): number {
+    return this.state.cart.totalSum;
+  }
+
+  /**
+   * Сбрасывает состояние корзины
+   *
+   * @example
+   * ```typescript
+   * store.resetCart();
+   * ```
+   */
+  public resetCart(): void {
+    this.state.cart.itemsCount = 0;
+    this.state.cart.totalSum = 0;
+    this.notifyChannel('cart');
+  }
+
+  /**
+   * Очищает всех слушателей (для предотвращения утечек памяти)
+   *
+   * @example
+   * ```typescript
+   * store.clearAllListeners();
+   * ```
+   */
+  public clearAllListeners(): void {
+    this.userListeners = [];
+    this.routeListeners = [];
+    this.modalListeners = [];
+    this.cartListeners = [];
+    this.globalListeners = [];
   }
 
   /**
    * Уведомляет слушателей конкретного канала
    *
    * @private
-   * @param {'user' | 'route' | 'modal'} channel - Канал для уведомления
+   * @param {'user' | 'route' | 'modal' | 'cart'} channel - Канал для уведомления
    */
-  private notifyChannel(channel: 'user' | 'route' | 'modal'): void {
-    // Определяем состояние для канала
-    const channelState: StoreState | UserState = channel === 'user' ? JSON.parse(JSON.stringify(this.state.user)) : this.getState();
+  private notifyChannel(channel: 'user' | 'route' | 'modal' | 'cart'): void {
+    // Все слушатели получают полное состояние StoreState
+    const state = this.getState();
 
     const listenersMap = {
       user: this.userListeners,
       route: this.routeListeners,
       modal: this.modalListeners,
+      cart: this.cartListeners,
     };
 
     // Вызываем канальные listeners
     listenersMap[channel].forEach((listener) => {
       try {
-        // Приводим тип для user канала
-        listener(channelState as StoreState);
-      } catch (error) {
-        console.error(`Ошибка в слушателе канала ${channel}:`, error);
+        listener(state);
+      } catch {
+        // Ошибка в слушателе игнорируется
       }
     });
 
     // Глобальные listeners всегда получают полное состояние
-    const fullState = this.getState();
     this.globalListeners.forEach((listener) => {
       try {
-        listener(fullState);
-      } catch (error) {
-        console.error('Ошибка в глобальном слушателе:', error);
+        listener(state);
+      } catch {
+        // Ошибка в глобальном слушателе игнорируется
       }
     });
   }

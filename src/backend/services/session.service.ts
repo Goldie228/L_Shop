@@ -9,6 +9,7 @@ import { config } from '../config/constants';
 import { UserService } from './user.service';
 import { createContextLogger } from '../utils/logger';
 import { SessionError } from '../errors/session.error';
+import { NotFoundError } from '../errors';
 
 const logger = createContextLogger('SessionService');
 const SESSIONS_FILE = 'sessions.json';
@@ -26,7 +27,7 @@ export class SessionService {
    * @param userId - ID пользователя
    * @returns Токен сессии
    * @throws {SessionError} При ошибке создания сессии
-   * @throws {NotFoundError} Если пользователь не найден (из UserService)
+   * @throws {NotFoundError} Если пользователь не найден
    */
   async createSession(userId: string): Promise<string> {
     try {
@@ -35,7 +36,13 @@ export class SessionService {
 
       // Получаем пользователя для получения его роли
       const user = await this.userService.getUserById(userId);
-      const role = user?.role ?? 'user'; // По умолчанию 'user' если пользователь не найден
+      
+      // Выбрасываем ошибку если пользователь не найден
+      if (!user) {
+        throw new NotFoundError('Пользователь не найден', { userId });
+      }
+      
+      const role = user.role;
 
       await modifyJsonFile<Session>(SESSIONS_FILE, (sessions) => {
         sessions.push({
@@ -51,6 +58,9 @@ export class SessionService {
 
       return token;
     } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw error;
+      }
       logger.error({ error, userId }, 'Ошибка создания сессии');
       throw new SessionError('Не удалось создать сессию для пользователя', { userId });
     }
@@ -169,6 +179,67 @@ export class SessionService {
     } catch (error) {
       logger.error({ error }, 'Ошибка продления сессии');
       return false;
+    }
+  }
+
+  /**
+   * Удаляет все сессии пользователя
+   * @param userId - ID пользователя
+   * @returns Количество удалённых сессий
+   */
+  async deleteAllUserSessions(userId: string): Promise<number> {
+    try {
+      let removedCount = 0;
+
+      await modifyJsonFile<Session>(SESSIONS_FILE, (sessions) => {
+        const userSessions = sessions.filter((s) => s.userId === userId);
+        removedCount = userSessions.length;
+        return sessions.filter((s) => s.userId !== userId);
+      });
+
+      if (removedCount > 0) {
+        logger.info({ userId, count: removedCount }, 'Удалены все сессии пользователя');
+      }
+
+      return removedCount;
+    } catch (error) {
+      logger.error({ error, userId }, 'Ошибка удаления сессий пользователя');
+      return 0;
+    }
+  }
+
+  /**
+   * Получает все активные сессии пользователя
+   * @param userId - ID пользователя
+   * @returns Массив активных сессий
+   */
+  async getUserSessions(userId: string): Promise<Session[]> {
+    try {
+      const sessions = await readJsonFile<Session>(SESSIONS_FILE);
+      const now = new Date();
+
+      return sessions.filter(
+        (s) => s.userId === userId && new Date(s.expiresAt) > now,
+      );
+    } catch (error) {
+      logger.error({ error, userId }, 'Ошибка получения сессий пользователя');
+      return [];
+    }
+  }
+
+  /**
+   * Получает количество активных сессий
+   * @returns Количество активных сессий
+   */
+  async getActiveSessionsCount(): Promise<number> {
+    try {
+      const sessions = await readJsonFile<Session>(SESSIONS_FILE);
+      const now = new Date();
+
+      return sessions.filter((s) => new Date(s.expiresAt) > now).length;
+    } catch (error) {
+      logger.error({ error }, 'Ошибка получения количества сессий');
+      return 0;
     }
   }
 }

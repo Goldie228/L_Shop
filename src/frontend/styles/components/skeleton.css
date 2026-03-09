@@ -1,0 +1,262 @@
+/**
+ * Стили для компонента Skeleton - L_Shop
+ * Скелетоны для индикации загрузки
+ */
+
+/* Базовый скелетон */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-neutral-200) 25%,
+    var(--color-neutral-100) 50%,
+    var(--color-neutral-200) 75%
+  );
+  background-size: 200% 100%;
+  border-radius: var(--radius-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Анимация пульсации */
+.skeleton--animated {
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+  0% {
+    background-position: 200% 0;
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    background-position: -200% 0;
+    opacity: 1;
+  }
+}
+
+/* Варианты скелетонов */
+.skeleton--text {
+  height: 14px;
+  width: 100%;
+  border-radius: var(--radius-sm);
+}
+
+.skeleton--text .skeleton__line {
+  height: 14px;
+  margin-bottom: 8px;
+  background: inherit;
+  border-radius: inherit;
+}
+
+.skeleton--circle {
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+}
+
+.skeleton--rect {
+  border-radius: var(--radius-md);
+  height: 100px;
+  width: 100%;
+}
+
+.skeleton--image {
+  border-radius: var(--radius-md);
+  height: 200px;
+  width: 100%;
+}
+
+.skeleton--avatar {
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+}
+
+/* Скелетон карточки товара */
+.skeleton-card {
+  background-color: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  padding: 0;
+}
+
+.skeleton-card__image {
+  height: 200px;
+  width: 100%;
+  background: linear-gradient(
+    90deg,
+    var(--color-neutral-200) 25%,
+    var(--color-neutral-100) 50%,
+    var(--color-neutral-200) 75%
+  );
+  background-size: 200% 100%;
+  border-radius: 0;
+}
+
+.skeleton-card__content {
+  padding: var(--spacing-md);
+}
+
+/* Сетка скелетонов */
+.skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+/* Скелетон страницы товара */
+.product-skeleton {
+  width: 100%;
+}
+
+.product-skeleton__main {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-xl);
+}
+
+@media (min-width: 768px) {
+  .product-skeleton__main {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.product-skeleton__image {
+  aspect-ratio: 1;
+  background: linear-gradient(
+    90deg,
+    var(--color-neutral-200) 25%,
+    var(--color-neutral-100) 50%,
+    var(--color-neutral-200) 75%
+  );
+  background-size: 200% 100%;
+  border-radius: var(--radius-lg);
+  max-height: 500px;
+}
+
+.product-skeleton__details {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Скелетон профиля */
+.profile-skeleton {
+  display: flex;
+  gap: var(--spacing-lg);
+  flex-direction: column;
+}
+
+@media (min-width: 768px) {
+  .profile-skeleton {
+    flex-direction: row;
+  }
+}
+
+.profile-skeleton__avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: linear-gradient(
+    90deg,
+    var(--color-neutral-200) 25%,
+    var(--color-neutral-100) 50%,
+    var(--color-neutral-200) 75%
+  );
+  background-size: 200% 100%;
+}
+
+.profile-skeleton__content {
+  flex: 1;
+}
+
+/* Скелетон корзины */
+.cart-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.cart-item-skeleton {
+  display: flex;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background-color: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.cart-item-skeleton__image {
+  width: 80px;
+  height: 80px;
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+  background: linear-gradient(
+    90deg,
+    var(--color-neutral-200) 25%,
+    var(--color-neutral-100) 50%,
+    var(--color-neutral-200) 75%
+  );
+  background-size: 200% 100%;
+}
+
+.cart-item-skeleton__content {
+  flex: 1;
+}
+
+/* Dark theme */
+:root.dark-theme .skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-neutral-700) 25%,
+    var(--color-neutral-600) 50%,
+    var(--color-neutral-700) 75%
+  );
+  background-size: 200% 100%;
+}
+
+:root.dark-theme .skeleton-card {
+  background-color: var(--color-bg-secondary-dark);
+  border-color: var(--color-border-primary-dark);
+}
+
+:root.dark-theme .skeleton-card__image {
+  background: linear-gradient(
+    90deg,
+    var(--color-neutral-700) 25%,
+    var(--color-neutral-600) 50%,
+    var(--color-neutral-700) 75%
+  );
+  background-size: 200% 100%;
+}
+
+:root.dark-theme .product-skeleton__image,
+:root.dark-theme .profile-skeleton__avatar,
+:root.dark-theme .cart-item-skeleton__image {
+  background: linear-gradient(
+    90deg,
+    var(--color-neutral-700) 25%,
+    var(--color-neutral-600) 50%,
+    var(--color-neutral-700) 75%
+  );
+  background-size: 200% 100%;
+}
+
+:root.dark-theme .cart-item-skeleton {
+  background-color: var(--color-bg-secondary-dark);
+  border-color: var(--color-border-primary-dark);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton--animated,
+  .skeleton-card__image,
+  .product-skeleton__image,
+  .profile-skeleton__avatar,
+  .cart-item-skeleton__image {
+    animation: none;
+  }
+}

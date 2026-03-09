@@ -24,8 +24,11 @@ const PRODUCTS_FILE = 'products.json';
  * Сервис для работы с корзиной пользователей
  */
 export class CartService {
-  // Кэш для часто запрашиваемых корзин (опционально, можно расширить)
+  // Кэш для часто запрашиваемых корзин с ограничением размера (LRU)
   static cartCache = new Map<string, CartWithProducts>();
+
+  // Максимальное количество записей в кэше корзин
+  private static readonly MAX_CART_CACHE_SIZE = 100;
 
   private static productsCache: Product[] | null = null;
 
@@ -401,9 +404,18 @@ export class CartService {
   }
 
   /**
-   * Сохранить корзину в кэш
+   * Сохранить корзину в кэш с LRU-механизмом
    */
   private static setCachedCart(userId: string, cart: CartWithProducts): void {
+    // Проверяем размер кэша и удаляем старые записи при превышении лимита
+    if (CartService.cartCache.size >= CartService.MAX_CART_CACHE_SIZE) {
+      // Удаляем первую запись (самую старую, так как Map сохраняет порядок вставки)
+      const firstKey = CartService.cartCache.keys().next().value;
+      if (firstKey) {
+        CartService.cartCache.delete(firstKey);
+        CartService.logger.debug('Кэш корзин превысил лимит, удалена самая старая запись');
+      }
+    }
     CartService.cartCache.set(userId, cart);
   }
 

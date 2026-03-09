@@ -67,9 +67,9 @@
   --color-text-inverse: var(--color-neutral-0);
 
   /* Алиасы для фонов */
-  --color-bg-primary: var(--color-neutral-0);
-  --color-bg-secondary: var(--color-neutral-50);
-  --color-bg-tertiary: var(--color-neutral-100);
+  --color-bg-primary: #f8fafc;
+  --color-bg-secondary: #f1f5f9;
+  --color-bg-tertiary: #e2e8f0;
 
   /* Алиасы для границ */
   --color-border: var(--color-neutral-200);
@@ -458,10 +458,11 @@
   --gradient-accent-dark: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
 }
 
+/* ============================================
  * DARK MODE
+ * ============================================ */
 
- * DARK THEME - Автоматическое переключение системы
-
+/* DARK THEME - Автоматическое переключение системы */
 @media (prefers-color-scheme: dark) {
   :root.auto-theme {
     /* ------ Background Colors ------ */
@@ -551,9 +552,7 @@
   }
 }
 
- * DARK THEME - Ручное управление через класс
-
-/* Ручное управление темой через класс .dark-theme */
+/* DARK THEME - Ручное управление через класс */
 :root.dark-theme {
   /* ------ Background Colors ------ */
   --color-bg-primary: var(--color-bg-primary-dark);
@@ -641,7 +640,7 @@
   --gradient-accent: var(--gradient-accent-dark);
 }
 
- * ТИПОГРАФИЧЕСКИЕ СТИЛИ
+/* ТИПОГРАФИЧЕСКИЕ СТИЛИ */
 
 /* Готовые классы для типографики */
 .text-hero {
@@ -722,7 +721,9 @@
   text-transform: uppercase;
 }
 
+/* ============================================
  * АНИМАЦИИ
+ * ============================================ */
 
 @keyframes fadeIn {
   from {

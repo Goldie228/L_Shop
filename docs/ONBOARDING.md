@@ -142,14 +142,19 @@ PORT=3001                    # Порт backend
 NODE_ENV=development         # Режим работы
 
 # Frontend Configuration
-FRONTEND_PORT=3000           # Порт frontend (Vite может изменить)
-FRONTEND_URL=http://localhost:3000
+FRONTEND_PORT=3002           # Порт frontend (Vite dev server)
+FRONTEND_URL=http://localhost:3002
+VITE_API_URL=http://localhost:3001  # URL API для frontend
 
 # Session Configuration
 SESSION_DURATION_MINUTES=10  # Время жизни сессии
 
 # Data Storage
 DATA_DIR=./src/backend/data  # Директория для JSON файлов
+
+# Security
+# SESSION_SECRET - секретный ключ для сессий (обязательно изменить в production)
+# Генерация: openssl rand -base64 32
 ```
 
 ---

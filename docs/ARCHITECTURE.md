@@ -355,7 +355,7 @@ User                 Frontend              Backend
 # Backend (порт 3001)
 npm run dev:backend
 
-# Frontend (порт 5173)
+# Frontend (порт 3002)
 npm run dev:frontend
 
 # Одновременно
@@ -369,7 +369,7 @@ npm run dev
 npm run build
 
 # Запуск backend
-npm run start:backend
+npm start
 ```
 
 ### Переменные окружения
@@ -378,10 +378,11 @@ npm run start:backend
 # Backend
 PORT=3001
 NODE_ENV=development
-FRONTEND_URL=http://localhost:5173
+FRONTEND_URL=http://localhost:3002
 
 # Frontend
 VITE_API_URL=http://localhost:3001
+FRONTEND_PORT=3002
 ```
 
 ---

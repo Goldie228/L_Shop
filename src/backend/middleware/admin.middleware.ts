@@ -6,7 +6,9 @@
 import { Response, NextFunction } from 'express';
 import { AuthRequest } from './auth-request';
 import { SessionService } from '../services/session.service';
+import { createContextLogger } from '../utils/logger';
 
+const logger = createContextLogger('AdminMiddleware');
 const sessionService = new SessionService();
 
 /**
@@ -61,7 +63,7 @@ export async function requireAdmin(
 
     next();
   } catch (error) {
-    console.error('[AdminMiddleware] Ошибка:', error);
+    logger.error({ error }, 'Ошибка при проверке прав администратора');
     res.status(500).json({
       message: 'Ошибка при проверке прав администратора',
       error: 'ADMIN_CHECK_ERROR',

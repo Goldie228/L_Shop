@@ -374,3 +374,49 @@ body.modal-open {
   justify-content: center;
   padding-top: 0;
 }
+
+/* ============================================
+   CONFIRM MODAL - Модальное окно подтверждения
+   ============================================ */
+
+.confirm-modal__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-4);
+  text-align: center;
+}
+
+.confirm-modal__message {
+  margin: 0 0 var(--spacing-6);
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-relaxed);
+}
+
+.confirm-modal__buttons {
+  display: flex;
+  gap: var(--spacing-3);
+  justify-content: center;
+  width: 100%;
+}
+
+.confirm-modal__buttons .btn {
+  min-width: 120px;
+}
+
+/* Адаптивность для confirm modal */
+@media (max-width: 480px) {
+  .confirm-modal__buttons {
+    flex-direction: column;
+  }
+
+  .confirm-modal__buttons .btn {
+    width: 100%;
+  }
+}
+
+/* Dark theme для confirm modal */
+:root.dark-theme .confirm-modal__message {
+  color: var(--color-text-primary-dark);
+}

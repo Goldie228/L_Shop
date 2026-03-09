@@ -581,19 +581,7 @@ body.menu-open {
   height: 100%;
 }
 
-/* Мобильный поиск - компактная версия */
-@media (max-width: 1024px) {
-  .header__search {
-    display: none;
-  }
-}
-
-/* Планшет и ниже - спрятать поиск */
-@media (max-width: 1024px) {
-  .header__search {
-    display: none;
-  }
-}
+/* Планшет и ниже - спрятать поиск (доступен через мобильное меню) */
 
 /* ====== Cart Button ====== */
 .header__cart-btn {
@@ -630,6 +618,8 @@ body.menu-open {
 .header__cart-icon {
   width: 22px;
   height: 22px;
+  display: block;
+  line-height: 0;
   transition: transform var(--duration-fast) var(--ease-out);
 }
 

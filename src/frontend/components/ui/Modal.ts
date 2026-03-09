@@ -162,9 +162,7 @@ export class Modal extends Component<ModalProps> {
       this.addEventListener(this.backdrop, 'click', this.handleBackdropClick);
     }
 
-    if (this.props.closeOnEscape) {
-      document.addEventListener('keydown', this.handleKeyDown);
-    }
+    // Примечание: обработчик keydown добавляется в open() и удаляется в finishClose()
 
     this.element = this.backdrop;
     return this.backdrop;
@@ -295,9 +293,8 @@ export class Modal extends Component<ModalProps> {
       'aria-label': 'Закрыть модальное окно',
     }) as HTMLButtonElement;
 
-    // Безопасно вставить SVG иконку
-    const iconSvg = this.props.icon || DEFAULT_CLOSE_ICON;
-    const svg = this.createSVGFromString(iconSvg);
+    // Всегда используем стандартную иконку закрытия (крестик)
+    const svg = this.createSVGFromString(DEFAULT_CLOSE_ICON);
     if (svg) {
       button.appendChild(svg);
     }
@@ -408,12 +405,18 @@ export class Modal extends Component<ModalProps> {
       document.body.appendChild(this.element);
     }
 
+    // Добавить обработчик Escape каждый раз при открытии
+    if (this.props.closeOnEscape) {
+      document.addEventListener('keydown', this.handleKeyDown);
+    }
+
     // Заблокировать скролл body
     document.body.classList.add('modal-open');
 
     // Показать overlay
     if (this.backdrop) {
       this.backdrop.setAttribute('aria-hidden', 'false');
+      this.backdrop.classList.add('modal-backdrop--visible');
     }
 
     // Показать модалку с анимацией
@@ -445,6 +448,11 @@ export class Modal extends Component<ModalProps> {
       this.modalElement.classList.remove('modal--visible');
     }
 
+    // Убрать класс видимости backdrop
+    if (this.backdrop) {
+      this.backdrop.classList.remove('modal-backdrop--visible');
+    }
+
     // Ждём завершения анимации (300ms)
     setTimeout(() => {
       this.finishClose();
@@ -466,10 +474,13 @@ export class Modal extends Component<ModalProps> {
     // Удалить обработчик клавиатуры
     document.removeEventListener('keydown', this.handleKeyDown);
 
-    // Сбросить состояние
+    // Сбросить атрибуты
+    if (this.backdrop) {
+      this.backdrop.setAttribute('aria-hidden', 'true');
+    }
+
+    // Сбросить состояние (но НЕ сбрасываем backdrop/modalElement чтобы сохранить контент)
     this.state = 'closed';
-    this.backdrop = null;
-    this.modalElement = null;
 
     // Вернуть фокус к триггеру
     if (this.triggerElement) {

@@ -27,6 +27,8 @@ body {
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color var(--duration-normal) var(--ease-out), 
+              color var(--duration-normal) var(--ease-out);
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -217,42 +219,7 @@ table {
   border: 0;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes fadeOut {
-  from { opacity: 1; }
-  to { opacity: 0; }
-}
-
-@keyframes slideInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes slideInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
+/* Анимации определены в design-tokens.css */
 
 .animate-fade-in {
   animation: fadeIn var(--transition-normal) ease-out;
@@ -266,11 +233,55 @@ table {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background: var(--color-bg-secondary);
+  transition: background-color var(--duration-normal) var(--ease-out);
 }
 
 .main-content {
   flex: 1;
   padding: var(--spacing-lg) 0;
+}
+
+/* Состояние загрузки приложения */
+.app-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  gap: var(--spacing-4);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-base);
+  background: var(--color-bg-secondary);
+}
+
+.app-loading p {
+  margin: 0;
+  animation: pulse 2s var(--ease-in-out) infinite;
+}
+
+/* Предупреждение при отключенном JS */
+.noscript-warning {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  text-align: center;
+  padding: var(--spacing-lg);
+}
+
+.noscript-warning h1 {
+  font-size: var(--font-size-2xl);
+  margin-bottom: var(--spacing-md);
+}
+
+.noscript-warning p {
+  max-width: 400px;
+  color: var(--color-text-secondary);
 }
 
 .page {
@@ -535,10 +546,19 @@ table {
 
 :root.dark-theme .app-loading {
   color: var(--color-text-secondary-dark);
+  background: var(--color-bg-primary-dark);
 }
 
 :root.dark-theme .noscript-warning {
   background: var(--color-bg-primary-dark);
+}
+
+:root.dark-theme .noscript-warning h1 {
+  color: var(--color-text-primary-dark);
+}
+
+:root.dark-theme .noscript-warning p {
+  color: var(--color-text-secondary-dark);
 }
 
 :root.dark-theme .not-found__title {

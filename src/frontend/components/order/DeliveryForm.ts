@@ -377,8 +377,12 @@ export class DeliveryForm extends Component<DeliveryFormProps> {
 
     if (!data.phone.trim()) {
       errors.phone = 'Укажите телефон';
-    } else if (!/^\+?[0-9]{10,15}$/.test(data.phone.replace(/\s/g, ''))) {
-      errors.phone = 'Некорректный формат телефона';
+    } else {
+      // Удаляем все нечисловые символы для валидации
+      const digitsOnly = data.phone.replace(/\D/g, '');
+      if (digitsOnly.length < 10 || digitsOnly.length > 15) {
+        errors.phone = 'Номер телефона должен содержать от 10 до 15 цифр';
+      }
     }
 
     if (!data.email.trim()) {
@@ -524,8 +528,8 @@ export class DeliveryForm extends Component<DeliveryFormProps> {
       }
     };
 
-    input.addEventListener('input', onInput);
-    input.addEventListener('focus', onFocus);
-    input.addEventListener('blur', onBlur);
+    this.addEventListener(input, 'input', onInput);
+    this.addEventListener(input, 'focus', onFocus);
+    this.addEventListener(input, 'blur', onBlur);
   }
 }

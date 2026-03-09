@@ -24,7 +24,9 @@ export class OrderService {
    * @returns Массив заказов
    */
   async getOrders(): Promise<Order[]> {
-    return api.get<Order[]>('/api/orders');
+    const response = await api.get<{ orders: Order[]; pagination: { total: number; limit: number; offset: number; hasMore: boolean } }>('/api/orders');
+    // API возвращает { orders: [], pagination: {} }, возвращаем массив заказов
+    return response.orders || [];
   }
 
   /**

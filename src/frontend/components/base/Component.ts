@@ -276,6 +276,10 @@ export abstract class Component<TProps extends ComponentProps = ComponentProps> 
 
     // Добавить дочерние элементы
     children.forEach((child) => {
+      if (child === null || child === undefined) {
+        // Пропускаем null и undefined
+        return;
+      }
       if (typeof child === 'string') {
         element.appendChild(document.createTextNode(child));
       } else {

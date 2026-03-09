@@ -106,6 +106,9 @@ export class Router {
     // Добавить запись в историю
     window.history.pushState({}, '', path);
 
+    // Прокрутить страницу наверх при навигации
+    window.scrollTo(0, 0);
+
     // Обработать маршрут
     this.handleRoute(path);
   }
@@ -247,9 +250,6 @@ export class Router {
 
       // Уведомить слушателей
       this.notifyListeners();
-    } else {
-      // Если нет обработчика, просто логируем
-      console.warn(`[Router] Нет обработчика для маршрута: ${path}`);
     }
   }
 
@@ -261,8 +261,8 @@ export class Router {
       this.listeners.forEach((listener) => {
         try {
           listener(this.currentRoute!);
-        } catch (error) {
-          console.error('[Router] Ошибка слушателя:', error);
+        } catch {
+          // Ошибка в слушателе маршрута игнорируется
         }
       });
     }
@@ -274,7 +274,7 @@ export class Router {
  */
 export const APP_ROUTES: Route[] = [
   { path: '/', component: 'HomePage', title: 'Главная' },
-  { path: '/catalog', component: 'HomePage', title: 'Каталог' }, // Redirect to HomePage (catalog)
+  { path: '/catalog', component: 'CatalogPage', title: 'Каталог' },
   { path: '/product/:id', component: 'ProductPage', title: 'Товар' },
   {
     path: '/profile',

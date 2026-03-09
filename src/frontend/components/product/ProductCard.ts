@@ -5,6 +5,7 @@
 
 import { Component, ComponentProps } from '../base/Component.js';
 import { Button } from '../ui/Button.js';
+import { Skeleton } from '../ui/Skeleton.js';
 import { Product } from '../../types/product.js';
 
 /**
@@ -55,10 +56,10 @@ export class ProductCard extends Component<ProductCardProps> {
       product, isAuthenticated, className, onAddToCart,
     } = this.props;
 
-    // Guard clause - не рендерим без продукта
+    // Guard clause - не рендерим без продукта (используем скелетон)
     if (!product) {
-      this.element = this.createElement('div', { className: 'product-card product-card--loading' });
-      this.element.textContent = 'Загрузка...';
+      const skeleton = new Skeleton({ variant: 'card' });
+      this.element = skeleton.render();
       return this.element;
     }
 
@@ -111,6 +112,8 @@ export class ProductCard extends Component<ProductCardProps> {
         src: product.imageUrl,
         alt: product.name,
         className: 'product-card__img',
+        loading: 'lazy',
+        decoding: 'async',
       });
       // Fallback при ошибке загрузки изображения
       img.onerror = () => {
@@ -209,13 +212,18 @@ export class ProductCard extends Component<ProductCardProps> {
    * Отрендерить рейтинг (Вариант 17)
    */
   private renderRating(product: Product): HTMLElement {
+    const ratingValue = (product.rating ?? 0).toFixed(1);
+    
     const ratingElement = this.createElement('div', {
       className: 'product-card__rating',
+      role: 'img',
+      'aria-label': `Рейтинг: ${ratingValue} из 5`,
     });
 
     // Звезда рейтинга (SVG)
     const star = this.createElement('span', {
       className: 'product-card__rating-star',
+      'aria-hidden': 'true',
     });
     star.innerHTML = `
       <svg class="product-card__rating-star-icon" viewBox="0 0 24 24" fill="currentColor">
@@ -226,16 +234,18 @@ export class ProductCard extends Component<ProductCardProps> {
     ratingElement.appendChild(star);
 
     // Значение рейтинга
-    const ratingValue = this.createElement('span', {
+    const ratingValueEl = this.createElement('span', {
       className: 'product-card__rating-value',
+      'aria-hidden': 'true',
     });
-    ratingValue.textContent = (product.rating ?? 0).toFixed(1);
-    ratingElement.appendChild(ratingValue);
+    ratingValueEl.textContent = ratingValue;
+    ratingElement.appendChild(ratingValueEl);
 
     // Количество отзывов
     if (product.reviewsCount) {
       const reviewsCount = this.createElement('span', {
         className: 'product-card__reviews-count',
+        'aria-hidden': 'true',
       });
       reviewsCount.textContent = `(${product.reviewsCount} отзывов)`;
       ratingElement.appendChild(reviewsCount);
@@ -278,6 +288,6 @@ export class ProductCard extends Component<ProductCardProps> {
    * Форматировать цену
    */
   private formatPrice(price: number): string {
-    return `${price.toLocaleString('ru-RU')} ₽`;
+    return `${price.toLocaleString('ru-RU')} BYN`;
   }
 }

@@ -8,6 +8,7 @@
 
 import { Component, ComponentProps } from '../base/Component.js';
 import { Button } from '../ui/Button.js';
+import { Icon } from '../ui/Icon.js';
 import { store } from '../../store/store.js';
 import { User, getUserDisplayInfo } from '../../types/user.js';
 import { AuthService } from '../../services/auth.service.js';
@@ -24,7 +25,8 @@ export interface HeaderProps extends ComponentProps {
 }
 
 /**
- * SVG иконки
+ * SVG иконка меню (бургер с анимацией)
+ * Используется inline т.к. имеет специальную структуру для анимации
  */
 const MENU_ICON = [
   '  <svg class="header__menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">',
@@ -34,26 +36,10 @@ const MENU_ICON = [
   '  </svg>',
 ].join('\n');
 
-const CHEVRON_DOWN_ICON = [
-  '  <svg class="header__dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">',
-  '    <polyline points="6 9 12 15 18 9"></polyline>',
-  '  </svg>',
-].join('\n');
-
-const SEARCH_ICON = [
-  '  <svg class="header__search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">',
-  '    <circle cx="11" cy="11" r="8"></circle>',
-  '    <path d="M21 21l-4.35-4.35"></path>',
-  '  </svg>',
-].join('\n');
-
-const CART_ICON = [
-  '  <svg class="header__cart-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">',
-  '    <circle cx="9" cy="21" r="1"></circle>',
-  '    <circle cx="20" cy="21" r="1"></circle>',
-  '    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>',
-  '  </svg>',
-].join('\n');
+/**
+ * Сервис для работы с корзиной (импортируется динамически для избежания циклических зависимостей)
+ */
+import { api } from '../../services/api.js';
 
 /**
  * SVG логотип L_Shop
@@ -74,7 +60,7 @@ const LOGO_ICON_SVG = [
  *   onLoginClick: () => openAuthModal(),
  *   scrollThreshold: 50
  * });
- * document.body.prepend(header.render());
+ * document.body.prepend
  * ```
  */
 export class Header extends Component<HeaderProps> {
@@ -87,6 +73,15 @@ export class Header extends Component<HeaderProps> {
   /** Функция отписки от store */
   private unsubscribe: (() => void) | null = null;
 
+  /** Функция отписки от router */
+  private routerUnsubscribe: (() => void) | null = null;
+
+  /** Функция отписки от cart */
+  private cartUnsubscribe: (() => void) | null = null;
+
+  /** Элемент бейджа корзины */
+  private cartBadge: HTMLElement | null = null;
+
   /** Ссылка на обработчик прокрутки */
   private scrollHandler: (() => void) | null = null;
 
@@ -95,6 +90,15 @@ export class Header extends Component<HeaderProps> {
 
   /** Открыто ли выпадающее меню */
   private isDropdownOpen = false;
+
+  /** Ссылка на обработчик клика вне dropdown для очистки */
+  private boundDropdownClickHandler: ((e: MouseEvent) => void) | null = null;
+
+  /** Элемент навигации для обновления активного пункта */
+  private navElement: HTMLElement | null = null;
+
+  /** Текущий активный путь */
+  private currentPath: string = '/';
 
   /**
    * Получить пропсы по умолчанию
@@ -198,20 +202,65 @@ export class Header extends Component<HeaderProps> {
       className: 'header__nav-list',
     });
 
+    // Получаем текущий путь
+    const currentPath = window.location.pathname;
+
     // Ссылка на главную
     const homeItem = this.createElement('li', { className: 'header__nav-item' });
-    const homeLink = this.createNavLink('Главная', '/', true);
+    const homeLink = this.createNavLink('Главная', '/', this.isActivePath('/', currentPath));
     homeItem.appendChild(homeLink);
     list.appendChild(homeItem);
 
     // Ссылка на каталог
     const catalogItem = this.createElement('li', { className: 'header__nav-item' });
-    const catalogLink = this.createNavLink('Каталог', '/catalog', false);
+    const catalogLink = this.createNavLink('Каталог', '/catalog', this.isActivePath('/catalog', currentPath));
     catalogItem.appendChild(catalogLink);
     list.appendChild(catalogItem);
 
+    // Ссылка на корзину
+    const cartItem = this.createElement('li', { className: 'header__nav-item' });
+    const cartLink = this.createNavLink('Корзина', '/cart', this.isActivePath('/cart', currentPath));
+    cartItem.appendChild(cartLink);
+    list.appendChild(cartItem);
+
     nav.appendChild(list);
+    this.navElement = nav;
     return nav;
+  }
+
+  /**
+   * Проверить, является ли путь активным
+   * @param linkPath - Путь ссылки
+   * @param currentPath - Текущий путь
+   */
+  private isActivePath(linkPath: string, currentPath: string): boolean {
+    // Точное совпадение для главной
+    if (linkPath === '/') {
+      return currentPath === '/' || currentPath === '';
+    }
+    // Для каталога - только /catalog
+    if (linkPath === '/catalog') {
+      return currentPath === '/catalog';
+    }
+    return currentPath.startsWith(linkPath);
+  }
+
+  /**
+   * Обновить активный пункт меню
+   */
+  private updateActiveNavLink(): void {
+    if (!this.navElement) return;
+
+    const currentPath = window.location.pathname;
+    const links = this.navElement.querySelectorAll('.header__nav-link');
+
+    links.forEach((link) => {
+      const href = link.getAttribute('href');
+      if (href) {
+        const isActive = this.isActivePath(href, currentPath);
+        link.classList.toggle('header__nav-link--active', isActive);
+      }
+    });
   }
 
   /**
@@ -243,11 +292,9 @@ export class Header extends Component<HeaderProps> {
       }
     });
 
-    const icon = this.createElement('span', { className: 'header__search-icon-wrapper' });
-    icon.innerHTML = SEARCH_ICON;
-
+    const icon = new Icon({ name: 'search', size: 20, className: 'header__search-icon-wrapper' });
     search.appendChild(input);
-    search.appendChild(icon);
+    search.appendChild(icon.render());
 
     return search;
   }
@@ -272,13 +319,68 @@ export class Header extends Component<HeaderProps> {
       'data-testid': 'header-cart-btn',
     });
 
-    cartButton.innerHTML = CART_ICON;
+    const cartIcon = new Icon({ name: 'cart', size: 24, className: 'header__cart-icon' });
+    cartButton.appendChild(cartIcon.render());
+
+    // Добавляем бейдж с количеством товаров
+    const itemsCount = store.getCartItemsCount();
+    if (itemsCount > 0) {
+      this.cartBadge = this.createElement('span', {
+        className: 'header__cart-badge',
+        'data-testid': 'cart-badge',
+      }, [String(itemsCount > 99 ? '99+' : itemsCount)]);
+      cartButton.appendChild(this.cartBadge);
+    }
 
     this.addEventListener(cartButton, 'click', () => {
       router.navigate('/cart');
     });
 
     return cartButton;
+  }
+
+  /**
+   * Обновить бейдж корзины
+   */
+  private updateCartBadge(): void {
+    if (!this.element) return;
+
+    const cartBtn = this.element.querySelector('.header__cart-btn');
+    if (!cartBtn) return;
+
+    // Удаляем старый бейдж
+    const oldBadge = cartBtn.querySelector('.header__cart-badge');
+    if (oldBadge) {
+      oldBadge.remove();
+    }
+
+    // Создаём новый бейдж если есть товары
+    const itemsCount = store.getCartItemsCount();
+    if (itemsCount > 0) {
+      this.cartBadge = this.createElement('span', {
+        className: 'header__cart-badge',
+        'data-testid': 'cart-badge',
+      }, [String(itemsCount > 99 ? '99+' : itemsCount)]);
+      cartBtn.appendChild(this.cartBadge);
+    } else {
+      this.cartBadge = null;
+    }
+  }
+
+  /**
+   * Загрузить данные корзины
+   */
+  private async loadCartData(): Promise<void> {
+    if (!store.isAuthenticated()) return;
+
+    try {
+      const cart = await api.get<{ items: unknown[]; totalSum: number }>('/api/cart');
+      if (cart && cart.items) {
+        store.setCartState(cart.items.length, cart.totalSum || 0);
+      }
+    } catch (error) {
+      // Игнорируем ошибки (например, 401)
+    }
   }
 
   /**
@@ -370,9 +472,8 @@ export class Header extends Component<HeaderProps> {
     trigger.appendChild(name);
 
     // Chevron icon
-    const chevron = this.createElement('span', { className: 'header__dropdown-chevron' });
-    chevron.innerHTML = CHEVRON_DOWN_ICON;
-    trigger.appendChild(chevron);
+    const chevronIcon = new Icon({ name: 'chevron-down', size: 16, className: 'header__dropdown-chevron' });
+    trigger.appendChild(chevronIcon.render());
 
     this.addEventListener(trigger, 'click', () => this.toggleDropdown());
 
@@ -432,11 +533,13 @@ export class Header extends Component<HeaderProps> {
     dropdown.appendChild(this.userDropdown);
 
     // Закрыть выпадающее меню при клике вне его
-    document.addEventListener('click', (e) => {
+    // Сохраняем ссылку на обработчик для очистки при unmount
+    this.boundDropdownClickHandler = (e: MouseEvent) => {
       if (this.isDropdownOpen && !dropdown.contains(e.target as Node)) {
         this.closeDropdown();
       }
-    });
+    };
+    document.addEventListener('click', this.boundDropdownClickHandler);
 
     return dropdown;
   }
@@ -526,6 +629,18 @@ export class Header extends Component<HeaderProps> {
     const homeLink = this.createMobileNavLink('Главная', '/');
     homeItem.appendChild(homeLink);
     navList.appendChild(homeItem);
+
+    // Ссылка на каталог
+    const catalogItem = this.createElement('li');
+    const catalogLink = this.createMobileNavLink('Каталог', '/catalog');
+    catalogItem.appendChild(catalogLink);
+    navList.appendChild(catalogItem);
+
+    // Ссылка на корзину
+    const cartNavItem = this.createElement('li');
+    const cartNavLink = this.createMobileNavLink('Корзина', '/cart');
+    cartNavItem.appendChild(cartNavLink);
+    navList.appendChild(cartNavItem);
 
     menu.appendChild(navList);
 
@@ -675,6 +790,9 @@ export class Header extends Component<HeaderProps> {
 
     if (this.props.onLoginClick) {
       this.props.onLoginClick();
+    } else {
+      // Fallback: отправляем глобальное событие для открытия модалки авторизации
+      document.dispatchEvent(new CustomEvent('openAuthModal'));
     }
   }
 
@@ -717,6 +835,22 @@ export class Header extends Component<HeaderProps> {
     // Subscribe to store changes
     this.unsubscribe = store.subscribe('user', () => {
       this.updateUserSection();
+      // При изменении авторизации загружаем корзину
+      if (store.isAuthenticated()) {
+        this.loadCartData();
+      } else {
+        store.resetCart();
+      }
+    });
+
+    // Subscribe to cart changes
+    this.cartUnsubscribe = store.subscribe('cart', () => {
+      this.updateCartBadge();
+    });
+
+    // Subscribe to router changes for updating active nav link
+    this.routerUnsubscribe = router.subscribe(() => {
+      this.updateActiveNavLink();
     });
 
     // Add scroll listener for header background
@@ -725,6 +859,14 @@ export class Header extends Component<HeaderProps> {
 
     // Initial scroll check
     this.handleScroll();
+
+    // Initial active nav link update
+    this.updateActiveNavLink();
+
+    // Load cart data if authenticated
+    if (store.isAuthenticated()) {
+      this.loadCartData();
+    }
   }
 
   /**
@@ -737,10 +879,28 @@ export class Header extends Component<HeaderProps> {
       this.unsubscribe = null;
     }
 
+    // Unsubscribe from cart
+    if (this.cartUnsubscribe) {
+      this.cartUnsubscribe();
+      this.cartUnsubscribe = null;
+    }
+
+    // Unsubscribe from router
+    if (this.routerUnsubscribe) {
+      this.routerUnsubscribe();
+      this.routerUnsubscribe = null;
+    }
+
     // Remove scroll listener
     if (this.scrollHandler) {
       window.removeEventListener('scroll', this.scrollHandler);
       this.scrollHandler = null;
+    }
+
+    // Remove dropdown click handler (исправление утечки памяти)
+    if (this.boundDropdownClickHandler) {
+      document.removeEventListener('click', this.boundDropdownClickHandler);
+      this.boundDropdownClickHandler = null;
     }
 
     // Close mobile menu

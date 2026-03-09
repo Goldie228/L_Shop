@@ -628,7 +628,7 @@ export class ProfilePage extends Component<ProfilePageProps> {
       {
         className: 'profile-page__order-total',
       },
-      [`${order.totalSum.toLocaleString('ru-RU')} ₽`],
+      [`${order.totalSum.toLocaleString('ru-RU')} BYN`],
     );
     card.appendChild(totalEl);
 

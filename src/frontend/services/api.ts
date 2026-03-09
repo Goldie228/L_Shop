@@ -9,6 +9,18 @@ import {
   ApiError,
   NetworkError,
 } from '../types/api.js';
+import { store } from '../store/store.js';
+
+/**
+ * Ошибка отмены запроса
+ */
+export class CancelError extends Error {
+  constructor(message = 'Request was cancelled') {
+    super(message);
+    this.name = 'CancelError';
+    Object.setPrototypeOf(this, CancelError.prototype);
+  }
+}
 
 /**
  * Конфигурация API клиента по умолчанию
@@ -78,7 +90,27 @@ export class ApiClient {
       }
 
       // Обработать ответы с ошибками
-      throw await ApiError.fromResponse(response);
+      const apiError = await ApiError.fromResponse(response);
+
+      // Обработка 401 - сброс авторизации
+      if (response.status === 401) {
+        // Для /api/auth/me - это нормальная ситуация для неавторизованного пользователя
+        // Возвращаем null вместо ошибки
+        if (endpoint === '/api/auth/me') {
+          return null as T;
+        }
+
+        // Не сбрасываем для запросов авторизации (login, register)
+        const authEndpoints = ['/api/auth/login', '/api/auth/register'];
+        const isAuthEndpoint = authEndpoints.some((e) => endpoint.startsWith(e));
+
+        if (!isAuthEndpoint) {
+          // Сбрасываем авторизацию в store
+          store.setUser(null);
+        }
+      }
+
+      throw apiError;
     } catch (error) {
       // Пробросить ApiError
       if (error instanceof ApiError) {
@@ -87,7 +119,7 @@ export class ApiClient {
 
       // Обработать ошибки отмены
       if (error instanceof Error && error.name === 'AbortError') {
-        throw new Error('Request was cancelled');
+        throw new CancelError();
       }
 
       // Обработать сетевые ошибки

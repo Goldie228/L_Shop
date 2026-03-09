@@ -6,15 +6,29 @@
 import { User } from './user.js';
 
 /**
+ * Структура ошибки в ответе API
+ */
+export interface ApiErrorResponse {
+  /** Код ошибки */
+  code?: string;
+  /** Сообщение об ошибке */
+  message?: string;
+  /** Детали ошибки */
+  details?: unknown;
+}
+
+/**
  * Базовая структура ответа API
  */
 export interface ApiResponse<T = unknown> {
   /** Успешен ли запрос */
-  success: boolean;
+  success?: boolean;
   /** Данные ответа (при успехе) */
   data?: T;
-  /** Сообщение об ошибке (при неудаче) */
-  error?: string;
+  /** Сообщение (при успехе) */
+  message?: string;
+  /** Ошибка (при неудаче) - может быть строкой или объектом */
+  error?: string | ApiErrorResponse;
   /** Детали ошибок (ошибки валидации) */
   errors?: ValidationError[];
 }
@@ -115,10 +129,23 @@ export class ApiError extends Error {
 
     try {
       const body = (await response.json()) as ApiResponse;
-      message = body.error || message;
-      errors = body.errors || [];
+      // Бэкенд возвращает { error: { code, message, details } }
+      if (typeof body.error === 'string') {
+        message = body.error;
+      } else if (body.error && typeof body.error === 'object' && 'message' in body.error) {
+        const errorObj = body.error as { message?: string; code?: string; details?: unknown };
+        message = errorObj.message || message;
+        // Если details содержит field, добавляем в errors
+        if (errorObj.details && typeof errorObj.details === 'object' && 'field' in errorObj.details) {
+          const details = errorObj.details as { field?: string };
+          if (details.field) {
+            errors = [{ field: details.field, message }];
+          }
+        }
+      }
+      errors = body.errors || errors;
     } catch {
-      // Тело ответа не в формате JSON
+      // Тело ответа не в формате JSON - используем статус-текст как сообщение
       message = response.statusText || message;
     }
 

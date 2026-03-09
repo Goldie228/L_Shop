@@ -3,7 +3,7 @@
  * Полная поддержка адаптивности и тёмной темы
  */
 
- * ОСНОВНОЙ КОНТЕЙНЕР
+/* ОСНОВНОЙ КОНТЕЙНЕР */
 
 .profile-page {
   max-width: 1200px;
@@ -34,7 +34,7 @@
   animation: fadeInDown 0.4s var(--ease-out);
 }
 
- * ДВУХКОЛОНОЧНЫЙ LAYOUT
+/* ДВУХКОЛОНОЧНЫЙ LAYOUT */
 
 .profile-page__content {
   display: grid;
@@ -64,7 +64,7 @@
   gap: var(--spacing-xl);
 }
 
- * КАРТОЧКА ПРОФИЛЯ
+/* КАРТОЧКА ПРОФИЛЯ */
 
 .profile-page__card {
   background: var(--color-bg-primary, var(--color-neutral-0));
@@ -162,18 +162,18 @@
   box-shadow: var(--shadow-primary);
 }
 
- * ПАНЕЛЬ АДМИНИСТРАТОРА
+/* ПАНЕЛЬ АДМИНИСТРАТОРА */
 
 .profile-page__admin-panel {
-  background: linear-gradient(135deg, var(--color-secondary-50) 0%, var(--color-primary-50) 100%);
+  background: var(--color-bg-secondary);
   border-radius: var(--radius-xl);
   padding: var(--spacing-lg);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--spacing-md);
-  box-shadow: var(--shadow-lg);
-  border: 2px solid var(--color-secondary-200);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-border);
   animation: slideInUp 0.5s var(--ease-out);
 }
 
@@ -185,7 +185,7 @@
 .profile-page__admin-title {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
-  color: var(--color-secondary-700);
+  color: var(--color-text-primary);
   margin: 0;
 }
 
@@ -212,7 +212,7 @@
   transform: translateY(0);
 }
 
- * СЕКЦИИ (ИСТОРИЯ ЗАКАЗОВ, РЕДАКТИРОВАНИЕ)
+/* СЕКЦИИ (ИСТОРИЯ ЗАКАЗОВ, РЕДАКТИРОВАНИЕ) */
 
 .profile-page__section {
   background: var(--color-bg-primary, var(--color-neutral-0));
@@ -242,7 +242,7 @@
   display: inline-block;
 }
 
- * ИСТОРИЯ ЗАКАЗОВ
+/* ИСТОРИЯ ЗАКАЗОВ */
 
 .profile-page__orders {
   display: flex;
@@ -367,7 +367,7 @@
   text-decoration: underline;
 }
 
- * ФОРМА РЕДАКТИРОВАНИЯ ПРОФИЛЯ
+/* ФОРМА РЕДАКТИРОВАНИЯ ПРОФИЛЯ */
 
 .profile-page__form {
   display: flex;
@@ -386,31 +386,23 @@
 
 /* Разделитель секции пароля */
 .profile-page__form-divider {
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
   text-align: center;
-  padding: var(--spacing-md) 0;
+  padding: var(--spacing-lg) 0 var(--spacing-md);
   margin: var(--spacing-sm) 0;
-  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
 }
 
 .profile-page__form-divider::before,
 .profile-page__form-divider::after {
   content: '';
-  position: absolute;
-  top: 50%;
-  width: 30%;
+  flex: 1;
   height: 1px;
   background: var(--color-border);
-}
-
-.profile-page__form-divider::before {
-  left: 0;
-}
-
-.profile-page__form-divider::after {
-  right: 0;
 }
 
 /* Общая ошибка формы */
@@ -424,7 +416,7 @@
   animation: shake 0.4s var(--ease-out);
 }
 
- * КНОПКИ ДЕЙСТВИЙ
+/* КНОПКИ ДЕЙСТВИЙ */
 
 .profile-page__actions {
   display: flex;
@@ -434,7 +426,7 @@
   flex-wrap: wrap;
 }
 
- * АДАПТИВНОСТЬ: ПЛАНШЕТ
+/* АДАПТИВНОСТЬ: ПЛАНШЕТ */
 
 @media (max-width: 1023px) and (min-width: 768px) {
   .profile-page {
@@ -451,7 +443,7 @@
   }
 }
 
- * АДАПТИВНОСТЬ: МОБИЛЬНЫЙ
+/* АДАПТИВНОСТЬ: МОБИЛЬНЫЙ */
 
 @media (max-width: 767px) {
   .profile-page {
@@ -496,46 +488,44 @@
   }
 }
 
- * ТЁМНАЯ ТЕМА
+/* ТЁМНАЯ ТЕМА */
 
 @media (prefers-color-scheme: dark) {
-  :root.auto-theme {
-    /* Карточки в тёмной теме */
-    .profile-page__card,
-    .profile-page__section {
-      background: var(--color-bg-secondary-dark);
-    }
+  :root.auto-theme .profile-page__card,
+  :root.auto-theme .profile-page__section {
+    background: var(--color-bg-secondary-dark);
+  }
 
-    /* История заказов - фон карточек */
-    .profile-page__order-card {
-      background: var(--color-bg-tertiary-dark);
-      border-color: var(--color-border-primary-dark);
-    }
+  :root.auto-theme .profile-page__order-card {
+    background: var(--color-bg-tertiary-dark);
+    border-color: var(--color-border-primary-dark);
+  }
 
-    .profile-page__order-card:hover {
-      border-color: var(--color-primary);
-    }
+  :root.auto-theme .profile-page__order-card:hover {
+    border-color: var(--color-primary);
+  }
 
-    /* Пустое состояние */
-    .profile-page__empty {
-      background: var(--color-bg-tertiary-dark);
-    }
+  :root.auto-theme .profile-page__empty {
+    background: var(--color-bg-tertiary-dark);
+  }
 
-    /* Панель админа */
-    .profile-page__admin-panel {
-      background: linear-gradient(135deg, rgba(168, 85, 247, 0.15) 0%, rgba(59, 130, 246, 0.15) 100%);
-      border-color: var(--color-secondary-500);
-    }
+  :root.auto-theme .profile-page__admin-panel {
+    background: var(--color-bg-tertiary-dark);
+    border-color: var(--color-border-secondary-dark);
+  }
 
-    /* Разделитель */
-    .profile-page__form-divider::before,
-    .profile-page__form-divider::after {
-      background: var(--color-border-secondary-dark);
-    }
+  :root.auto-theme .profile-page__role--admin {
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%);
+    color: var(--color-secondary-300);
+  }
+
+  :root.auto-theme .profile-page__form-divider::before,
+  :root.auto-theme .profile-page__form-divider::after {
+    background: var(--color-border-secondary-dark);
   }
 }
 
- * АНИМАЦИИ
+/* АНИМАЦИИ */
 
 @keyframes fadeIn {
   from {

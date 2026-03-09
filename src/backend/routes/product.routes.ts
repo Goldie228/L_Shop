@@ -4,21 +4,28 @@
  */
 
 import { Router } from 'express';
-import { getProducts, getProductById } from '../controllers/product.controller';
+import { getProducts, getProductById, getCategories } from '../controllers/product.controller';
+import { asyncHandler } from '../middleware/error.middleware';
 
 const router = Router();
 
 /**
  * GET /api/products
- * Получить список продуктов с фильтрацией
- * Query параметры: search, sort, category, inStock, minRating
+ * Получить список продуктов с фильтрацией и пагинацией
+ * Query параметры: search, sort, category, inStock, minRating, limit, offset
  */
-router.get('/', getProducts);
+router.get('/', asyncHandler(getProducts));
+
+/**
+ * GET /api/products/categories
+ * Получить список всех категорий
+ */
+router.get('/categories', asyncHandler(getCategories));
 
 /**
  * GET /api/products/:id
  * Получить продукт по ID
  */
-router.get('/:id', getProductById);
+router.get('/:id', asyncHandler(getProductById));
 
 export default router;

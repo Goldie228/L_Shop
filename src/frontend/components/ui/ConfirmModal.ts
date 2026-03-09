@@ -118,9 +118,12 @@ export class ConfirmModal extends Component<ConfirmModalProps> {
     buttons.appendChild(confirmButton.render());
 
     content.appendChild(buttons);
+
+    // Сначала рендерим модальное окно, потом устанавливаем содержимое
+    const modalElement = this.modal.render();
     this.modal.setContent(content);
 
-    return this.modal.render();
+    return modalElement;
   }
 
   /**

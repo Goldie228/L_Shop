@@ -1,10 +1,15 @@
 /**
  * Страница товара - L_Shop Frontend
  * Детальная информация о товаре с похожими товарами
+ *
+ * @see docs/DESIGN_SYSTEM.md - документация дизайн-системы
  */
 
 import { Component, ComponentProps } from '../base/Component';
 import { Button } from '../ui/Button';
+import { Breadcrumbs, BreadcrumbItem } from '../ui/Breadcrumbs';
+import { Toast } from '../ui/Toast';
+import { createProductPageSkeleton } from '../ui/Skeleton';
 import { Product } from '../../types/product';
 import { api } from '../../services/api';
 import { store } from '../../store/store';
@@ -54,6 +59,9 @@ export class ProductPage extends Component<ProductPageProps> {
   };
 
   private productId: string | null = null;
+
+  /** Компонент хлебных крошек */
+  private breadcrumbsComponent: Breadcrumbs | null = null;
 
   constructor(props: ProductPageProps = {}) {
     super(props);
@@ -152,6 +160,9 @@ export class ProductPage extends Component<ProductPageProps> {
     }
 
     const { product } = this.state;
+
+    // Хлебные крошки
+    this.renderBreadcrumbs();
 
     // Основной контент
     const mainContent = this.createElement('div', {
@@ -356,7 +367,7 @@ export class ProductPage extends Component<ProductPageProps> {
         {
           className: 'product-page__price-old',
         },
-        [`${product.price.toLocaleString('ru-RU')} ₽`],
+        [`${product.price.toLocaleString('ru-RU')} BYN`],
       );
       priceContainer.appendChild(oldPrice);
 
@@ -366,7 +377,7 @@ export class ProductPage extends Component<ProductPageProps> {
         {
           className: 'product-page__price-new',
         },
-        [`${Math.round(newPrice).toLocaleString('ru-RU')} ₽`],
+        [`${Math.round(newPrice).toLocaleString('ru-RU')} BYN`],
       );
       priceContainer.appendChild(newPriceEl);
 
@@ -384,7 +395,7 @@ export class ProductPage extends Component<ProductPageProps> {
         {
           className: 'product-page__price',
         },
-        [`${product.price.toLocaleString('ru-RU')} ₽`],
+        [`${product.price.toLocaleString('ru-RU')} BYN`],
       );
       priceContainer.appendChild(price);
     }
@@ -652,7 +663,7 @@ export class ProductPage extends Component<ProductPageProps> {
         {
           className: 'product-page__similar-price-old',
         },
-        [`${product.price.toLocaleString('ru-RU')} ₽`],
+        [`${product.price.toLocaleString('ru-RU')} BYN`],
       );
       price.appendChild(oldPrice);
 
@@ -662,11 +673,11 @@ export class ProductPage extends Component<ProductPageProps> {
         {
           className: 'product-page__similar-price-new',
         },
-        [`${Math.round(newPrice).toLocaleString('ru-RU')} ₽`],
+        [`${Math.round(newPrice).toLocaleString('ru-RU')} BYN`],
       );
       price.appendChild(newPriceEl);
     } else {
-      price.textContent = `${product.price.toLocaleString('ru-RU')} ₽`;
+      price.textContent = `${product.price.toLocaleString('ru-RU')} BYN`;
     }
     card.appendChild(price);
 
@@ -899,27 +910,55 @@ export class ProductPage extends Component<ProductPageProps> {
   }
 
   /**
-   * Показать уведомление
-   * @param message - Текст уведомления
-   * @param type - Тип уведомления (success, error, info)
+   * Отрендерить хлебные крошки
    */
-  private showNotification(message: string, type: 'success' | 'error' | 'info'): void {
-    const notification = this.createElement('div', {
-      className: `notification notification--${type}`,
-      role: 'alert',
+  private renderBreadcrumbs(): void {
+    const { product } = this.state;
+    const breadcrumbItems: BreadcrumbItem[] = [];
+
+    // Добавляем категорию если есть
+    if (product?.category) {
+      breadcrumbItems.push({
+        label: this.getCategoryLabel(product.category),
+        href: `/?category=${product.category}`,
+      });
+    }
+
+    // Добавляем название товара
+    if (product?.name) {
+      breadcrumbItems.push({ label: product.name });
+    }
+
+    this.breadcrumbsComponent = new Breadcrumbs({
+      items: breadcrumbItems,
+      showHome: true,
     });
-    notification.textContent = message;
 
-    document.body.appendChild(notification);
+    const container = this.createElement('div', { className: 'container' });
+    this.breadcrumbsComponent.mount(container);
+    this.addChild(this.breadcrumbsComponent);
+    this.element?.prepend(container);
+  }
 
-    requestAnimationFrame(() => {
-      notification.classList.add('notification--visible');
-    });
-
-    setTimeout(() => {
-      notification.classList.remove('notification--visible');
-      setTimeout(() => notification.remove(), 300);
-    }, 3000);
+  /**
+   * Показать уведомление с использованием Toast компонента
+   * @param message - Текст уведомления
+   * @param type - Тип уведомления (success, error, info, warning)
+   */
+  private showNotification(message: string, type: 'success' | 'error' | 'info' | 'warning'): void {
+    switch (type) {
+      case 'success':
+        Toast.showSuccess(message);
+        break;
+      case 'error':
+        Toast.showError(message);
+        break;
+      case 'warning':
+        Toast.showWarning(message);
+        break;
+      default:
+        Toast.showInfo(message);
+    }
   }
 
   /**

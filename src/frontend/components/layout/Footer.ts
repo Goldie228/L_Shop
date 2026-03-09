@@ -107,7 +107,7 @@ export class Footer extends Component<FooterProps> {
     });
 
     const linksTitle = this.createElement(
-      'h4',
+      'h3',
       {
         className: 'footer__links-title',
       },
@@ -123,8 +123,6 @@ export class Footer extends Component<FooterProps> {
       { text: 'Каталог', href: '/catalog' },
       { text: 'О нас', href: '/about' },
       { text: 'Контакты', href: '/contacts' },
-      { text: 'Доставка', href: '/delivery' },
-      { text: 'Возврат', href: '/returns' },
     ];
 
     links.forEach((link) => {
@@ -151,7 +149,7 @@ export class Footer extends Component<FooterProps> {
     });
 
     const contactsTitle = this.createElement(
-      'h4',
+      'h3',
       {
         className: 'footer__links-title',
       },
@@ -194,7 +192,7 @@ export class Footer extends Component<FooterProps> {
     });
 
     const socialTitle = this.createElement(
-      'h4',
+      'h3',
       {
         className: 'footer__links-title',
       },
@@ -205,12 +203,12 @@ export class Footer extends Component<FooterProps> {
       className: 'footer__social-links',
     });
 
-    // Социальные сети (используем Icon компонент)
-    const socialNetworks = [
-      { name: 'VK', href: 'https://vk.com/lshop', iconName: 'vk' as const },
-      { name: 'Telegram', href: 'https://t.me/lshop', iconName: 'telegram' as const },
-      { name: 'Instagram', href: 'https://instagram.com/lshop', iconName: 'instagram' as const },
-      { name: 'YouTube', href: 'https://youtube.com/@lshop', iconName: 'youtube' as const },
+    // Социальные сети (используем компонент Icon)
+    const socialNetworks: Array<{ name: string; href: string; icon: 'vk' | 'telegram' | 'instagram' | 'youtube' }> = [
+      { name: 'VK', href: 'https://vk.com/lshop', icon: 'vk' },
+      { name: 'Telegram', href: 'https://t.me/lshop', icon: 'telegram' },
+      { name: 'Instagram', href: 'https://instagram.com/lshop', icon: 'instagram' },
+      { name: 'YouTube', href: 'https://youtube.com/@lshop', icon: 'youtube' },
     ];
 
     socialNetworks.forEach((network) => {
@@ -222,13 +220,14 @@ export class Footer extends Component<FooterProps> {
         rel: 'noopener noreferrer',
       });
 
+      // Используем компонент Icon вместо inline SVG
       const icon = new Icon({
-        name: network.iconName,
-        size: 24,
+        name: network.icon,
+        size: 18,
         className: 'footer__social-icon',
-        ariaLabel: `Иконка ${network.name}`,
       });
       link.appendChild(icon.render());
+
       socialLinks.appendChild(link);
     });
 

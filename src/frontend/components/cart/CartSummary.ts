@@ -110,7 +110,7 @@ export class CartSummary extends Component<CartSummaryProps> {
       {
         className: 'cart-summary__total',
       },
-      [`Сумма: ${totalSum.toFixed(2)} ₽`],
+      [`Сумма: ${totalSum.toFixed(2)} BYN`],
     );
 
     // Секция промокода

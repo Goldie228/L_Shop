@@ -1,0 +1,63 @@
+/**
+ * Стили для компонента Icon - L_Shop
+ */
+
+/* Контейнер иконки */
+.icon-container {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+.icon-container svg {
+  display: block;
+  flex-shrink: 0;
+}
+
+/* Базовый класс иконки */
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Иконки в секции преимуществ (используются на главной странице) */
+.feature-item__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  margin-bottom: var(--spacing-4, 1rem);
+  border-radius: var(--radius-4, 12px);
+  background: var(--gradient-primary, linear-gradient(135deg, #3b82f6 0%, #2563eb 100%));
+  color: var(--color-text-inverse, #ffffff);
+}
+
+.feature-item__icon svg {
+  width: 32px;
+  height: 32px;
+}
+
+/* Размеры иконок */
+.icon--sm {
+  width: 16px;
+  height: 16px;
+}
+
+.icon--md {
+  width: 24px;
+  height: 24px;
+}
+
+.icon--lg {
+  width: 32px;
+  height: 32px;
+}
+
+.icon--xl {
+  width: 48px;
+  height: 48px;
+}

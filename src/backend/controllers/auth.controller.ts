@@ -69,7 +69,7 @@ export async function register(req: Request, res: Response): Promise<undefined> 
   res.cookie('sessionToken', token, {
     httpOnly: true,
     secure: config.isProduction,
-    sameSite: 'strict',
+    sameSite: config.isProduction ? 'strict' : 'lax',
     maxAge: config.sessionDurationMs,
   });
 
@@ -133,7 +133,7 @@ export async function login(req: Request, res: Response): Promise<undefined> {
   res.cookie('sessionToken', token, {
     httpOnly: true,
     secure: config.isProduction,
-    sameSite: 'strict',
+    sameSite: config.isProduction ? 'strict' : 'lax',
     maxAge: config.sessionDurationMs,
   });
 
