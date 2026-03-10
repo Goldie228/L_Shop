@@ -86,7 +86,7 @@ export class DeliveryForm extends Component<DeliveryFormProps> {
     // Поле имени
     this.firstNameInput = new Input({
       className: 'delivery-form__input',
-      id: 'delivery-firstName',
+      name: 'delivery-firstName',
       placeholder: 'Имя получателя *',
       type: 'text',
       required: true,
@@ -102,7 +102,7 @@ export class DeliveryForm extends Component<DeliveryFormProps> {
     // Поле адреса
     this.addressInput = new Input({
       className: 'delivery-form__input',
-      id: 'delivery-address',
+      name: 'delivery-address',
       placeholder: 'Адрес доставки *',
       type: 'text',
       required: true,
@@ -118,17 +118,13 @@ export class DeliveryForm extends Component<DeliveryFormProps> {
     // Поле телефона
     this.phoneInput = new Input({
       className: 'delivery-form__input',
-      id: 'delivery-phone',
+      name: 'delivery-phone',
       placeholder: '+375 (29) XXX-XX-XX',
       type: 'tel',
       required: true,
       disabled: this.props.disabled,
     });
-    const phoneGroup = this.createFormGroup(
-      'delivery-phone',
-      'Телефон',
-      this.phoneInput.render(),
-    );
+    const phoneGroup = this.createFormGroup('delivery-phone', 'Телефон', this.phoneInput.render());
     form.appendChild(phoneGroup);
 
     // Добавляем обработчик маски телефона
@@ -137,17 +133,13 @@ export class DeliveryForm extends Component<DeliveryFormProps> {
     // Поле email
     this.emailInput = new Input({
       className: 'delivery-form__input',
-      id: 'delivery-email',
+      name: 'delivery-email',
       placeholder: 'email@example.com',
       type: 'email',
       required: true,
       disabled: this.props.disabled,
     });
-    const emailGroup = this.createFormGroup(
-      'delivery-email',
-      'Email',
-      this.emailInput.render(),
-    );
+    const emailGroup = this.createFormGroup('delivery-email', 'Email', this.emailInput.render());
     form.appendChild(emailGroup);
 
     // Вариант 24: Выбор типа доставки
@@ -161,7 +153,7 @@ export class DeliveryForm extends Component<DeliveryFormProps> {
     // Вариант 24: Поле комментария
     this.commentInput = new Input({
       className: 'delivery-form__input delivery-form__input--textarea',
-      id: 'delivery-comment',
+      name: 'delivery-comment',
       placeholder: 'Комментарий к заказу (необязательно)',
       type: 'text',
       disabled: this.props.disabled,
@@ -411,19 +403,19 @@ export class DeliveryForm extends Component<DeliveryFormProps> {
     });
   }
 
-   /**
-    * Очистить ошибки
-    */
-   private clearErrors(): void {
-     // Очистить тексты ошибок
-     document.querySelectorAll('.delivery-form__field-error').forEach((el) => {
-       el.textContent = '';
-     });
+  /**
+   * Очистить ошибки
+   */
+  private clearErrors(): void {
+    // Очистить тексты ошибок
+    document.querySelectorAll('.delivery-form__field-error').forEach((el) => {
+      el.textContent = '';
+    });
 
-     // Убрать класс ошибки с полей
-     document.querySelectorAll('.input--error').forEach((el) => {
-       el.classList.remove('input--error');
-     });
+    // Убрать класс ошибки с полей
+    document.querySelectorAll('.input--error').forEach((el) => {
+      el.classList.remove('input--error');
+    });
 
     this.state.generalError = null;
     const errorContainer = this.element?.querySelector('.delivery-form__error-container');

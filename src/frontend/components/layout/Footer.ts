@@ -204,7 +204,11 @@ export class Footer extends Component<FooterProps> {
     });
 
     // Социальные сети (используем компонент Icon)
-    const socialNetworks: Array<{ name: string; href: string; icon: 'vk' | 'telegram' | 'instagram' | 'youtube' }> = [
+    const socialNetworks: Array<{
+      name: string;
+      href: string;
+      icon: 'vk' | 'telegram' | 'instagram' | 'youtube';
+    }> = [
       { name: 'VK', href: 'https://vk.com/lshop', icon: 'vk' },
       { name: 'Telegram', href: 'https://t.me/lshop', icon: 'telegram' },
       { name: 'Instagram', href: 'https://instagram.com/lshop', icon: 'instagram' },

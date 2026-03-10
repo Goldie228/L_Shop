@@ -32,9 +32,7 @@ export interface OrdersPageState {
 /**
  * Форматировать цену в BYN
  */
-const formatPrice = (price: number): string => {
-  return `${price.toLocaleString('ru-BY')} BYN`;
-};
+const formatPrice = (price: number): string => `${price.toLocaleString('ru-BY')} BYN`;
 
 /**
  * Отображение статуса заказа на русском

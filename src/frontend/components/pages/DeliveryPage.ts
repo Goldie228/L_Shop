@@ -342,6 +342,7 @@ export class DeliveryPage extends Component<DeliveryPageProps> {
     try {
       this.cartData = await api.get<CartWithProducts>('/api/cart');
       this.updateOrderSummary();
+      this.update();
     } catch (error) {
       console.error('[DeliveryPage] Ошибка загрузки корзины:', error);
       this.state.error = 'Не удалось загрузить корзину';

@@ -143,12 +143,16 @@ export class RegisterForm extends Component<RegisterFormProps> {
    * @returns Элемент баннера ошибки
    */
   private createErrorBanner(): HTMLDivElement {
-    return this.createElement('div', { className: 'auth-form__error-banner' }, [
-      `<svg class="auth-form__error-banner-icon" viewBox="0 0 24 24" fill="currentColor">
-           <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-         </svg>`,
-      this.state.submitError ?? '',
-    ]);
+    return this.createElement(
+      'div',
+      { className: 'auth-form__error-banner' },
+      [
+        `<svg class="auth-form__error-banner-icon" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+        </svg>`,
+        this.state.submitError ?? '',
+      ],
+    );
   }
 
   /**
@@ -378,8 +382,9 @@ export class RegisterForm extends Component<RegisterFormProps> {
   private updateInputState(field: keyof RegisterUserData): void {
     const input = this.inputs.get(field);
     if (input) {
-      if (this.state.errors[field]) {
-        input.setError(this.state.errors[field]!);
+      const error = this.state.errors[field];
+      if (error) {
+        input.setError(error);
       } else {
         input.clearError();
       }

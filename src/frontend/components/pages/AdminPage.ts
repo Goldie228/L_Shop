@@ -160,7 +160,9 @@ export class AdminPage extends Component<AdminPageProps> {
       const tabButton = this.createElement(
         'button',
         {
-          className: `admin-page__tab ${this.activeTab === tab.id ? 'admin-page__tab--active' : ''}`,
+          className: `admin-page__tab ${
+            this.activeTab === tab.id ? 'admin-page__tab--active' : ''
+          }`,
           'data-tab': tab.id,
         },
         [tab.label],
@@ -195,13 +197,13 @@ export class AdminPage extends Component<AdminPageProps> {
       const loading = this.createElement('div', {
         className: 'admin-page__loading',
       });
-      
+
       const spinner = this.createElement('div', {
         className: 'admin-page__loading-spinner',
       });
-      
+
       const loadingText = this.createElement('span', {}, ['Загрузка данных...']);
-      
+
       loading.appendChild(spinner);
       loading.appendChild(loadingText);
       this.contentContainer.appendChild(loading);
@@ -677,7 +679,11 @@ export class AdminPage extends Component<AdminPageProps> {
     // Поля формы
     const fields = [
       {
-        name: 'name', label: 'Название', type: 'text', required: true, value: product?.name || '',
+        name: 'name',
+        label: 'Название',
+        type: 'text',
+        required: true,
+        value: product?.name || '',
       },
       {
         name: 'description',
@@ -890,7 +896,7 @@ export class AdminPage extends Component<AdminPageProps> {
    * Удалить товар
    */
   private async deleteProduct(id: string): Promise<void> {
-    if (!await this.showConfirm('Вы уверены, что хотите удалить этот товар?')) {
+    if (!(await this.showConfirm('Вы уверены, что хотите удалить этот товар?'))) {
       return;
     }
 
@@ -935,7 +941,7 @@ export class AdminPage extends Component<AdminPageProps> {
    * Удалить заказ
    */
   private async deleteOrder(id: string): Promise<void> {
-    if (!await this.showConfirm('Вы уверены, что хотите удалить этот заказ?')) {
+    if (!(await this.showConfirm('Вы уверены, что хотите удалить этот заказ?'))) {
       return;
     }
 
@@ -974,9 +980,7 @@ export class AdminPage extends Component<AdminPageProps> {
    */
   private async toggleUserBlock(id: string): Promise<void> {
     if (
-      !await this.showConfirm(
-        'Вы уверены, что хотите изменить статус блокировки пользователя?',
-      )
+      !(await this.showConfirm('Вы уверены, что хотите изменить статус блокировки пользователя?'))
     ) {
       return;
     }

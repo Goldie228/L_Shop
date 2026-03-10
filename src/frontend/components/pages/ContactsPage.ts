@@ -517,7 +517,12 @@ export class ContactsPage extends Component<ContactsPageProps> {
   private validateForm(): boolean {
     let isValid = true;
 
-    const fields: Array<'name' | 'email' | 'subject' | 'message'> = ['name', 'email', 'subject', 'message'];
+    const fields: Array<'name' | 'email' | 'subject' | 'message'> = [
+      'name',
+      'email',
+      'subject',
+      'message',
+    ];
 
     fields.forEach((field) => {
       const input = this.inputInstances.get(field);

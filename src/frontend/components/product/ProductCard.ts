@@ -213,7 +213,7 @@ export class ProductCard extends Component<ProductCardProps> {
    */
   private renderRating(product: Product): HTMLElement {
     const ratingValue = (product.rating ?? 0).toFixed(1);
-    
+
     const ratingElement = this.createElement('div', {
       className: 'product-card__rating',
       role: 'img',

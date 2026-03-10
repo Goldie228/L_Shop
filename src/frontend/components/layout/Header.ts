@@ -15,6 +15,11 @@ import { AuthService } from '../../services/auth.service.js';
 import { router } from '../../router/router.js';
 
 /**
+ * Сервис для работы с корзиной (импортируется динамически для избежания циклических зависимостей)
+ */
+import { api } from '../../services/api.js';
+
+/**
  * Пропсы для компонента Header
  */
 export interface HeaderProps extends ComponentProps {
@@ -29,26 +34,24 @@ export interface HeaderProps extends ComponentProps {
  * Используется inline т.к. имеет специальную структуру для анимации
  */
 const MENU_ICON = [
-  '  <svg class="header__menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">',
-  '    <line class="header__menu-line header__menu-line--top" x1="3" y1="6" x2="21" y2="6"></line>',
-  '    <line class="header__menu-line header__menu-line--middle" x1="3" y1="12" x2="21" y2="12"></line>',
-  '    <line class="header__menu-line header__menu-line--bottom" x1="3" y1="18" x2="21" y2="18"></line>',
-  '  </svg>',
+  '<svg class="header__menu-icon" viewBox="0 0 24 24" fill="none"',
+  '  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">',
+  '  <line class="header__menu-line header__menu-line--top" x1="3" y1="6" x2="21" y2="6"/>',
+  '  <line class="header__menu-line header__menu-line--middle" x1="3" y1="12" x2="21" y2="12"/>',
+  '  <line class="header__menu-line header__menu-line--bottom" x1="3" y1="18" x2="21" y2="18"/>',
+  '</svg>',
 ].join('\n');
-
-/**
- * Сервис для работы с корзиной (импортируется динамически для избежания циклических зависимостей)
- */
-import { api } from '../../services/api.js';
 
 /**
  * SVG логотип L_Shop
  * Масштабируемый векторный логотип с буквой L
  */
 const LOGO_ICON_SVG = [
-  '  <svg class="header__logo-svg" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">',
-  '    <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" style="font-family: \'Inter\', -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif; font-size: 20px; font-weight: 700;" fill="currentColor">L</text>',
-  '  </svg>',
+  '<svg class="header__logo-svg" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">',
+  '  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle"',
+  '    style="font-family: \'Inter\', sans-serif; font-size: 20px; font-weight: 700;"',
+  '    fill="currentColor">L</text>',
+  '</svg>',
 ].join('\n');
 
 /**
@@ -98,7 +101,7 @@ export class Header extends Component<HeaderProps> {
   private navElement: HTMLElement | null = null;
 
   /** Текущий активный путь */
-  private currentPath: string = '/';
+  private currentPath = '/';
 
   /**
    * Получить пропсы по умолчанию
@@ -213,13 +216,21 @@ export class Header extends Component<HeaderProps> {
 
     // Ссылка на каталог
     const catalogItem = this.createElement('li', { className: 'header__nav-item' });
-    const catalogLink = this.createNavLink('Каталог', '/catalog', this.isActivePath('/catalog', currentPath));
+    const catalogLink = this.createNavLink(
+      'Каталог',
+      '/catalog',
+      this.isActivePath('/catalog', currentPath),
+    );
     catalogItem.appendChild(catalogLink);
     list.appendChild(catalogItem);
 
     // Ссылка на корзину
     const cartItem = this.createElement('li', { className: 'header__nav-item' });
-    const cartLink = this.createNavLink('Корзина', '/cart', this.isActivePath('/cart', currentPath));
+    const cartLink = this.createNavLink(
+      'Корзина',
+      '/cart',
+      this.isActivePath('/cart', currentPath),
+    );
     cartItem.appendChild(cartLink);
     list.appendChild(cartItem);
 
@@ -275,6 +286,7 @@ export class Header extends Component<HeaderProps> {
 
     const input = this.createElement('input', {
       type: 'search',
+      name: 'search',
       className: 'header__search-input',
       placeholder: 'Поиск товаров...',
       'aria-label': 'Поиск товаров',
@@ -301,10 +313,10 @@ export class Header extends Component<HeaderProps> {
 
   /**
    * Обработать поисковый запрос
-   * @param query - Поисковый запрос
+   * @param _query - Поисковый запрос
    */
-  private handleSearch(query: string): void {
-    // Логирование удалено (только для отладки)
+  private handleSearch(_query: string): void {
+    // TODO: Реализовать поиск товаров
   }
 
   /**
@@ -325,10 +337,14 @@ export class Header extends Component<HeaderProps> {
     // Добавляем бейдж с количеством товаров
     const itemsCount = store.getCartItemsCount();
     if (itemsCount > 0) {
-      this.cartBadge = this.createElement('span', {
-        className: 'header__cart-badge',
-        'data-testid': 'cart-badge',
-      }, [String(itemsCount > 99 ? '99+' : itemsCount)]);
+      this.cartBadge = this.createElement(
+        'span',
+        {
+          className: 'header__cart-badge',
+          'data-testid': 'cart-badge',
+        },
+        [String(itemsCount > 99 ? '99+' : itemsCount)],
+      );
       cartButton.appendChild(this.cartBadge);
     }
 
@@ -357,10 +373,14 @@ export class Header extends Component<HeaderProps> {
     // Создаём новый бейдж если есть товары
     const itemsCount = store.getCartItemsCount();
     if (itemsCount > 0) {
-      this.cartBadge = this.createElement('span', {
-        className: 'header__cart-badge',
-        'data-testid': 'cart-badge',
-      }, [String(itemsCount > 99 ? '99+' : itemsCount)]);
+      this.cartBadge = this.createElement(
+        'span',
+        {
+          className: 'header__cart-badge',
+          'data-testid': 'cart-badge',
+        },
+        [String(itemsCount > 99 ? '99+' : itemsCount)],
+      );
       cartBtn.appendChild(this.cartBadge);
     } else {
       this.cartBadge = null;
@@ -472,7 +492,11 @@ export class Header extends Component<HeaderProps> {
     trigger.appendChild(name);
 
     // Chevron icon
-    const chevronIcon = new Icon({ name: 'chevron-down', size: 16, className: 'header__dropdown-chevron' });
+    const chevronIcon = new Icon({
+      name: 'chevron-down',
+      size: 16,
+      className: 'header__dropdown-chevron',
+    });
     trigger.appendChild(chevronIcon.render());
 
     this.addEventListener(trigger, 'click', () => this.toggleDropdown());

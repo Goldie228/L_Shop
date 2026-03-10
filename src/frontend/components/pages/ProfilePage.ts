@@ -389,6 +389,7 @@ export class ProfilePage extends Component<ProfilePageProps> {
     editForm.appendChild(nameLabel);
 
     this.nameInput = new Input({
+      name: 'profile-name',
       type: 'text',
       placeholder: 'Введите имя',
       value: this.formState.name,
@@ -418,6 +419,7 @@ export class ProfilePage extends Component<ProfilePageProps> {
     editForm.appendChild(emailLabel);
 
     this.emailInput = new Input({
+      name: 'profile-email',
       type: 'email',
       placeholder: 'Введите email',
       value: this.formState.email,
@@ -457,6 +459,7 @@ export class ProfilePage extends Component<ProfilePageProps> {
     editForm.appendChild(currentPasswordLabel);
 
     this.currentPasswordInput = new Input({
+      name: 'profile-current-password',
       type: 'password',
       placeholder: 'Введите текущий пароль',
       value: this.formState.currentPassword,
@@ -485,6 +488,7 @@ export class ProfilePage extends Component<ProfilePageProps> {
     editForm.appendChild(newPasswordLabel);
 
     this.newPasswordInput = new Input({
+      name: 'profile-new-password',
       type: 'password',
       placeholder: 'Минимум 6 символов',
       value: this.formState.newPassword,
@@ -514,6 +518,7 @@ export class ProfilePage extends Component<ProfilePageProps> {
     editForm.appendChild(confirmPasswordLabel);
 
     this.confirmPasswordInput = new Input({
+      name: 'profile-confirm-password',
       type: 'password',
       placeholder: 'Повторите новый пароль',
       value: this.formState.confirmPassword,
@@ -810,7 +815,7 @@ export class ProfilePage extends Component<ProfilePageProps> {
 
         // Проверяем, есть ли更多信息 в ошибке
         if ('statusCode' in error) {
-          const { statusCode } = (error as { statusCode: number });
+          const { statusCode } = error as { statusCode: number };
           if (statusCode === 409) {
             errorMessage = 'Email уже используется другим пользователем';
             this.formState.errors.email = errorMessage;

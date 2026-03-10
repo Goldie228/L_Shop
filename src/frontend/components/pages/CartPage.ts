@@ -68,38 +68,34 @@ export class CartPage extends Component<CartPageProps> {
 
       // Иконка корзины
       const iconContainer = this.createElement('div', {
-        className: 'cart-empty__icon',
+        className: 'cart-page__auth-icon',
       });
 
       const cartIconSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
       cartIconSvg.setAttribute('viewBox', '0 0 24 24');
       cartIconSvg.setAttribute('fill', 'none');
-      cartIconSvg.setAttribute('class', 'cart-empty__icon-svg');
+      cartIconSvg.setAttribute('class', 'cart-page__auth-icon-svg');
 
       const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      path.setAttribute('d', 'M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z');
+      path.setAttribute(
+        'd',
+        'M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z',
+      );
       path.setAttribute('fill', 'currentColor');
 
       cartIconSvg.appendChild(path);
       iconContainer.appendChild(cartIconSvg);
       authMessage.appendChild(iconContainer);
 
-      // Заголовок
-      const title = this.createElement(
-        'h2',
-        {
-          className: 'cart-page__auth-title',
-          style: 'font-size: var(--font-size-2xl); margin: 0 0 var(--spacing-4); color: var(--color-text-primary);',
-        },
-        ['Корзина'],
-      );
-      authMessage.appendChild(title);
+      // Заголовок (убираем дублирование, т.к. h1 уже есть на странице)
+      // Текст пояснения
 
       // Текст
       const message = this.createElement(
         'p',
         {
-          style: 'font-size: var(--font-size-lg); color: var(--color-text-secondary); margin: 0 0 var(--spacing-6);',
+          style:
+            'font-size: var(--font-size-lg); color: var(--color-text-secondary); margin: 0 0 var(--spacing-6);',
         },
         ['Войдите в аккаунт, чтобы увидеть вашу корзину и оформить заказ'],
       );

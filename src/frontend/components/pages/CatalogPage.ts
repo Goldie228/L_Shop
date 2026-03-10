@@ -227,10 +227,10 @@ export class CatalogPage extends Component<CatalogPageProps> {
 
       // API возвращает { products: [...], pagination: {...} }
       const response = await api.get<ProductsApiResponse>('/api/products', params);
-      
+
       // Извлекаем массив продуктов из ответа
       this.products = response.products || [];
-      
+
       this.productListComponent.setProps({ products: this.products, loading: false });
       this.productListComponent.update();
     } catch (error) {

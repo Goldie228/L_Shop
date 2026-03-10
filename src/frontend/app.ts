@@ -3,6 +3,38 @@
  * Инициализация основного приложения
  */
 
+// Базовые стили (должны загружаться первыми)
+import './styles/design-tokens.css';
+import './styles/variables.css';
+import './styles/main.css';
+import './styles/utilities.css';
+
+// Стили компонентов
+import './styles/components/button.css';
+import './styles/components/input.css';
+import './styles/components/modal.css';
+import './styles/components/header.css';
+import './styles/components/layout.css';
+import './styles/components/forms.css';
+import './styles/components/cart.css';
+import './styles/components/product-card.css';
+import './styles/components/toast.css';
+import './styles/components/breadcrumbs.css';
+import './styles/components/skeleton.css';
+import './styles/components/icon.css';
+
+// Стили страниц
+import './styles/pages/main-page.css';
+import './styles/pages/catalog-page.css';
+import './styles/pages/product-page.css';
+import './styles/pages/profile-page.css';
+import './styles/pages/admin-page.css';
+import './styles/pages/orders-page.css';
+import './styles/pages/about-page.css';
+import './styles/pages/contacts-page.css';
+import './styles/pages/delivery.css';
+import './styles/pages/not-found-page.css';
+
 import { store } from './store/store.js';
 import { router, APP_ROUTES, Route } from './router/router.js';
 import { AuthService } from './services/auth.service.js';
@@ -20,22 +52,6 @@ import { ProductPage } from './components/pages/ProductPage.js';
 import { AboutPage } from './components/pages/AboutPage.js';
 import { ContactsPage } from './components/pages/ContactsPage.js';
 import { AdminPage } from './components/pages/AdminPage.js';
-
-// Импорт стилей страниц
-import './styles/pages/delivery.css';
-import './styles/pages/main-page.css';
-import './styles/pages/profile-page.css';
-import './styles/components/product-card.css';
-import './styles/pages/product-page.css';
-import './styles/pages/about-page.css';
-import './styles/pages/contacts-page.css';
-import './styles/pages/orders-page.css';
-import './styles/pages/admin-page.css';
-import './styles/pages/not-found-page.css';
-// Импорт стилей UI компонентов
-import './styles/components/toast.css';
-// Импорт стилей корзины
-import './styles/components/cart.css';
 
 // Тема по умолчанию
 const THEME_KEY = 'lshop-theme';

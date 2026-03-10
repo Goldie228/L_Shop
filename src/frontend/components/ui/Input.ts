@@ -238,13 +238,14 @@ export class Input extends Component<InputProps> {
       labelClasses.push('form-field__label--required');
     }
 
+    const labelText = label ?? '';
     return this.createElement(
       'label',
       {
         for: name,
         className: labelClasses.join(' '),
       },
-      [label!],
+      [labelText],
     );
   }
 
@@ -414,7 +415,7 @@ export class Input extends Component<InputProps> {
       {
         className: 'form-field__error-text',
       },
-      [error!],
+      [error ?? ''],
     );
 
     errorElement.appendChild(iconSpan);
@@ -436,7 +437,7 @@ export class Input extends Component<InputProps> {
         className: 'form-field__helper',
         id: `${name}-helper`,
       },
-      [helperText!],
+      [helperText ?? ''],
     );
   }
 
@@ -445,7 +446,7 @@ export class Input extends Component<InputProps> {
    * @param event - Событие ввода
    */
   private handleInput = (event: Event): void => {
-    const { value } = (event.target as HTMLInputElement);
+    const { value } = event.target as HTMLInputElement;
     this.props.value = value;
 
     if (this.props.onChange) {
@@ -458,7 +459,7 @@ export class Input extends Component<InputProps> {
    * @param event - Событие focus
    */
   private handleBlur = (event: Event): void => {
-    const { value } = (event.target as HTMLInputElement);
+    const { value } = event.target as HTMLInputElement;
 
     if (this.props.onBlur) {
       this.props.onBlur(value);

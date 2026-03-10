@@ -9,7 +9,6 @@ import { Component, ComponentProps } from '../base/Component';
 import { Button } from '../ui/Button';
 import { Breadcrumbs, BreadcrumbItem } from '../ui/Breadcrumbs';
 import { Toast } from '../ui/Toast';
-import { createProductPageSkeleton } from '../ui/Skeleton';
 import { Product } from '../../types/product';
 import { api } from '../../services/api';
 import { store } from '../../store/store';
@@ -50,7 +49,10 @@ export interface ProductPageState {
  */
 export class ProductPage extends Component<ProductPageProps> {
   private state: ProductPageState = {
-    loading: false,
+    // Если товар не передан в props, показываем загрузку
+    loading:
+      !this.props.product
+      && !!(this.props.productId || window.location.pathname.match(/^\/product\//)),
     loadingSimilar: false,
     error: null,
     product: this.props.product || null,
@@ -81,6 +83,7 @@ export class ProductPage extends Component<ProductPageProps> {
   }
 
   // SVG иконки для безопасного рендеринга (без innerHTML)
+  /* eslint-disable max-len */
   private static readonly PLACEHOLDER_IMAGE_SVG = '<svg class="product-page__placeholder-image" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>';
 
   private static readonly FILLED_STAR_SVG = '<svg class="product-page__rating-star-icon product-page__rating-star-icon--filled" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
@@ -90,6 +93,7 @@ export class ProductPage extends Component<ProductPageProps> {
   private static readonly EMPTY_STAR_SVG = '<svg class="product-page__rating-star-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
 
   private static readonly PLACEHOLDER_SIMILAR_SVG = '<svg class="product-page__placeholder-image-similar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>';
+  /* eslint-enable max-len */
 
   protected getDefaultProps(): ProductPageProps {
     return {
@@ -123,6 +127,9 @@ export class ProductPage extends Component<ProductPageProps> {
     const container = this.createElement('div', {
       className: 'product-page',
     });
+
+    // Сохраняем ссылку на элемент для корректной работы update()
+    this.element = container;
 
     // Внутренний контейнер для центрирования
     const innerContainer = this.createElement('div', {
@@ -826,12 +833,22 @@ export class ProductPage extends Component<ProductPageProps> {
 
     try {
       // Получаем товары той же категории
-      const products = await api.get<Product[]>(
+      const response = await api.get<Product[] | { items: Product[]; products: Product[] }>(
         `/api/products?category=${encodeURIComponent(category)}`,
       );
 
+      // Обрабатываем разные форматы ответа API
+      let productsArray: Product[] = [];
+      if (Array.isArray(response)) {
+        productsArray = response;
+      } else if (response && 'items' in response && Array.isArray(response.items)) {
+        productsArray = response.items;
+      } else if (response && 'products' in response && Array.isArray(response.products)) {
+        productsArray = response.products;
+      }
+
       // Фильтруем: исключаем текущий товар и ограничиваем до 4 штук
-      const similarProducts = products.filter((p) => p.id !== currentProductId).slice(0, 4);
+      const similarProducts = productsArray.filter((p) => p.id !== currentProductId).slice(0, 4);
 
       this.state.similarProducts = similarProducts;
       this.state.loadingSimilar = false;

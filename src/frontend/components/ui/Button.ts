@@ -82,14 +82,6 @@ export class Button extends Component<ButtonProps> {
   private buttonElement: HTMLButtonElement | null = null;
 
   /**
-   * Создать экземпляр кнопки
-   * @param props - Пропсы кнопки
-   */
-  constructor(props: ButtonProps) {
-    super(props);
-  }
-
-  /**
    * Получить пропсы по умолчанию
    * @returns Пропсы по умолчанию
    */
@@ -133,15 +125,7 @@ export class Button extends Component<ButtonProps> {
 
     // Создаём атрибуты для кнопки
     const attrs: Record<string, string | number | boolean> = {
-      className: this.buildClassName(
-        variant,
-        size,
-        block,
-        iconOnly,
-        loading,
-        disabled,
-        className,
-      ),
+      className: this.buildClassName(variant, size, block, iconOnly, loading, disabled, className),
       type,
       'aria-busy': loading,
       'aria-disabled': disabled || loading,

@@ -91,9 +91,13 @@ export class ConfirmModal extends Component<ConfirmModalProps> {
     });
 
     // Сообщение
-    const messageEl = this.createElement('p', {
-      className: 'confirm-modal__message',
-    }, [message]);
+    const messageEl = this.createElement(
+      'p',
+      {
+        className: 'confirm-modal__message',
+      },
+      [message],
+    );
     content.appendChild(messageEl);
 
     // Кнопки
