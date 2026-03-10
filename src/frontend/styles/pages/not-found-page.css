@@ -28,6 +28,9 @@
   line-height: 1;
   margin-bottom: var(--spacing-md);
   letter-spacing: -0.02em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 /* Заголовок */

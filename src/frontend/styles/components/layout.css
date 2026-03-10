@@ -43,7 +43,7 @@
   .layout__content {
     padding: var(--spacing-10) var(--spacing-6);
   }
-  
+
   .layout__main > * + * {
     margin-top: var(--spacing-12);
   }
@@ -54,7 +54,7 @@
   .layout__content {
     padding: var(--spacing-12) var(--spacing-6);
   }
-  
+
   .layout__main > * + * {
     margin-top: var(--spacing-16);
   }
@@ -72,7 +72,7 @@
   .layout__content {
     padding: var(--spacing-4) var(--spacing-3);
   }
-  
+
   .layout__main > * + * {
     margin-top: var(--spacing-6);
   }
@@ -101,11 +101,11 @@
   .layout {
     min-height: auto;
   }
-  
+
   .layout__main {
     padding: 0;
   }
-  
+
   .layout__content {
     max-width: 100%;
     padding: 0;
@@ -182,12 +182,14 @@
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, 
-    transparent 0%, 
-    var(--color-primary-500) 20%, 
-    var(--color-secondary-500) 50%, 
-    var(--color-primary-500) 80%, 
-    transparent 100%);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--color-primary-500) 20%,
+    var(--color-secondary-500) 50%,
+    var(--color-primary-500) 80%,
+    transparent 100%
+  );
   opacity: 0.5;
 }
 
@@ -500,7 +502,7 @@
     grid-template-columns: 1fr 1fr;
     gap: var(--spacing-8);
   }
-  
+
   .footer__brand {
     grid-column: span 2;
   }
@@ -510,25 +512,25 @@
   .footer {
     padding: var(--spacing-12) 0 var(--spacing-6);
   }
-  
+
   .footer__content {
     grid-template-columns: 1fr;
     gap: var(--spacing-8);
   }
-  
+
   .footer__brand {
     grid-column: span 1;
   }
-  
+
   .footer__container {
     padding: 0 var(--spacing-4);
   }
-  
+
   .footer__bottom {
     flex-direction: column;
     text-align: center;
   }
-  
+
   .footer__newsletter-form {
     flex-direction: column;
   }
@@ -544,7 +546,11 @@
 }
 
 :root.dark-theme .footer__logo-icon {
-  background: linear-gradient(135deg, var(--color-accent-primary-dark) 0%, var(--color-accent-hover-dark) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-accent-primary-dark) 0%,
+    var(--color-accent-hover-dark) 100%
+  );
 }
 
 :root.dark-theme .footer__social-link {

@@ -176,6 +176,7 @@
   --font-size-4xl: 2.25rem; /* 36px */
   --font-size-5xl: 3rem; /* 48px */
   --font-size-6xl: 3.75rem; /* 60px */
+  --font-size-display: 6rem; /* 96px - для крупных заголовков на страницах 404 и т.д. */
 
   /* ------ Вес шрифтов ------ */
   --font-weight-light: 300;

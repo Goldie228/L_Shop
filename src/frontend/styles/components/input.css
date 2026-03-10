@@ -51,9 +51,8 @@
   background-color: var(--color-bg-primary);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  transition: border-color var(--transition-input), 
-              box-shadow var(--transition-input),
-              background-color var(--transition-input);
+  transition: border-color var(--transition-input), box-shadow var(--transition-input),
+    background-color var(--transition-input);
   min-height: 44px; /* Минимум для touch-устройств */
   box-sizing: border-box;
 }
@@ -64,7 +63,6 @@
   opacity: 1;
   transition: color var(--transition-fast);
 }
-
 
 /* Маленький */
 .form-field__input--small {
@@ -81,7 +79,6 @@
   border-radius: var(--radius-lg);
   min-height: 52px;
 }
-
 
 /* Outlined (по умолчанию) */
 .form-field--outlined .form-field__input {
@@ -148,7 +145,6 @@
   border-bottom-color: var(--color-focus);
   box-shadow: var(--shadow-focus);
 }
-
 
 /* Hover */
 .form-field--hover .form-field__input:not(:disabled):not(:focus) {
@@ -369,38 +365,38 @@
     padding: var(--spacing-3) var(--spacing-3);
     font-size: var(--font-size-base);
   }
-  
+
   .form-field__input--small {
     min-height: 40px;
     padding: var(--spacing-2) var(--spacing-3);
   }
-  
+
   .form-field__input--large {
     min-height: 52px;
     padding: var(--spacing-4) var(--spacing-4);
   }
-  
+
   .form-field__icon {
     width: 24px;
     height: 24px;
   }
-  
+
   .form-field__icon--left {
     left: var(--spacing-2);
   }
-  
+
   .form-field__icon--right {
     right: var(--spacing-2);
   }
-  
+
   .form-field__input--has-left-icon {
     padding-left: calc(var(--spacing-10) + var(--spacing-1));
   }
-  
+
   .form-field__input--has-right-icon {
     padding-right: calc(var(--spacing-10) + var(--spacing-1));
   }
-  
+
   .form-field__toggle-password {
     width: 44px;
     height: 44px;

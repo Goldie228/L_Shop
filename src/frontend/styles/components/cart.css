@@ -653,7 +653,11 @@
 }
 
 :root.dark-theme .cart-item__price--new {
-  background: linear-gradient(135deg, var(--color-accent-primary-dark) 0%, var(--color-accent-hover-dark) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-accent-primary-dark) 0%,
+    var(--color-accent-hover-dark) 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -728,7 +732,11 @@
 }
 
 :root.dark-theme .cart-summary__total-value {
-  background: linear-gradient(135deg, var(--color-accent-primary-dark) 0%, var(--color-accent-hover-dark) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-accent-primary-dark) 0%,
+    var(--color-accent-hover-dark) 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

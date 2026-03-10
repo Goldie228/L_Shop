@@ -157,7 +157,11 @@
 }
 
 .profile-page__role--admin {
-  background: linear-gradient(135deg, var(--color-secondary-100) 0%, var(--color-primary-light) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-secondary-100) 0%,
+    var(--color-primary-light) 100%
+  );
   color: var(--color-secondary-700);
   box-shadow: var(--shadow-primary);
 }
@@ -570,13 +574,16 @@
 }
 
 @keyframes shake {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateX(0);
   }
-  20%, 60% {
+  20%,
+  60% {
     transform: translateX(-8px);
   }
-  40%, 80% {
+  40%,
+  80% {
     transform: translateX(8px);
   }
 }

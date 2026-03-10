@@ -20,15 +20,15 @@
   --color-border-secondary: var(--color-border-hover);
 
   /* ====== Дополнительные алиасы для обратной совместимости ====== */
-  
+
   /* Цвета кнопок */
   --color-primary-focus-ring: var(--shadow-focus);
-  
+
   /* Тени для компонентов */
   --shadow-button: var(--shadow-primary);
   --shadow-button-hover: var(--shadow-primary-hover);
   --shadow-modal: var(--shadow-6);
-  
+
   /* Анимации */
   --animation-fade-in: fadeIn var(--duration-normal) var(--ease-out);
   --animation-scale-in: scaleIn var(--duration-normal) var(--ease-out);

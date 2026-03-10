@@ -111,7 +111,7 @@
 
 .contacts-page__card-text br {
   display: block;
-  content: "";
+  content: '';
   margin-top: var(--spacing-xs);
 }
 

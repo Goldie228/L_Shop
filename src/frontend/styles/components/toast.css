@@ -64,19 +64,19 @@
 }
 
 /* Типы тостов - цвета иконок */
-.toast[data-type="success"] .toast__icon {
+.toast[data-type='success'] .toast__icon {
   color: var(--color-success);
 }
 
-.toast[data-type="error"] .toast__icon {
+.toast[data-type='error'] .toast__icon {
   color: var(--color-error);
 }
 
-.toast[data-type="warning"] .toast__icon {
+.toast[data-type='warning'] .toast__icon {
   color: var(--color-warning);
 }
 
-.toast[data-type="info"] .toast__icon {
+.toast[data-type='info'] .toast__icon {
   color: var(--color-info);
 }
 
