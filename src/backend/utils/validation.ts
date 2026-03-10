@@ -238,8 +238,8 @@ export const createProductSchema = z.object({
     .min(1, 'Гарантия обязательна')
     .max(50, 'Гарантия слишком длинная')
     .transform((val) => val.trim()),
-   specifications: z.record(z.string(), z.unknown()).optional().default({}),
-   currency: z.string().default('BYN'),
+  specifications: z.record(z.string(), z.unknown()).optional().default({}),
+  currency: z.string().default('BYN'),
 });
 
 /**
@@ -317,10 +317,13 @@ export const productFiltersSchema = z.object({
   minRating: z
     .string()
     .regex(/^\d+(\.\d+)?$/, 'minRating должно быть числом')
-    .refine((val) => {
-      const num = Number(val);
-      return num >= 1 && num <= 5;
-    }, { message: 'minRating должно быть от 1 до 5' })
+    .refine(
+      (val) => {
+        const num = Number(val);
+        return num >= 1 && num <= 5;
+      },
+      { message: 'minRating должно быть от 1 до 5' },
+    )
     .optional(),
 });
 

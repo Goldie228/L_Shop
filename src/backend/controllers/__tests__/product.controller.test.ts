@@ -7,15 +7,15 @@ import { Request, Response } from 'express';
 import { Product } from '../../models/product.model';
 
 // Мокаем сервис до импорта контроллера
-const mockGetProducts = jest.fn();
+const mockGetProductsWithPagination = jest.fn();
 const mockGetProductById = jest.fn();
 
 jest.mock('../../services/product.service', () => {
   return {
-    ProductService: jest.fn().mockImplementation(() => ({
-      getProducts: mockGetProducts,
+    ProductService: {
+      getProductsWithPagination: mockGetProductsWithPagination,
       getProductById: mockGetProductById,
-    })),
+    },
   };
 });
 
@@ -65,6 +65,14 @@ describe('ProductController', () => {
     },
   ];
 
+  const mockPaginatedResult = {
+    products: mockProducts,
+    total: 2,
+    limit: 20,
+    offset: 0,
+    hasMore: false,
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -83,35 +91,39 @@ describe('ProductController', () => {
   });
 
   describe('getProducts', () => {
-    it('должен вернуть список продуктов без фильтров', async () => {
-      mockGetProducts.mockResolvedValue(mockProducts);
+    it('должен вернуть список продуктов с пагинацией', async () => {
+      mockGetProductsWithPagination.mockResolvedValue(mockPaginatedResult);
 
       await getProducts(mockRequest as Request, mockResponse as Response);
 
-      expect(mockGetProducts).toHaveBeenCalledWith({});
-      expect(mockJson).toHaveBeenCalledWith(mockProducts);
+      expect(mockGetProductsWithPagination).toHaveBeenCalled();
+      expect(mockJson).toHaveBeenCalledWith({
+        products: mockProducts,
+        pagination: {
+          total: 2,
+          limit: 20,
+          offset: 0,
+          hasMore: false,
+        },
+      });
     });
 
-    it('должен передать все фильтры в сервис', async () => {
-      mockGetProducts.mockResolvedValue(mockProducts);
+    it('должен передать параметры пагинации', async () => {
+      mockGetProductsWithPagination.mockResolvedValue(mockPaginatedResult);
 
       mockRequest.query = {
-        search: 'iphone',
-        sort: 'price_asc',
-        category: 'electronics',
-        inStock: 'true',
-        minRating: '4.0',
+        limit: '10',
+        offset: '5',
       };
 
       await getProducts(mockRequest as Request, mockResponse as Response);
 
-      expect(mockGetProducts).toHaveBeenCalledWith({
-        search: 'iphone',
-        sort: 'price_asc',
-        category: 'electronics',
-        inStock: 'true',
-        minRating: '4.0',
-      });
+      expect(mockGetProductsWithPagination).toHaveBeenCalledWith(
+        expect.objectContaining({
+          limit: 10,
+          offset: 5,
+        }),
+      );
     });
 
     it('должен вернуть 400 при некорректном параметре sort', async () => {
@@ -123,6 +135,7 @@ describe('ProductController', () => {
       expect(mockJson).toHaveBeenCalledWith({
         message: 'Некорректный параметр sort. Допустимые значения: price_asc, price_desc',
         error: 'INVALID_SORT_PARAMETER',
+        field: 'sort',
       });
     });
 
@@ -133,8 +146,9 @@ describe('ProductController', () => {
 
       expect(mockStatus).toHaveBeenCalledWith(400);
       expect(mockJson).toHaveBeenCalledWith({
-        message: 'Некорректный параметр inStock. Допустимые значения: true, false',
-        error: 'INVALID_INSTOCK_PARAMETER',
+        message: 'Некорректный параметр',
+        error: 'INVALID_PARAMETER',
+        field: 'inStock',
       });
     });
 
@@ -145,8 +159,9 @@ describe('ProductController', () => {
 
       expect(mockStatus).toHaveBeenCalledWith(400);
       expect(mockJson).toHaveBeenCalledWith({
-        message: 'Некорректный параметр minRating. Допустимые значения: число от 1 до 5',
-        error: 'INVALID_MINRATING_PARAMETER',
+        message: 'Некорректный параметр',
+        error: 'INVALID_PARAMETER',
+        field: 'minRating',
       });
     });
 
@@ -157,8 +172,9 @@ describe('ProductController', () => {
 
       expect(mockStatus).toHaveBeenCalledWith(400);
       expect(mockJson).toHaveBeenCalledWith({
-        message: 'Некорректный параметр minRating. Допустимые значения: число от 1 до 5',
-        error: 'INVALID_MINRATING_PARAMETER',
+        message: 'Некорректный параметр',
+        error: 'INVALID_PARAMETER',
+        field: 'minRating',
       });
     });
 
@@ -169,24 +185,31 @@ describe('ProductController', () => {
 
       expect(mockStatus).toHaveBeenCalledWith(400);
       expect(mockJson).toHaveBeenCalledWith({
-        message: 'Некорректный параметр minRating. Допустимые значения: число от 1 до 5',
-        error: 'INVALID_MINRATING_PARAMETER',
+        message: 'Некорректный параметр',
+        error: 'INVALID_PARAMETER',
+        field: 'minRating',
       });
     });
 
     it('должен принять корректный minRating (Вариант 17)', async () => {
-      mockGetProducts.mockResolvedValue([mockProducts[0]]);
+      mockGetProductsWithPagination.mockResolvedValue({
+        ...mockPaginatedResult,
+        products: [mockProducts[0]],
+      });
 
       mockRequest.query = { minRating: '4.2' };
 
       await getProducts(mockRequest as Request, mockResponse as Response);
 
-      expect(mockGetProducts).toHaveBeenCalledWith({ minRating: '4.2' });
-      expect(mockJson).toHaveBeenCalledWith([mockProducts[0]]);
+      expect(mockGetProductsWithPagination).toHaveBeenCalledWith(
+        expect.objectContaining({
+          minRating: 4.2,
+        }),
+      );
     });
 
     it('должен вернуть 500 при ошибке сервиса', async () => {
-      mockGetProducts.mockRejectedValue(new Error('Database error'));
+      mockGetProductsWithPagination.mockRejectedValue(new Error('Database error'));
 
       await getProducts(mockRequest as Request, mockResponse as Response);
 

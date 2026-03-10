@@ -25,20 +25,24 @@ jest.mock('../../config/constants', () => ({
 }));
 
 describe('Обработчик ошибок', () => {
+  let mockReq: Request;
+  let mockRes: Response;
+  let mockNext: NextFunction;
+
   beforeEach(() => {
     // Сбрасываем моки перед каждым тестом
     (logger.error as jest.Mock).mockClear();
     (config as any).nodeEnv = 'development';
-  });
 
-  describe('errorHandler', () => {
-    const mockReq = {} as Request;
-    const mockRes = {
+    mockReq = {} as Request;
+    mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
     } as unknown as Response;
-    const mockNext = jest.fn() as NextFunction;
+    mockNext = jest.fn() as NextFunction;
+  });
 
+  describe('errorHandler', () => {
     describe('BusinessError и наследники', () => {
       it('ValidationError: возвращает правильный статус, код и сообщение', () => {
         // Arrange
@@ -124,7 +128,7 @@ describe('Обработчик ошибок', () => {
         // Arrange
         const error = new ValidationError('Ошибка');
         (error as any).details = null;
-        (config as any).isProduction = false;
+        (config as any).nodeEnv = 'development';
 
         // Act
         errorHandler(error, mockReq, mockRes, mockNext);
@@ -145,7 +149,7 @@ describe('Обработчик ошибок', () => {
       it('ValidationError с undefined details: не включает details в ответ', () => {
         // Arrange
         const error = new ValidationError('Ошибка');
-        (config as any).isProduction = false;
+        (config as any).nodeEnv = 'development';
 
         // Act
         errorHandler(error, mockReq, mockRes, mockNext);
@@ -160,7 +164,7 @@ describe('Обработчик ошибок', () => {
       it('возвращает статус 500 и код INTERNAL_ERROR', () => {
         // Arrange
         const error = new Error('Произошла ошибка') as any;
-        (config as any).isProduction = false;
+        (config as any).nodeEnv = 'development';
 
         // Act
         errorHandler(error, mockReq, mockRes, mockNext);
@@ -180,7 +184,7 @@ describe('Обработчик ошибок', () => {
         // Arrange
         const error = new Error('') as any;
         error.message = '';
-        (config as any).isProduction = false;
+        (config as any).nodeEnv = 'development';
 
         // Act
         errorHandler(error, mockReq, mockRes, mockNext);
@@ -244,7 +248,7 @@ describe('Обработчик ошибок', () => {
       it('логирует BusinessError с правильными параметрами', () => {
         // Arrange
         const error = new ValidationError('Ошибка валидации', { field: 'name' });
-        (config as any).isProduction = false;
+        (config as any).nodeEnv = 'development';
 
         // Act
         errorHandler(error, mockReq, mockRes, mockNext);
@@ -266,7 +270,7 @@ describe('Обработчик ошибок', () => {
       it('логирует обычную Error с кодом INTERNAL_ERROR', () => {
         // Arrange
         const error = new Error('Критическая ошибка') as any;
-        (config as any).isProduction = false;
+        (config as any).nodeEnv = 'development';
 
         // Act
         errorHandler(error, mockReq, mockRes, mockNext);
@@ -288,7 +292,7 @@ describe('Обработчик ошибок', () => {
         // Arrange
         const error = new Error('Ошибка') as any;
         error.stack = 'stack trace';
-        (config as any).isProduction = true;
+        (config as any).nodeEnv = 'production';
 
         // Act
         errorHandler(error, mockReq, mockRes, mockNext);
