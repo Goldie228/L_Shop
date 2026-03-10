@@ -96,9 +96,7 @@ export function getUserDisplayInfo(user: User): UserDisplayInfo {
     .map((part) => part.charAt(0).toUpperCase())
     .join('');
 
-  const displayName = user.name.length > 20
-    ? `${user.name.substring(0, 17)}...`
-    : user.name;
+  const displayName = user.name.length > 20 ? `${user.name.substring(0, 17)}...` : user.name;
 
   return {
     initials: initials || user.login.charAt(0).toUpperCase(),

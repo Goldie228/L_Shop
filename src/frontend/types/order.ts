@@ -24,12 +24,7 @@ export interface OrderItem {
 /**
  * Статус заказа
  */
-export type OrderStatus =
-  | 'pending'
-  | 'processing'
-  | 'shipped'
-  | 'delivered'
-  | 'cancelled';
+export type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
 
 /**
  * Способ оплаты

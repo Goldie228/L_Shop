@@ -136,7 +136,11 @@ export class ApiError extends Error {
         const errorObj = body.error as { message?: string; code?: string; details?: unknown };
         message = errorObj.message || message;
         // Если details содержит field, добавляем в errors
-        if (errorObj.details && typeof errorObj.details === 'object' && 'field' in errorObj.details) {
+        if (
+          errorObj.details
+          && typeof errorObj.details === 'object'
+          && 'field' in errorObj.details
+        ) {
           const details = errorObj.details as { field?: string };
           if (details.field) {
             errors = [{ field: details.field, message }];

@@ -4,10 +4,7 @@
  */
 
 import {
-  RequestConfig,
-  ApiClientConfig,
-  ApiError,
-  NetworkError,
+  RequestConfig, ApiClientConfig, ApiError, NetworkError,
 } from '../types/api.js';
 import { store } from '../store/store.js';
 
