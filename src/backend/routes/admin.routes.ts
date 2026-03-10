@@ -103,7 +103,12 @@ router.get('/orders/:id', authMiddleware, requireAdmin, asyncHandler(getOrderByI
  * PUT /api/admin/orders/:id/status
  * Обновить статус заказа
  */
-router.put('/orders/:id/status', authMiddleware, requireAdmin, asyncHandler(updateOrderStatusAdmin));
+router.put(
+  '/orders/:id/status',
+  authMiddleware,
+  requireAdmin,
+  asyncHandler(updateOrderStatusAdmin),
+);
 
 /**
  * DELETE /api/admin/orders/:id

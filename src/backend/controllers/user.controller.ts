@@ -11,7 +11,12 @@ import { SessionService } from '../services/session.service';
 import { User } from '../models/user.model';
 import { comparePassword, hashPassword } from '../utils/hash.utils';
 import { createContextLogger } from '../utils/logger';
-import { validate, updateUserRoleSchema, updateProfileSchema, changePasswordSchema } from '../utils/validation';
+import {
+  validate,
+  updateUserRoleSchema,
+  updateProfileSchema,
+  changePasswordSchema,
+} from '../utils/validation';
 
 const logger = createContextLogger('UserController');
 
@@ -42,10 +47,17 @@ function removePassword(user: User): UserWithoutPassword {
 export async function getAllUsers(req: AuthRequest, res: Response): Promise<undefined> {
   try {
     // Парсим query параметры
+    let isBlockedValue: boolean | undefined;
+    if (req.query.isBlocked === 'true') {
+      isBlockedValue = true;
+    } else if (req.query.isBlocked === 'false') {
+      isBlockedValue = false;
+    }
+
     const params: GetUsersParams = {
       search: req.query.search as string | undefined,
       role: req.query.role as 'user' | 'admin' | undefined,
-      isBlocked: req.query.isBlocked === 'true' ? true : req.query.isBlocked === 'false' ? false : undefined,
+      isBlocked: isBlockedValue,
       limit: req.query.limit ? parseInt(req.query.limit as string, 10) : 20,
       offset: req.query.offset ? parseInt(req.query.offset as string, 10) : 0,
       sort: req.query.sort as GetUsersParams['sort'] | undefined,
@@ -208,7 +220,10 @@ export async function updateUserRole(req: AuthRequest, res: Response): Promise<u
       return;
     }
 
-    logger.info({ userId: id, newRole: role, adminId: currentUserId }, 'Роль пользователя изменена');
+    logger.info(
+      { userId: id, newRole: role, adminId: currentUserId },
+      'Роль пользователя изменена',
+    );
     res.status(200).json(removePassword(updatedUser));
   } catch (error) {
     logger.error({ err: error }, 'Ошибка при изменении роли');
@@ -275,8 +290,11 @@ export async function toggleUserBlock(req: AuthRequest, res: Response): Promise<
     }
 
     const action = updatedUser.isBlocked ? 'заблокирован' : 'разблокирован';
-    logger.info({ userId: id, isBlocked: updatedUser.isBlocked, adminId: currentUserId }, `Пользователь ${action}`);
-    
+    logger.info(
+      { userId: id, isBlocked: updatedUser.isBlocked, adminId: currentUserId },
+      `Пользователь ${action}`,
+    );
+
     res.status(200).json({
       message: `Пользователь успешно ${action}`,
       user: removePassword(updatedUser),

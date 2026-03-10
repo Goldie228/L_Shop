@@ -80,7 +80,7 @@ export class UserService {
 
   /**
    * Создать нового пользователя
-   * @param data - Данные пользователя (имя, email, логин, телефон, пароль, опционально firstName, role)
+   * @param data - Данные пользователя (имя, email, логин, телефон, пароль, firstName, role)
    * @returns Созданный пользователь с хешированным паролем
    * @throws {Error} При ошибке записи файла или если email/login уже существуют
    */
@@ -91,7 +91,7 @@ export class UserService {
     phone: string;
     password: string;
     /** Имя (отдельное поле) */
-    firstName?: string; // Опционально, по умолчанию берётся из name
+    firstName?: string; // Опционально, по умолчанию из name
     role?: string; // Опционально, по умолчанию 'user'
   }): Promise<User> {
     const now = new Date().toISOString();
@@ -102,7 +102,7 @@ export class UserService {
     const newUser: User = {
       id: generateId(),
       name: data.name.trim(),
-      /** Имя (отдельное поле) */
+      // Имя (отдельное поле)
       firstName: data.firstName?.trim() ?? data.name.trim(),
       email: data.email.toLowerCase().trim(),
       login: data.login.trim(),
@@ -331,12 +331,7 @@ export class UserService {
    */
   async getUsersWithPagination(params: GetUsersParams): Promise<GetUsersResult> {
     const {
-      search,
-      role,
-      isBlocked,
-      limit = 20,
-      offset = 0,
-      sort = 'created_at_desc',
+      search, role, isBlocked, limit = 20, offset = 0, sort = 'created_at_desc',
     } = params;
 
     let users = await this.getAllUsers();
@@ -345,10 +340,9 @@ export class UserService {
     if (search) {
       const searchLower = search.toLowerCase();
       users = users.filter(
-        (u) =>
-          u.name.toLowerCase().includes(searchLower) ||
-          u.email.toLowerCase().includes(searchLower) ||
-          u.login.toLowerCase().includes(searchLower),
+        (u) => u.name.toLowerCase().includes(searchLower)
+          || u.email.toLowerCase().includes(searchLower)
+          || u.login.toLowerCase().includes(searchLower),
       );
     }
 
@@ -439,10 +433,13 @@ export class UserService {
   async getUsersCount(): Promise<{ total: number; admins: number; blocked: number }> {
     const users = await this.getAllUsers();
 
+    const admins = users.filter((u) => u.role === 'admin').length;
+    const blocked = users.filter((u) => u.isBlocked === true).length;
+
     return {
       total: users.length,
-      admins: users.filter((u) => u.role === 'admin').length,
-      blocked: users.filter((u) => u.isBlocked === true).length,
+      admins,
+      blocked,
     };
   }
 }

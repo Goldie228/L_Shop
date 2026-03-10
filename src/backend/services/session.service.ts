@@ -36,13 +36,13 @@ export class SessionService {
 
       // Получаем пользователя для получения его роли
       const user = await this.userService.getUserById(userId);
-      
+
       // Выбрасываем ошибку если пользователь не найден
       if (!user) {
         throw new NotFoundError('Пользователь не найден', { userId });
       }
-      
-      const role = user.role;
+
+      const { role } = user;
 
       await modifyJsonFile<Session>(SESSIONS_FILE, (sessions) => {
         sessions.push({
@@ -115,7 +115,10 @@ export class SessionService {
    */
   async deleteSession(token: string): Promise<void> {
     try {
-      await modifyJsonFile<Session>(SESSIONS_FILE, (sessions) => sessions.filter((s) => s.token !== token));
+      await modifyJsonFile<Session>(
+        SESSIONS_FILE,
+        (sessions) => sessions.filter((s) => s.token !== token),
+      );
 
       logger.debug('Сессия удалена');
     } catch (error) {
@@ -218,9 +221,7 @@ export class SessionService {
       const sessions = await readJsonFile<Session>(SESSIONS_FILE);
       const now = new Date();
 
-      return sessions.filter(
-        (s) => s.userId === userId && new Date(s.expiresAt) > now,
-      );
+      return sessions.filter((s) => s.userId === userId && new Date(s.expiresAt) > now);
     } catch (error) {
       logger.error({ error, userId }, 'Ошибка получения сессий пользователя');
       return [];

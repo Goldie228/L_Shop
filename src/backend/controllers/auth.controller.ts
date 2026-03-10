@@ -40,11 +40,7 @@ export async function register(req: Request, res: Response): Promise<undefined> 
   }
 
   const {
-    name,
-    email,
-    login: userLogin,
-    phone,
-    password,
+    name, email, login: userLogin, phone, password,
   } = validation.data;
 
   const existingUser = await userService.findByEmailOrLogin(email, userLogin);
