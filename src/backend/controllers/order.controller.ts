@@ -8,10 +8,7 @@ import { AuthRequest } from '../middleware/auth-request';
 import { OrderService, GetOrdersParams } from '../services/order.service';
 import { createOrderSchema, updateOrderStatusSchema, validate } from '../utils/validation';
 import {
-  ValidationError,
-  NotFoundError,
-  AuthorizationError,
-  BusinessRuleError,
+  ValidationError, NotFoundError, AuthorizationError, BusinessRuleError,
 } from '../errors';
 import { createContextLogger } from '../utils/logger';
 
@@ -232,7 +229,7 @@ export async function getAllOrdersAdmin(req: AuthRequest, res: Response): Promis
   const validSorts = ['created_at_desc', 'created_at_asc', 'total_desc', 'total_asc'];
   if (params.sort && !validSorts.includes(params.sort)) {
     res.status(400).json({
-      message: `Некорректный параметр sort. Допустимые значения: ${validSorts.join(', ')}`,
+      message: `Некорректный параметр sort. Допустимые: ${validSorts.join(', ')}`,
       error: 'INVALID_SORT_PARAMETER',
     });
     return;
@@ -300,7 +297,10 @@ export async function updateOrderStatusAdmin(req: AuthRequest, res: Response): P
     throw new NotFoundError('Заказ не найден');
   }
 
-  logger.info({ orderId: id, status: validation.data.status }, 'Статус заказа обновлён администратором');
+  logger.info(
+    { orderId: id, status: validation.data.status },
+    'Статус заказа обновлён администратором',
+  );
   res.json(order);
 }
 

@@ -138,7 +138,9 @@ export class ProductService {
    * @param data - Данные продукта (без id, createdAt, updatedAt)
    * @returns Созданный продукт
    */
-  static async createProduct(data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>): Promise<Product> {
+  static async createProduct(
+    data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<Product> {
     const products = await readJsonFile<Product>(PRODUCTS_FILE);
     const now = new Date().toISOString();
 
@@ -196,11 +198,11 @@ export class ProductService {
     }
 
     await writeJsonFile(PRODUCTS_FILE, filtered);
-    
+
     // Очищаем кэш
     clearCache(PRODUCTS_FILE);
     logger.info({ productId: id }, 'Продукт удалён');
-    
+
     return true;
   }
 
@@ -226,10 +228,9 @@ export class ProductService {
     if (search) {
       const searchLower = search.toLowerCase();
       products = products.filter(
-        (p) =>
-          p.name.toLowerCase().includes(searchLower) ||
-          p.description.toLowerCase().includes(searchLower) ||
-          (p.brand && p.brand.toLowerCase().includes(searchLower)),
+        (p) => p.name.toLowerCase().includes(searchLower)
+          || p.description.toLowerCase().includes(searchLower)
+          || (p.brand && p.brand.toLowerCase().includes(searchLower)),
       );
     }
 
@@ -296,7 +297,7 @@ export class ProductService {
     let totalRating = 0;
     let ratedProducts = 0;
 
-    for (const product of products) {
+    products.forEach((product) => {
       // Подсчёт по категориям
       categories[product.category] = (categories[product.category] || 0) + 1;
 
@@ -308,15 +309,21 @@ export class ProductService {
         totalRating += product.rating;
         ratedProducts += 1;
       }
-    }
+    });
+
+    const avgPrice = products.length > 0 ? (totalPrice / products.length) : 0;
+    const averagePrice = Math.round(avgPrice * 100) / 100;
+
+    const avgRating = ratedProducts > 0 ? (totalRating / ratedProducts) : 0;
+    const averageRating = Math.round(avgRating * 100) / 100;
 
     return {
       total: products.length,
       inStock: products.filter((p) => p.inStock).length,
       outOfStock: products.filter((p) => !p.inStock).length,
       categories,
-      averagePrice: products.length > 0 ? Math.round((totalPrice / products.length) * 100) / 100 : 0,
-      averageRating: ratedProducts > 0 ? Math.round((totalRating / ratedProducts) * 100) / 100 : 0,
+      averagePrice,
+      averageRating,
     };
   }
 
@@ -350,14 +357,16 @@ export class ProductService {
     let updatedCount = 0;
     const now = new Date().toISOString();
 
-    for (const update of updates) {
+    updates.forEach((update) => {
       const index = products.findIndex((p) => p.id === update.id);
       if (index !== -1 && products[index].inStock !== update.inStock) {
+        // eslint-disable-next-line no-param-reassign
         products[index].inStock = update.inStock;
+        // eslint-disable-next-line no-param-reassign
         products[index].updatedAt = now;
-        updatedCount++;
+        updatedCount += 1;
       }
-    }
+    });
 
     if (updatedCount > 0) {
       await writeJsonFile(PRODUCTS_FILE, products);

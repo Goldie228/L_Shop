@@ -5,7 +5,8 @@
 
 import { Request, Response } from 'express';
 import { z } from 'zod';
-import { ProductService, GetProductsParams } from '../services/product.service';
+import { ProductService } from '../services/product.service';
+import type { GetProductsParams } from '../services/product.service';
 import {
   createProductSchema,
   updateProductSchema,
@@ -19,7 +20,7 @@ import { logger } from '../utils/logger';
 /**
  * Получить список продуктов с фильтрацией и пагинацией
  * Публичный endpoint - авторизация не требуется
- * @param req - Запрос с query-параметрами (search, sort, category, inStock, minRating, limit, offset)
+ * @param req - Запрос с query-параметрами
  * @param res - Ответ Express
  * @returns 200 с массивом продуктов и метаданными пагинации
  */
@@ -175,11 +176,19 @@ export async function getProductById(req: Request, res: Response): Promise<undef
 export async function getAllProductsAdmin(req: Request, res: Response): Promise<undefined> {
   try {
     // Парсим query параметры
+    const inStockParam = req.query.inStock;
+    let inStockValue: boolean | undefined;
+    if (inStockParam === 'true') {
+      inStockValue = true;
+    } else if (inStockParam === 'false') {
+      inStockValue = false;
+    }
+
     const params: GetProductsParams = {
       search: req.query.search as string | undefined,
       sort: req.query.sort as GetProductsParams['sort'] | undefined,
       category: req.query.category as string | undefined,
-      inStock: req.query.inStock === 'true' ? true : req.query.inStock === 'false' ? false : undefined,
+      inStock: inStockValue,
       minRating: req.query.minRating ? parseFloat(req.query.minRating as string) : undefined,
       limit: req.query.limit ? parseInt(req.query.limit as string, 10) : 20,
       offset: req.query.offset ? parseInt(req.query.offset as string, 10) : 0,
@@ -203,7 +212,14 @@ export async function getAllProductsAdmin(req: Request, res: Response): Promise<
     }
 
     // Валидация sort
-    const validSorts = ['price_asc', 'price_desc', 'name_asc', 'name_desc', 'created_at_desc', 'rating_desc'];
+    const validSorts = [
+      'price_asc',
+      'price_desc',
+      'name_asc',
+      'name_desc',
+      'created_at_desc',
+      'rating_desc',
+    ];
     if (params.sort && !validSorts.includes(params.sort)) {
       res.status(400).json({
         message: `Некорректный параметр sort. Допустимые значения: ${validSorts.join(', ')}`,
@@ -442,14 +458,13 @@ export async function bulkUpdateStock(req: Request, res: Response): Promise<unde
     }
 
     // Валидация формата updates
-    for (const update of updates) {
-      if (!update.id || typeof update.inStock !== 'boolean') {
-        res.status(400).json({
-          message: 'Каждый элемент updates должен содержать id (string) и inStock (boolean)',
-          error: 'INVALID_UPDATE_FORMAT',
-        });
-        return;
-      }
+    const invalidUpdate = updates.find((u) => !u.id || typeof u.inStock !== 'boolean');
+    if (invalidUpdate) {
+      res.status(400).json({
+        message: 'Каждый элемент updates должен содержать id (string) и inStock (boolean)',
+        error: 'INVALID_UPDATE_FORMAT',
+      });
+      return;
     }
 
     const updatedCount = await ProductService.bulkUpdateStock(updates);

@@ -427,7 +427,9 @@ export class OrderService {
       }
       logger.error({ error }, 'Ошибка чтения заказов');
       throw new OrderError(
-        `Не удалось прочитать файл заказов: ${error instanceof Error ? error.message : 'Неизвестная ошибка'}`,
+        `Не удалось прочитать файл заказов: ${
+          error instanceof Error ? error.message : 'Неизвестная ошибка'
+        }`,
         { originalError: error },
       );
     }
@@ -458,7 +460,9 @@ export class OrderService {
     } catch (error) {
       logger.error({ error }, 'Ошибка чтения продуктов');
       throw new OrderError(
-        `Не удалось прочитать файл продуктов: ${error instanceof Error ? error.message : 'Неизвестная ошибка'}`,
+        `Не удалось прочитать файл продуктов: ${
+          error instanceof Error ? error.message : 'Неизвестная ошибка'
+        }`,
         { originalError: error },
       );
     }
@@ -643,12 +647,12 @@ export class OrderService {
 
     let totalRevenue = 0;
 
-    for (const order of orders) {
+    orders.forEach((order) => {
       statusCounts[order.status] = (statusCounts[order.status] || 0) + 1;
       if (order.status !== 'cancelled') {
         totalRevenue += order.totalSum;
       }
-    }
+    });
 
     const nonCancelledCount = orders.filter((o) => o.status !== 'cancelled').length;
 
@@ -656,9 +660,8 @@ export class OrderService {
       total: orders.length,
       byStatus: statusCounts,
       totalRevenue: Math.round(totalRevenue * 100) / 100,
-      averageOrderValue: nonCancelledCount > 0 
-        ? Math.round((totalRevenue / nonCancelledCount) * 100) / 100 
-        : 0,
+      averageOrderValue:
+        nonCancelledCount > 0 ? Math.round((totalRevenue / nonCancelledCount) * 100) / 100 : 0,
     };
   }
 

@@ -5,10 +5,7 @@
 
 import { Router } from 'express';
 import {
-  createOrder,
-  getOrders,
-  getOrderById,
-  cancelOrder,
+  createOrder, getOrders, getOrderById, cancelOrder,
 } from '../controllers/order.controller';
 import { authMiddleware } from '../middleware/auth.middleware';
 import { asyncHandler } from '../middleware/error.middleware';
